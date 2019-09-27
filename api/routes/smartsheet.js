@@ -68,15 +68,64 @@ postRoutes.route('/updateartlog').post(function (req, res) {
       res.send("Data Update Successfully");
   }
 });
+
+postRoutes.route('/updateJob').post(function (req, res) {
+  console.log("ACTION : addnewjobs REQ==>",req.body);
+  if(req.body.newData ){
+    let newDt=JSON.parse(req.body.newData);
+    // Lession, components, tags, artComplex, artAssign, Risk, Impact, module, grade,
+    let Mdt= new Metadt(newDt);
+    Mdt.iniMeta(WorkFlowJobsMetaData);
+    if(!!newDt.lession){
+      Mdt.setLession(newDt.lession);
+    }if(!!newDt.component){
+      Mdt.setComponent(newDt.component);
+    }if(!!newDt.Mdtags){
+      Mdt.setTag(newDt.tags);
+    }if(!!newDt.artcomplex){
+      Mdt.setArtComplex( Mdt.referValueByKey(Mdt.artComplexkey , newDt.artcomplex));
+    }if(!!newDt.artassion){
+      Mdt.setArtAssion( Mdt.referValueByKey( Mdt.artAssionkey, newDt.artassion));
+    }if(!!newDt.risk){
+      Mdt.setRisk( Mdt.referValueByKey( Mdt.riskkey, newDt.risk));
+    }if(!!newDt.impact){
+      Mdt.setImpact( Mdt.referValueByKey( Mdt.impactkey, newDt.impact));
+    }if(!!newDt.module){
+      Mdt.setModule(Mdt.referValueByKey( Mdt.modulekey, newDt.module));
+    }if(!!newDt.grade){
+      Mdt.setGrade( Mdt.referValueByKey(Mdt.gradekey,newDt.grade));
+    }
+    if(!!Mdt.getM()){
+      let where ={ _id: newDt._newDt};
+      //let set={ jobMetaproperties: Mdt.getM() };
+      try{
+        Mdb.bynder_jobs.updateOne({ _id : newDt._id },{
+          $set:{
+            jobMetaproperties: Mdt.getM()
+          }
+        }).then((rs)=>{
+           console.log("data updated",rs, newDt._id);
+           let ress=[{'msg':"SUCCESS"}];
+           res.send(ress);
+        }).catch((Err)=>{
+           console.log("Error in updating data", Err, newDt._id);
+           let ress=[{'msg':"FAILED"}];
+           res.send(ress);
+        });
+        
+    }catch(Err){
+      console.log("Error In update", Err);
+    } 
+    }
+  }
+  //res.send(req.body);
+}); 
 postRoutes.route('/addnewjobs').post(function (req, res) {
     console.log("ACTION : addnewjobs REQ==>",req.body);
     //res.send(req.body);
     if(req.body.jobAdd){
       let rqdata = JSON.parse(req.body.jobAdd);
       if(rqdata.length > 0){
-        // for( let d of rqdata){
-
-        // }
         let allJobs=rqdata.map(d => d.jobkey);
         let QueryForC={job_key : {$in : allJobs },  duplicate : {$exists: false } };
         Mdb.bynder_jobs.find(QueryForC ).then((data)=>{
@@ -208,10 +257,10 @@ postRoutes.route('/artlogdata').post(function (req, res) {
     }else if($and.length >0){
        q= { $and};
     } 
-    let fields={ presetName:1, Preset_Stages:1, id:1, name:1, description:1, job_active_stage:1, jobMetaproperties:1, jobID:1, job_key:1, dateCreated:1, job_date_finished:1};
+    let fields={ duplicate:1, presetName:1, Preset_Stages:1, id:1, name:1, description:1, job_active_stage:1, jobMetaproperties:1, jobID:1, job_key:1, dateCreated:1, job_date_finished:1};
     console.log("Calling artlogdata Data " , JSON.stringify(q));
 
-    Mdb.bynder_jobs.find(q, fields ).limit(50).then((data)=>{
+    Mdb.bynder_jobs.find(q, fields ).sort({job_key:-1}).limit(50).then((data)=>{
     let dataResult=[];
 
     for(let  dtkey in data){

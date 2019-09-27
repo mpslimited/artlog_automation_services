@@ -34,6 +34,18 @@
         this.data = dt;
         this.meta=meta;
      }
+     referValueByKey(refKey, refVal){
+        console.log(refKey, refVal);
+        let retVal = "";
+        let opt=this.Meta.filter(d=>d.tempId==refKey);
+        if(opt.length> 0 && !! opt[0].options){
+            let lendt=opt[0].options.filter((d)=> d.label== refVal);
+            if(lendt.length> 0){
+                retVal= lendt[0].ID.split("-").join("");
+            }
+        }
+        return retVal;
+     }
      getWorkflow(){
        let  ret='';
         if(this.data.hasOwnProperty('presetName') && this.data.presetName !=""){
@@ -137,7 +149,7 @@
         } 
      }
      setComponent(value){
-        this.data.jobMetaproperties[this.lessionkey]=value;
+        this.data.jobMetaproperties[this.componentkey]=value;
      }
      getLession(){
         if(this.data.jobMetaproperties.hasOwnProperty(this.lessionkey)){
@@ -148,6 +160,9 @@
      }
      setLession(value){
         this.data.jobMetaproperties[this.lessionkey]=value;
+     }
+     getM(){
+         return this.data.jobMetaproperties;
      }
      getGrade(){
         if(this.data.jobMetaproperties.hasOwnProperty(this.gradekey)){
