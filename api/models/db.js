@@ -1,7 +1,7 @@
 var mongoose = require('mongoose');
 mongoose.Promise = global.Promise;
 var gracefulShutdown;
-var dbURI = 'mongodb://localhost/mpsdb';
+var dbURI = 'mongodb://mpst:HBjgmdT649(T2@10.31.1.143:27017/mpsdb';
 //var dbURI = 'mongodb://mpst:HBjgmdT649(T2@10.31.1.143:27017/mpsdb';
 // if (process.env.NODE_ENV === 'production') {
 //   dbURI = 'mongodb://mpst:HBjgmdT649(T2@10.31.1.143:27017/mpsdb'; //process.env.MONGOLAB_URI;

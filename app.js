@@ -21,10 +21,10 @@ var routesApiData = require('./api/routes/data.services');
 var app = express();
 const publicRoot = 'dist';
 app.use(express.static(publicRoot));
-// app.use('/static', express.static(path.join(__dirname,"/public/dist/static/")));
-// app.get("/*", (req, res, next) => {
-//   res.sendFile("index.html", { root: publicRoot });
-// });
+app.use('/static', express.static(path.join(__dirname,"/public/dist/static/")));
+app.get("/*", (req, res, next) => {
+  res.sendFile("index.html", { root: publicRoot });
+});
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'jade');
