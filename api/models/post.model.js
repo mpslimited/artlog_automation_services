@@ -78,6 +78,9 @@ let bynder_jobs= new Schema({
   loadMeta:{ type: Boolean},
   isMerged:{type : Boolean},
   isUpdated: {type : Boolean},
+  comment: {type: String},
+  isPaging: {type: String},
+  mVerification:  {type : Boolean},
   duplicate : {type : Boolean}
  },{
     collection: 'bynder_jobs'
@@ -102,6 +105,22 @@ let bynder_jobs= new Schema({
       updatedDate: { type : Date} 
     },{
       collection: 'presetdataupdate'
+    });
+    let assetMeta= new Schema({
+      usedfor: { type: Object},
+      curricula_wip: { type: Object},
+    },{
+      collection: 'assetMeta'
+    })
+    let searchState= new Schema({
+      uid : {type: String},
+      searchTitle : { type: String },
+      fields      : { type: Object},
+      isDefault : { type: Boolean},
+      state  : { type: String},
+      dateModified: { type : Date} 
+    },{
+      collection: 'searchState'
     });
     let metaproperties=new Schema({
       ID: { type: String} ,
@@ -228,11 +247,13 @@ let asset=new Schema({
     let Mdb={
       post: mongoose.model('Post', Post),
       asset: mongoose.model('asset', asset),
+      assetMeta:  mongoose.model('assetMeta', assetMeta),
       tempAssetCount:mongoose.model('tempAssetCount', tempAssetCount),
       apiErrors: mongoose.model('apiErrors', apiErrors),
       job_presets: mongoose.model('job_presets', job_presets),
       bynder_jobs: mongoose.model('bynder_jobs', bynder_jobs),
       presetdataupdate: mongoose.model('presetdataupdate', presetdataupdate),
+      searchState: mongoose.model('searchState', searchState),
       metaproperties : mongoose.model('metaproperties', metaproperties),
       users: mongoose.model('users', users),
       campaign: mongoose.model('campaign', campaign),

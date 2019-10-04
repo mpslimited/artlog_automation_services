@@ -1,3 +1,11 @@
+//  class AssetTags{
+//     constructor(dt){
+//         this.data=dt;
+//     }
+//     getJobs(){
+//         console.job("READ TAGS from :",this.data);
+//     }
+//  }
  class Metadt {
     constructor(dt){
         this.data = dt;
@@ -5,7 +13,8 @@
             this.metaObj=Object.entries(dt.jobMetaproperties);
         }
         
-        this.lessionkey    =   "b447dc7d70b0420a8ac9ec9aeff78296";
+        this.lessonkey     =   "b447dc7d70b0420a8ac9ec9aeff78296";
+        this.lessonletkey  =   "7b30e1d296d343bdaaffcb6be164a713";
         this.componentkey  =   "87d538e6d3a442468b20426285aef253";
         this.tagkey        =   "dde4714035904b0cb68888e0acf389b2";
         this.gradekey      =   "c0ac0a86e65f4f7ebd88dbd7e77965ef";
@@ -17,6 +26,7 @@
         this.impactkey     =   "f8bf767302224972a79fd80f7fb36d12";
         this.batchkey      =    "";
         this.jobkeykey     =    "ccf531b93d1c46428aa5c52bc8cc639f";
+        this.wipkey        =    "0790cd4f2aed4ce0a315ff8034a43994";
      }
      getAMetaOptionsBykey(key){
       let retdt=[];
@@ -60,6 +70,16 @@
             }
         }
         return ret;
+     }
+     getWip(){
+        if( this.data.jobMetaproperties.hasOwnProperty(this.wipkey)){
+            return this.data.jobMetaproperties[this.wipkey];
+        }else{
+            return '';
+        } 
+     }
+     setWip(){
+        this.data.jobMetaproperties[this.wipkey]=value;
      }
      getJobkey(){
         if( this.data.jobMetaproperties.hasOwnProperty(this.jobkey)){
@@ -151,15 +171,25 @@
      setComponent(value){
         this.data.jobMetaproperties[this.componentkey]=value;
      }
-     getLession(){
-        if(this.data.jobMetaproperties.hasOwnProperty(this.lessionkey)){
-            return this.data.jobMetaproperties[this.lessionkey];
+     getLessonlet(){
+        if(this.data.jobMetaproperties.hasOwnProperty(this.lessonletkey)){
+            return this.data.jobMetaproperties[this.lessonletkey];
         }else{
             return '';
         }
      }
-     setLession(value){
-        this.data.jobMetaproperties[this.lessionkey]=value;
+     setLessonlet(value){
+        this.data.jobMetaproperties[this.lessonletkey]=value;
+     }
+     getLesson(){
+        if(this.data.jobMetaproperties.hasOwnProperty(this.lessonkey)){
+            return this.data.jobMetaproperties[this.lessonkey];
+        }else{
+            return '';
+        }
+     }
+     setLesson(value){
+        this.data.jobMetaproperties[this.lessonkey]=value;
      }
      getM(){
          return this.data.jobMetaproperties;
@@ -187,7 +217,8 @@
      getMeta(){
         let dt={ 
             getjobkey    :   this.getJobkey(),
-            lession      :   this.getLession(),
+            lesson       :   this.getLesson(),
+            lessonlet    :   this.getLessonlet(),
             component    :   this.getComponent(),
             batch        :   "",
             dateCreatedM :   this.getDateCreatedM(),
@@ -198,8 +229,8 @@
             moduleVal    :   this.getValByKeyID(this.modulekey, this.getModule()),
             impact       :   this.getImpact(),
             impactVal    :   this.getValByKeyID(this.impactkey, this.getImpact()),
-            rist         :   this.getRisk(),
-            ristVal      :   this.getValByKeyID(this.riskkey, this.getRisk()),
+            risk         :   this.getRisk(),
+            riskVal      :   this.getValByKeyID(this.riskkey, this.getRisk()),
             artComplex   :   this.getArtComplex(),
             artComplexVal:   this.getValByKeyID(this.artComplexkey, this.getArtComplex()),
             artAssion    :   this.getArtAssion()  ,
@@ -216,7 +247,7 @@
             moduleID    : this.getModule(),
             moduleVal   :'',
 
-            lession   : this.getLession(),
+            lession   : this.getLesson(),
             component : this.getComponent(),
             batch     : "",
             dateCreatedM : this.getDateCreatedM(),
@@ -242,3 +273,4 @@ class Wmdt {
     }
 };
 module.exports= Metadt;
+//module.exports= AssetTags;

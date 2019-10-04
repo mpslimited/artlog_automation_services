@@ -6,6 +6,7 @@ const crypto  = require('crypto');
 const await = require("await");
 const async = require("async");
 let Mdb = require('../models/post.model');
+let  AssetTags  =require("../models/AssetTags");
 let appConfig=require('../models/config');
 
 const oauth = OAuth({
@@ -37,12 +38,12 @@ postRoutes.route('/getdata/:campaignId').get(function (req, res) {
 });
 postRoutes.route('/getAssetsProp/:id').get(function (req, res) {
   let id = req.params.id;
-  console.log("hitting getAssetsProp", id);
+  //console.log("hitting getAssetsProp", id);
 
   var request_data=appConfig.getActionInfo("getAssetsProp");
   var token=appConfig.getToken();
   request_data.data={};
-  console.log("request_data :1 ==>", request_data,"token=>",token);
+  //console.log("request_data :1 ==>", request_data,"token=>",token);
 
   request({url: request_data.url, method: request_data.method, form: request_data.data, headers: oauth.toHeader(oauth.authorize(request_data, token))
   }, function(error, response, body) {
@@ -50,7 +51,15 @@ postRoutes.route('/getAssetsProp/:id').get(function (req, res) {
     if(error){
       console.log("API ERROR:", error);
     }else{
-      res.send(response.body);
+     let d= JSON.parse(response.body);
+      let assetMeta = new Mdb.assetMeta({usedfor: d.usedfor, curricula_wip: d.curricula_wip});
+      assetMeta.save().then((dt)=>{
+        console.log("data saved");
+        res.send(d);
+      }).catch((Err)=>{
+         console.log("Error in Saved Data", Err); 
+        });
+      
     }
   });
 
@@ -99,7 +108,19 @@ postRoutes.route('/getjobsmeta/').get(function (req, res) {
   });
 
 });
+//
+postRoutes.route('/assetJobs/').post(function (req, res) {
 
+  Mdb.asset.find({ "tags":"SC_0402TE1_L10_L11"}).then((data)=> {
+    if(data.length){
+      let asset = new AssetTags(data[0]);
+      asset.getJobs();
+      //getJobs(data[0]);
+    }
+  }).catch((Err)=>{ 
+    console.log("Getting Jobs have error:", Err);
+  });
+});
 postRoutes.route('/getAssets/:page').get(function (req, res) {
 
   let page = req.params.page;

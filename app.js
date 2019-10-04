@@ -3,9 +3,13 @@ var path = require('path');
 var favicon = require('serve-favicon');
 var logger = require('morgan');
 var cookieParser = require('cookie-parser');
+var session = require('express-session');
+var morgan = require('morgan');
+
 var bodyParser = require('body-parser');
 var cors = require('cors');
 // [SH] Require Passport
+var url = require('url');
 var passport = require('passport');
 
 // [SH] Bring in the data model
@@ -20,11 +24,28 @@ var routessmartsheetApi = require('./api/routes/smartsheet');
 var routesApiData = require('./api/routes/data.services');
 var app = express();
 const publicRoot = 'dist';
+//
 app.use(express.static(publicRoot));
 app.use('/static', express.static(path.join(__dirname,"/public/dist/static/")));
-app.get("/*", (req, res, next) => {
+// app.get('/', function (request, res) {
+//   console.log("requesting data for ==>",req.query);
+//   res.send('Wiki home page');
+// });
+
+
+
+app.get("/*", (request, res, next) => {
+  let refUrl=request.headers.referer || request.url;
+  var url = require('url');
+  var url_parts = url.parse(refUrl, true);
+  var query = url_parts.query;
+  if(query.jssonId){
+   // let user=checkUserInfo(query.jssonId);
+    res.cookie('jssonId',query.jssonId, { maxAge: 900000, httpOnly: true });
+  }
   res.sendFile("index.html", { root: publicRoot });
 });
+
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'jade');
@@ -44,8 +65,6 @@ app.use(passport.initialize());
 app.use('/api', routesApi);
 app.use('/api', routessmartsheetApi);
 app.use('/apiData', routesApiData);
-
-
 // app.listen(3000, function(){
 //   console.log('Server is running on Port:',3000);
 // });

@@ -5,11 +5,27 @@ const OAuth   = require('oauth-1.0a');
 const crypto  = require('crypto');
 const await = require("await");
 const async = require("async");
-let Metadt =require("../models/Metadt");
-let Mdb = require('../models/post.model');
+let  Metadt  =require("../models/Metadt");
+let Mdb  = require('../models/post.model');
+let checkToken = require('../models/middleware');
+var mongoose = require( 'mongoose' );
+var jwt = require('jsonwebtoken');
 //let appConfig=require('./config');
 // Metadt= new Metadt('dddd');
 // Metadt.print("hello this is metdt class");
+function verifyToken(req, res, next) {
+  const bearerHeader = req.headers['authorization'];
+
+  if (bearerHeader) {
+    const bearer = bearerHeader.split(' ');
+    const bearerToken = bearer[1];
+    req.token = bearerToken;
+    next();
+  } else {
+    // Forbidden
+    res.sendStatus(403);
+  }
+}
 
 let d=[], WorkFlowJobsMetaData=[], GGrades=[], GModules=[], GCurriculaWIP=[], GArtComplex=[], GArtAssign=[],
 GRisk=[],GImpact=[];
@@ -27,17 +43,101 @@ Mdb.metaproperties.find().then((metaData)=>{
 }).catch((Err)=>{
   console.log("Finding Metadata ERROR:", Err);
 });
+Mdb.assetMeta.find({},{"curricula_wip.options":1}).then((dt)=>{
+  if(dt.length > 0){
+    GCurriculaWIP=dt[0].curricula_wip.options.map(d=>({value:d.id, label: d.label}));
+  }
+}).catch((Err)=>{ console.log(" Error in ASset Meta:", Err);});
+postRoutes.route('/dt').get(function (req, res) {  
+  
+  res.send({ grade: GGrades, module: GModules, artcomplex: GArtComplex, artAssign: GArtAssign, risk: GRisk, impact: GImpact});
+});
 postRoutes.route('/dataInit').post(function (req, res) {  
   res.send({ grade: GGrades, module: GModules, artcomplex: GArtComplex, artAssign: GArtAssign, risk: GRisk, impact: GImpact});
 });
-postRoutes.route('/getUserInfo').get(function (req, res) {  
+postRoutes.route('/logout').post(function (req, res) {  
+  console.log("Action Logout");
+  res.send(data={'mag':"cleard"});
+});
+//dellSearchState
+postRoutes.route('/dellSearchState', verifyToken).post(function (req, res) {
+  console.log("ACTION : dellSearchState REQ==>",req.body);
+  Mdb.searchState.remove({'_id': req.body._id}).then((data)=>{
+    res.send({'msg': 'DELETED', "did": req.body._id});
+  }).catch((Err)=>{
+    console.log("Error in delete data", Err);
+  });
+});
+postRoutes.route('/setDefaultSearch', verifyToken).post(function (req, res) {
+  console.log("ACTION : dellSearchState REQ==>",req.body);
+  Mdb.searchState.updateMany({'uid':  req.headers['authuser']},{ $set:{ isDefault: false }}).then((rs)=>{
+    Mdb.searchState.updateOne({"_id": req.body.default},{
+        $set:{ isDefault : true }
+      }).then((rr)=>{
+        
+        res.send({'msg':'DEFAULTADDED', rid:req.body.default });
+      }).catch((Error)=>{ console.log( "ERROR in SET DEFAULT :", Error) ; })
+  }).catch((Err)=>{
+    console.log("Updating Mulit Err: ", Err);
+  });
+});
+postRoutes.route('/gridStage', verifyToken).post(function (req, res) {  
+  console.log("ACTION : gridStage selectedColumn REQ==>",req.body);
+  Mdb.searchState.find({ uid: req.headers['authuser'] , state:'GridStage' }).then((data)=>{
+    if(data.length > 0){
+      Mdb.searchState.updateOne({ uid: req.headers['authuser'] , state:'GridStage'},{
+        $set:{
+          fields: req.body.selectedColumn
+         }
+      }).then((dt)=>{
+        res.send(dt);
+      }).catch((Err)=>{ console.log("Error in updating data"); })
+    }else{
+      let searchState= new Mdb.searchState({ uid: req.headers['authuser'] ,searchTitle : "MyGrid Data",
+      fields: req.body.selectedColumn, state:'GridStage' });
+      searchState.save().then((rs)=>{
+      res.send(rs);
+      }).catch(Err=>{
+        console.log("ERROR in SAVED: ERR:", Err);
+      });
+    }
+  }).catch((Err)=>{
+    console.log("Finding Error :", Err);
+  });
+})
+postRoutes.route('/searchState', verifyToken).post(function (req, res) {  
+  console.log("ACTION : searchState REQ==>",req.body);
+  let searchState= new Mdb.searchState({uid: req.headers['authuser'] , searchTitle : req.body.searchText, fields: req.body.frmdt, state:'SearchStage' });
+  searchState.save().then((rs)=>{
+    console.log("value saved sucessfully ", rs); 
+    res.send(rs);
+    }).catch(Err=>{
+      console.log("ERROR in SAVED: ERR:", Err);
+    });
+})
+postRoutes.route('/grideState', verifyToken).post(function (req, res) {  
+  console.log("ACTION : searchState REQ==>",req.body);
+  let searchState= new Mdb.searchState({uid: req.headers['authuser'] , searchTitle : req.body.searchText, fields: req.body.frmdt , state:'GridStage'});
+  searchState.save().then((rs)=>{
+    console.log("value saved sucessfully ", rs); 
+    res.send(rs);
+    }).catch(Err=>{
+      console.log("ERROR in SAVED: ERR:", Err);
+    })
+ // res.send(req.body);
+})
+postRoutes.route('/getUserInfo').post(function (req, res) {  
+   console.log(req.cookies);
+   if(!req.cookies.jssonId){
+    res.status(404);
+   }
       var options = { method: 'POST',
       url: 'https://greatmindsdemo.mpstechnologies.com/GreatMinds/admin/getLoggedInUserDeatils',
       headers: 
       { 'cache-control': 'no-cache',
         Connection: 'keep-alive',
         'Content-Length': '0',
-        Cookie: 'JSESSIONID=D0225FD8EAFDE01880B0D9492D27E556',
+        Cookie: 'JSESSIONID='+req.cookies.jssonId,
         'Accept-Encoding': 'gzip, deflate',
         Host: 'greatmindsdemo.mpstechnologies.com',
         'Postman-Token': '253922e1-1531-47b2-b9d7-5ec943db1a91,24e7633e-1344-4d5d-a7d2-1a73fd497799',
@@ -45,17 +145,45 @@ postRoutes.route('/getUserInfo').get(function (req, res) {
          Accept: '*/*',
         'User-Agent': 'PostmanRuntime/7.17.1' } };
 
+    res.clearCookie("jssonId");
     request(options, function (error, response, body) {
       if (error) throw new Error(error);
-      if(body=""){
-        res.send(body)
+      if(body!=""){
+        let d=JSON.parse(body);
+        let data= {email: d.email, firstName: d.firstName,lastName:d.lastName, roleName:d.roleName, userId: d.userId };
+        var User = mongoose.model('User');
+        User.findOne({ email: d.email, roleName: d.roleName }, function (err, user) {
+        if(!!user ){
+            let token = user.generateJwt();
+              res.status(200);
+              res.json({
+                "token" : token,
+                "Status": "OK",
+                "id":user._id,
+              });
+          }else{
+            var users = new User();
+            users.name = d.userId;
+            users.roleName= d.roleName;
+            users.email = d.email;
+            users.setPassword('remote');
+            users.save(function(err) {
+              var token;
+              token = users.generateJwt();
+              res.status(200);
+              res.json({
+                "token" : token,
+                "Status": "OK",
+                "id":users._id
+              });
+            });
+          }
+        });
       }else{
-        res.send({'msg':'NOTFOUND'})
+        res.send({'msg':'NOTFOUND','para': options});
       }
       console.log(body);
     });
-
-  //res.send({ grade: GGrades, module: GModules, artcomplex: GArtComplex, artAssign: GArtAssign, risk: GRisk, impact: GImpact});
 });
 postRoutes.route('/jobsMetadata').post(function (req, res) {  
   console.log("calling api jobsMetadata");
@@ -73,14 +201,16 @@ postRoutes.route('/updateJob').post(function (req, res) {
   console.log("ACTION : addnewjobs REQ==>",req.body);
   if(req.body.newData ){
     let newDt=JSON.parse(req.body.newData);
-    // Lession, components, tags, artComplex, artAssign, Risk, Impact, module, grade,
+    // Lesson, components, tags, artComplex, artAssign, Risk, Impact, module, grade,
     let Mdt= new Metadt(newDt);
     Mdt.iniMeta(WorkFlowJobsMetaData);
-    if(!!newDt.lession){
-      Mdt.setLession(newDt.lession);
+    if(!!newDt.lesson){
+      Mdt.setLesson(newDt.lesson);
+    }if(!!newDt.lessonlet){
+      Mdt.setLessonlet(newDt.lessonlet);
     }if(!!newDt.component){
       Mdt.setComponent(newDt.component);
-    }if(!!newDt.Mdtags){
+    }if(!!newDt.tags){
       Mdt.setTag(newDt.tags);
     }if(!!newDt.artcomplex){
       Mdt.setArtComplex( Mdt.referValueByKey(Mdt.artComplexkey , newDt.artcomplex));
@@ -92,16 +222,19 @@ postRoutes.route('/updateJob').post(function (req, res) {
       Mdt.setImpact( Mdt.referValueByKey( Mdt.impactkey, newDt.impact));
     }if(!!newDt.module){
       Mdt.setModule(Mdt.referValueByKey( Mdt.modulekey, newDt.module));
-    }if(!!newDt.grade){
+    }if(!!newDt.grade && newDt.grade!=""){
       Mdt.setGrade( Mdt.referValueByKey(Mdt.gradekey,newDt.grade));
     }
     if(!!Mdt.getM()){
-      let where ={ _id: newDt._newDt};
+      let where ={ _id: newDt._id};
       //let set={ jobMetaproperties: Mdt.getM() };
       try{
         Mdb.bynder_jobs.updateOne({ _id : newDt._id },{
           $set:{
-            jobMetaproperties: Mdt.getM()
+            jobMetaproperties: Mdt.getM(),
+            description: newDt.description,
+            comment : newDt.comment,
+            isPaging : newDt.isPaging
           }
         }).then((rs)=>{
            console.log("data updated",rs, newDt._id);
@@ -147,7 +280,7 @@ postRoutes.route('/addnewjobs').post(function (req, res) {
                   let Meta= new Metadt(InsData[i]);
                   Meta.iniMeta(WorkFlowJobsMetaData);
                   let Mdt= Meta.getMeta();
-                  InsData[i].lession=Mdt.lession;
+                  InsData[i].lesson=Mdt.lesson;
                   // workflow / age
                   if(InsData[i].Preset_Stages.length > 0 ){
                     let lastChangeCreated= InsData[i].Preset_Stages[InsData[i].Preset_Stages.length -1].start_date;
@@ -205,7 +338,16 @@ postRoutes.route('/addnewjobs').post(function (req, res) {
       res.send("Not Saved Msg");
     }
 });
-postRoutes.route('/artlogdata').post(function (req, res) {
+postRoutes.route('/artloginit', checkToken.checkToken).post(function (req, res) {
+  Mdb.searchState.find({ uid: req.headers['authuser'] }).then((dt)=>{
+    let resJSON={ inData:dt, grade: GGrades, module: GModules, artcomplex: GArtComplex, artAssign: GArtAssign, risk: GRisk, impact: GImpact, wip: GCurriculaWIP
+    }
+    res.send(resJSON);
+  }).catch((Err)=>{
+    console.log("Finding error from searchState: ", Err);
+  });
+})
+postRoutes.route('/artlogdata', checkToken.checkToken).post(function (req, res) {
     console.log("req parameters :" , req.body);
     let $and = [ ];
     if(!!req.body.grade && req.body.grade!=""){
@@ -226,6 +368,16 @@ postRoutes.route('/artlogdata').post(function (req, res) {
         $or.push( { "jobMetaproperties.7388493928bc4a9aa57ca65306ed1579" :{$in:  m  }  }) 
       }
       $and.push({$or:$or})
+    }
+    if(!!req.body.curricula && req.body.curricula!=""){
+      $and.push(
+        { "jobMetaproperties.0790cd4f2aed4ce0a315ff8034a43994" : req.body.curricula }
+      ); 
+    }
+    if(!!req.body.added && req.body.added== "true"){
+      $and.push(
+        { "duplicate" : req.body.added }
+      ); 
     }
     if(!!req.body.workflow && req.body.workflow!=""){
       $and.push(
@@ -257,10 +409,10 @@ postRoutes.route('/artlogdata').post(function (req, res) {
     }else if($and.length >0){
        q= { $and};
     } 
-    let fields={ duplicate:1, presetName:1, Preset_Stages:1, id:1, name:1, description:1, job_active_stage:1, jobMetaproperties:1, jobID:1, job_key:1, dateCreated:1, job_date_finished:1};
-    console.log("Calling artlogdata Data " , JSON.stringify(q));
-
-    Mdb.bynder_jobs.find(q, fields ).sort({job_key:-1}).limit(50).then((data)=>{
+    let fields={isPaging:1, comment:1, mVerification:1, duplicate:1, presetName:1, Preset_Stages:1, id:1, name:1, description:1, job_active_stage:1, jobMetaproperties:1, jobID:1, job_key:1, dateCreated:1, job_date_finished:1};
+    console.log("Calling artlogdata Data " , JSON.stringify(q), JSON.stringify(fields));
+    //
+    Mdb.bynder_jobs.find(q, fields ).sort({job_key:-1}).limit(100).then((data)=>{
     let dataResult=[];
 
     for(let  dtkey in data){
@@ -284,17 +436,17 @@ postRoutes.route('/artlogdata').post(function (req, res) {
           data[dtkey].job_date_finished=new Date().toISOString();
         }
         objData.cstage=""; objData.workflow="";
-        if(objData.presetName !=""){
-          if(objData.presetName.indexOf('Clip Art')!= -1 ){
-            objData.workflow="Clip Art";
-          }else if(objData.presetName.indexOf('Created Image')!= -1 ){
-            objData.workflow="Created Image";
-          }else if(objData.presetName.indexOf('Permission')!= -1 ){
-            objData.workflow="Permission";
-          }else if(objData.presetName.indexOf('Shutterstock')!= -1 ){
-            objData.workflow="Shutterstock";
-          }
-        }
+        // if(objData.presetName !=""){
+        //   if(objData.presetName.indexOf('Clip Art')!= -1 ){
+        //     objData.workflow="Clip Art";
+        //   }else if(objData.presetName.indexOf('Created Image')!= -1 ){
+        //     objData.workflow="Created Image";
+        //   }else if(objData.presetName.indexOf('Permission')!= -1 ){
+        //     objData.workflow="Permission";
+        //   }else if(objData.presetName.indexOf('Shutterstock')!= -1 ){
+        //     objData.workflow="Shutterstock";
+        //   }
+        // }
         if(objData.Preset_Stages.length > 0){
           // IT Should be another that we can not captuchred 
           let ob=objData.Preset_Stages[ objData.Preset_Stages.length-1 ];
@@ -305,21 +457,22 @@ postRoutes.route('/artlogdata').post(function (req, res) {
           }
         }
          objData.totalage=dateDiff(dateCreatedJob, data[dtkey].job_date_finished);
-         objData.lession      =   Mdt.lession;
+         objData.lesson       =   Mdt.lesson;
+         objData.lessonlet    =   Mdt.lessonlet;
          objData.component    =   Mdt.component; 
          objData.tags         =   Mdt.tag; 
          objData.gradeID      =   Mdt.grade;
          objData.grade        =   Mdt.gradeVal;
          objData.moduleID     =   Mdt.module;
          objData.module       =   Mdt.moduleVal;
-         objData.artcomplexID =   Mdb.artcomplex;
-         objData.artcomplex   =   Mdb.artcomplexVal;
-         objData.artassionID  =   Mdb.artassion;
-         objData.artassion    =   Mdb.artassionVal;
-         objData.riskID       =   Mdb.risk;
-         objData.risk         =   Mdb.riskVal;
-         objData.impactId     =   Mdb.impact;
-         objData.impact       =   Mdb.impactVal;
+         objData.artcomplexID =   Mdt.artComplex;
+         objData.artcomplex   =   Mdt.artComplexVal;
+         objData.artassionID  =   Mdt.artAssion;
+         objData.artassion    =   Mdt.artAssionVal;
+         objData.riskID       =   Mdt.risk;
+         objData.risk         =   Mdt.riskVal;
+         objData.impactId     =   Mdt.impact;
+         objData.impact       =   Mdt.impactVal;
 
         // objData.workflowMeta=WorkFlowJobsMetaData;
 
@@ -330,7 +483,7 @@ postRoutes.route('/artlogdata').post(function (req, res) {
     }
      job_keys=dataResult.filter( (d)=> d.job_key!="" ).map(d=>d.job_key);
      GridFilters={ 
-       lession: [...new Set(dataResult.filter( (v, i)=> !!v.lession ).map(d=>d.lession))],  //.filter((v,i) => grades.indexOf(v) === i),
+       lesson: [...new Set(dataResult.filter( (v, i)=> !!v.lesson ).map(d=>d.lesson))],  //.filter((v,i) => grades.indexOf(v) === i),
        component: [...new Set(dataResult.filter( (d)=> !!d.component ).map(d=>d.component))],
        grade: [...new Set(dataResult.filter( (d)=> !!d.grade ).map(d=>d.grade))],
        module: [...new Set(dataResult.filter( (d)=> !!d.module ).map(d=>d.module))],
@@ -340,7 +493,7 @@ postRoutes.route('/artlogdata').post(function (req, res) {
        impact: [...new Set(dataResult.filter( (d)=> !!d.impact ).map(d=>d.impact))],
      };
      GridEditing={ 
-      lession: [...new Set(dataResult.filter( (v, i)=> !!v.lession ).map(d=> d.lession))],  //.filter((v,i) => grades.indexOf(v) === i),
+      lesson: [...new Set(dataResult.filter( (v, i)=> !!v.lesson ).map(d=> d.lesson))],  //.filter((v,i) => grades.indexOf(v) === i),
       component: [...new Set(dataResult.filter( (d)=> !!d.component ).map(d=>d.component))],
       grade: [...new Set(dataResult.filter( (d)=> !!d.grade ).map(d=>d.grade))],
       module: [...new Set(dataResult.filter( (d)=> !!d.module ).map(d=>d.module))],
@@ -349,7 +502,7 @@ postRoutes.route('/artlogdata').post(function (req, res) {
       risk: [...new Set(dataResult.filter( (d)=> !!d.risk ).map(d=>d.risk))],
       impact: [...new Set(dataResult.filter( (d)=> !!d.impact ).map(d=>d.impact))],
     };
-    GlobalDt={ grade: GGrades, module: GModules, artcomplex: GArtComplex, artAssign: GArtAssign, risk: GRisk, impact: GImpact}
+    GlobalDt={ grade: GGrades, module: GModules, artcomplex: GArtComplex, artAssign: GArtAssign, risk: GRisk, impact: GImpact, wip: GCurriculaWIP}
      let assetQ={property_workflowjobkey: {
       $in:  job_keys 
       }};
