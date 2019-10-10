@@ -270,9 +270,9 @@ postRoutes.route('/addnewjobs').post(function (req, res) {
              let changes= rqdata.filter(d=> d.jobkey== InsData[i].job_key);
               // grade : "c0ac0a86e65f4f7ebd88dbd7e77965ef"  Module: 7388493928bc4a9aa57ca65306ed1579"
               for( let ch of changes){
-                  if(ch.grade.value)
+                  if(!!ch.grade && ch.grade.value)
                   InsData[i].jobMetaproperties['c0ac0a86e65f4f7ebd88dbd7e77965ef']=ch.grade.value;
-                  if(ch.grade.module)
+                  if(!!ch.grade && ch.grade.module)
                   InsData[i].jobMetaproperties['7388493928bc4a9aa57ca65306ed1579']=ch.module.value;
                   
                   let saveBynderJobs= new Mdb.bynder_jobs(InsData[i]);
