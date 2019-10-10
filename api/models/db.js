@@ -1,14 +1,26 @@
 var mongoose = require('mongoose');
 mongoose.Promise = global.Promise;
 var gracefulShutdown;
-//var dbURI = 'mongodb://localhost/mpsdb';
-var dbURI = 'mongodb://mpst:HBjgmdT649(T2@10.31.1.143:27017/mpsdb';
+const option = {
+  socketTimeoutMS: 30000,
+  keepAlive: true,
+  reconnectTries: 30000
+};
+var dbURI = 'mongodb://localhost/mpsdb';
+//var dbURI = 'mongodb://mpst:HBjgmdT649(T2@10.31.1.143:27017/mpsdb';
 // if (process.env.NODE_ENV === 'production') {
 //   dbURI = 'mongodb://mpst:HBjgmdT649(T2@10.31.1.143:27017/mpsdb'; //process.env.MONGOLAB_URI;
 // }
 
 //mongoose.connect(dbURI);
-mongoose.connect(dbURI+'?connectTimeoutMS=1000&bufferCommands=false');
+//mongoose.connect(dbURI+'?connectTimeoutMS=1000&bufferCommands=false');
+mongoose.connect(dbURI, option).then(function(){
+  //connected successfully
+  console.log("db Connected successfully");
+}, function(err) {
+  //err handle
+  console.log("db Connection error :", err)
+});
 //mongoose.connect('mongodb://mpst:HBjgmdT649(T2@10.31.1.143:27017/mpsdb?connectTimeoutMS=1000&bufferCommands=false');
 // CONNECTION EVENTS
 mongoose.connection.on('connected', function() {

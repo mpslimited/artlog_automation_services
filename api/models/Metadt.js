@@ -40,6 +40,9 @@
      iniMeta(meta){
         this.Meta=meta;
      }
+     initAssetMeta(assetMeta){
+        this.assetMeta=assetMeta; 
+     }
      reIniMeta( dt, meta){
         this.data = dt;
         this.meta=meta;
@@ -49,7 +52,7 @@
         let retVal = "";
         let opt=this.Meta.filter(d=>d.tempId==refKey);
         if(opt.length> 0 && !! opt[0].options){
-            let lendt=opt[0].options.filter((d)=> d.label== refVal);
+            let lendt=opt[0].options.filter((d)=> d.label== refVal || d.label.split(" ").join("")== refVal);
             if(lendt.length> 0){
                 retVal= lendt[0].ID.split("-").join("");
             }
@@ -58,7 +61,7 @@
      }
      getWorkflow(){
        let  ret='';
-        if(this.data.hasOwnProperty('presetName') && this.data.presetName !=""){
+        if(!!this.data.presetName && this.data.presetName !==''){
             if(this.data.presetName.indexOf('Clip Art')!= -1 ){
                 ret="Clip Art";
             }else if(this.data.presetName.indexOf('Created Image')!= -1 ){
@@ -201,6 +204,14 @@
             return '';
         }
      }
+     getAssetWipByID(key, tempWipID){
+        let ret='';
+        let filterd=this.assetMeta.filter(d=> d.value==tempWipID);
+        if(filterd.length > 0){
+            ret= filterd[0].label;
+        }
+        return ret;
+     }
      getValByKeyID(key, tempID){
          let res="";
          let Mdt=this.Meta.filter(d=>d.tempId==key);
@@ -211,6 +222,7 @@
          }
          return res;
      }
+     
      setGrade(value){
         this.data.jobMetaproperties[this.gradekey]=value;
      }
@@ -235,36 +247,89 @@
             artComplexVal:   this.getValByKeyID(this.artComplexkey, this.getArtComplex()),
             artAssion    :   this.getArtAssion()  ,
             artAssionVal :   this.getValByKeyID(this.artAssionkey, this.getArtAssion()),
+            wipVal       :   this.getWip(),
+            wip          :   this.getAssetWipByID(this.wipkey, this.getWip()),   
+            workflow     :   this.getWorkflow()
             
         };
         return dt;
     }
     getmetaVal(){
         let dt={ 
-            getjobkey : this.getJobkey(),
-            gradeID     : this.getGrade(),
-            gradeVal    : this.getGradeVal(),
-            moduleID    : this.getModule(),
-            moduleVal   :'',
+            getjobkey    : this.getJobkey(),
+            gradeID      : this.getGrade(),
+            gradeVal     : this.getGradeVal(),
+            moduleID     : this.getModule(),
+            moduleVal    :'',
 
-            lession   : this.getLesson(),
-            component : this.getComponent(),
-            batch     : "",
+            lession      : this.getLesson(),
+            component    : this.getComponent(),
+            batch        : "",
             dateCreatedM : this.getDateCreatedM(),
-            tag         : this.getTag(),
-            impactID    : this.getImpact(),
-            impactVal   : '',
-            ristID      : this.getRisk(),
-            ristVal     : '',
-            artComplexID: this.getArtComplex(),
+            tag          : this.getTag(),
+            impactID     : this.getImpact(),
+            impactVal    : '',
+            ristID       : this.getRisk(),
+            ristVal      : '',
+            artComplexID : this.getArtComplex(),
             artComplexVal:'',
-            artAssionID : this.getArtAssion() ,
-            artAssionVal:'' 
+            artAssionID  : this.getArtAssion() ,
+            artAssionVal :'' 
         };
         return dt;
     }
      print( dd){
         console.log('Name is :'+ this.name, '==>', dd);
+     }
+     getStageRTeam(name){
+        //this.getWorkflow()
+        var Teamname="";
+        if(name!=""){
+          if(name.toLowerCase().indexOf("research asset and original source")!=-1 ||
+          name.toLowerCase().indexOf("select job type")!=-1 ||
+          name.toLowerCase().indexOf("copyright status")!=-1 ||
+          name.toLowerCase().indexOf("contract negotiation and asset procurement")!=-1 ||
+          name.toLowerCase().indexOf("review image permissions")!=-1 ||
+          name.toLowerCase().indexOf("asset approval")!=-1 ||
+          name.toLowerCase().indexOf("waiting room preflight (for permission workflow)")!=-1 ||
+          name.toLowerCase().indexOf("a&p record keeping")!=-1 ){
+            Teamname="Permissions Team";
+          }
+          else if(name.toLowerCase().indexOf("art production lead assigns designer")!=-1 ||
+           name.toLowerCase().indexOf("create asset")!=-1 ||
+           name.toLowerCase().indexOf("designer create asset")!=-1 ||
+           name.toLowerCase().indexOf("review image design and quality")!=-1 ||
+           name.toLowerCase().indexOf("art production lead review")!=-1 ||
+           name.toLowerCase().indexOf("team lead/designer creates asset")!=-1 ||
+           name.toLowerCase().indexOf("team lead assigns designer")!=-1 ||
+           name.toLowerCase().indexOf("waiting room preflight")!=-1 ){
+             Teamname="Art Team";
+          }
+          else if(name.toLowerCase().indexOf("search the dam for existing assets")!=-1 ||
+          name.toLowerCase().indexOf("verify permissions and upload the")!=-1 ||
+          name.toLowerCase().indexOf("evaluate asset and assign for further action ")!=-1 ||
+          name.toLowerCase().indexOf("search the DAM for existing assets ")!=-1 ||
+          name.toLowerCase().indexOf("waiting room preflight (for clip art or storage workflow) ")!=-1 ||
+          name.toLowerCase().indexOf("approve and upload asset to the waiting room")!=-1 ){
+            Teamname="Clip Art & Storage Team";
+          }else if(name.toLowerCase().indexOf("complete image research and provide options to writer")!=-1 ||
+          name.toLowerCase().indexOf("upload final image")!=-1 ){
+            Teamname="Shutterstock Team";
+          }else if(name.toLowerCase().indexOf("content team feedback and approval")!=-1 ||
+          name.toLowerCase().indexOf("feedback and approval")!=-1 ||
+          name.toLowerCase().indexOf("math audit review")!=-1 ||
+          name.toLowerCase().indexOf("math managing editor feedback and approval")!=-1 ||
+          name.toLowerCase().indexOf("complete request form")!=-1 ||
+          name.toLowerCase().indexOf("content team feedback and approval")!=-1 ||
+          name.toLowerCase().indexOf("feedback and approval")!=-1 ||
+          name.toLowerCase().indexOf("fpo math audit")!=-1 ||
+          name.toLowerCase().indexOf("rejected asset notification")!=-1 ){
+            Teamname="Content Team";
+          }else{
+            Teamname="On Hold Team";
+          }
+        }
+        return Teamname;
      }
 }
 class Wmdt {

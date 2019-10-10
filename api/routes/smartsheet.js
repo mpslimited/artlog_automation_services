@@ -34,6 +34,7 @@ let GMeta=new Metadt(d);
 Mdb.metaproperties.find().then((metaData)=>{
   WorkFlowJobsMetaData = metaData;
   GMeta.iniMeta(metaData);
+  GMeta.initAssetMeta(GCurriculaWIP);
   GGrades=GMeta.getAMetaOptionsBykey(GMeta.gradekey);
   GModules=GMeta.getAMetaOptionsBykey(GMeta.modulekey);
   GArtComplex=GMeta.getAMetaOptionsBykey(GMeta.artComplexkey);
@@ -45,7 +46,7 @@ Mdb.metaproperties.find().then((metaData)=>{
 });
 Mdb.assetMeta.find({},{"curricula_wip.options":1}).then((dt)=>{
   if(dt.length > 0){
-    GCurriculaWIP=dt[0].curricula_wip.options.map(d=>({value:d.id, label: d.label}));
+    GCurriculaWIP=dt[0].curricula_wip.options.map(d=>({value:d.id, label: d.label , name: d.name}));
   }
 }).catch((Err)=>{ console.log(" Error in ASset Meta:", Err);});
 postRoutes.route('/dt').get(function (req, res) {  
@@ -81,6 +82,13 @@ postRoutes.route('/setDefaultSearch', verifyToken).post(function (req, res) {
     console.log("Updating Mulit Err: ", Err);
   });
 });
+//cleargridStage
+postRoutes.route('/cleargridStage', verifyToken).post(function (req, res) { 
+  console.log("ACTION : cleargridStage selectedColumn REQ==>",req.body);
+  Mdb.searchState.remove({ uid: req.headers['authuser'] , state:'GridStage' }).then((data)=>{
+   res.send(data);
+  });
+});
 postRoutes.route('/gridStage', verifyToken).post(function (req, res) {  
   console.log("ACTION : gridStage selectedColumn REQ==>",req.body);
   Mdb.searchState.find({ uid: req.headers['authuser'] , state:'GridStage' }).then((data)=>{
@@ -93,7 +101,7 @@ postRoutes.route('/gridStage', verifyToken).post(function (req, res) {
         res.send(dt);
       }).catch((Err)=>{ console.log("Error in updating data"); })
     }else{
-      let searchState= new Mdb.searchState({ uid: req.headers['authuser'] ,searchTitle : "MyGrid Data",
+      let searchState= new Mdb.searchState({ uid: req.headers['authuser'] ,searchTitle : "Reset Grid Data",
       fields: req.body.selectedColumn, state:'GridStage' });
       searchState.save().then((rs)=>{
       res.send(rs);
@@ -114,18 +122,8 @@ postRoutes.route('/searchState', verifyToken).post(function (req, res) {
     }).catch(Err=>{
       console.log("ERROR in SAVED: ERR:", Err);
     });
-})
-postRoutes.route('/grideState', verifyToken).post(function (req, res) {  
-  console.log("ACTION : searchState REQ==>",req.body);
-  let searchState= new Mdb.searchState({uid: req.headers['authuser'] , searchTitle : req.body.searchText, fields: req.body.frmdt , state:'GridStage'});
-  searchState.save().then((rs)=>{
-    console.log("value saved sucessfully ", rs); 
-    res.send(rs);
-    }).catch(Err=>{
-      console.log("ERROR in SAVED: ERR:", Err);
-    })
- // res.send(req.body);
-})
+});
+
 postRoutes.route('/getUserInfo').post(function (req, res) {  
    console.log(req.cookies);
    if(!req.cookies.jssonId){
@@ -204,6 +202,7 @@ postRoutes.route('/updateJob').post(function (req, res) {
     // Lesson, components, tags, artComplex, artAssign, Risk, Impact, module, grade,
     let Mdt= new Metadt(newDt);
     Mdt.iniMeta(WorkFlowJobsMetaData);
+   
     if(!!newDt.lesson){
       Mdt.setLesson(newDt.lesson);
     }if(!!newDt.lessonlet){
@@ -279,6 +278,7 @@ postRoutes.route('/addnewjobs').post(function (req, res) {
                   let saveBynderJobs= new Mdb.bynder_jobs(InsData[i]);
                   let Meta= new Metadt(InsData[i]);
                   Meta.iniMeta(WorkFlowJobsMetaData);
+                  Meta.initAssetMeta(GCurriculaWIP);
                   let Mdt= Meta.getMeta();
                   InsData[i].lesson=Mdt.lesson;
                   // workflow / age
@@ -409,10 +409,10 @@ postRoutes.route('/artlogdata', checkToken.checkToken).post(function (req, res) 
     }else if($and.length >0){
        q= { $and};
     } 
-    let fields={isPaging:1, comment:1, mVerification:1, duplicate:1, presetName:1, Preset_Stages:1, id:1, name:1, description:1, job_active_stage:1, jobMetaproperties:1, jobID:1, job_key:1, dateCreated:1, job_date_finished:1};
+    let fields={isPaging:1, comment:1, mVerification:1, duplicate:1, presetName:1, Preset_Stages:1, id:1, name:1, description:1, job_active_stage:1, jobMetaproperties:1, jobID:1, job_key:1, dateCreated:1, job_date_finished:1, thumb:1};
     console.log("Calling artlogdata Data " , JSON.stringify(q), JSON.stringify(fields));
     //
-    Mdb.bynder_jobs.find(q, fields ).sort({job_key:-1}).limit(100).then((data)=>{
+    Mdb.bynder_jobs.find(q, fields ).sort({job_key:-1}).limit(200).then((data)=>{
     let dataResult=[];
 
     for(let  dtkey in data){
@@ -422,6 +422,7 @@ postRoutes.route('/artlogdata', checkToken.checkToken).post(function (req, res) 
       if(!!data[dtkey].jobMetaproperties){
         let Meta= new Metadt(data[dtkey])
         Meta.iniMeta(WorkFlowJobsMetaData);
+        Meta.initAssetMeta(GCurriculaWIP);
         let Mdt= Meta.getMeta();
         //console.log("Metadata", data[dtkey].jobMetaproperties);
         let metaObj=Object.entries(data[dtkey].jobMetaproperties);
@@ -435,18 +436,8 @@ postRoutes.route('/artlogdata', checkToken.checkToken).post(function (req, res) 
         if(data[dtkey].job_date_finished===null && data[dtkey].job_active_stage.status!="Approved"){
           data[dtkey].job_date_finished=new Date().toISOString();
         }
-        objData.cstage=""; objData.workflow="";
-        // if(objData.presetName !=""){
-        //   if(objData.presetName.indexOf('Clip Art')!= -1 ){
-        //     objData.workflow="Clip Art";
-        //   }else if(objData.presetName.indexOf('Created Image')!= -1 ){
-        //     objData.workflow="Created Image";
-        //   }else if(objData.presetName.indexOf('Permission')!= -1 ){
-        //     objData.workflow="Permission";
-        //   }else if(objData.presetName.indexOf('Shutterstock')!= -1 ){
-        //     objData.workflow="Shutterstock";
-        //   }
-        // }
+        objData.cstage=""; objData.workflow=Meta.getWorkflow();
+       
         if(objData.Preset_Stages.length > 0){
           // IT Should be another that we can not captuchred 
           let ob=objData.Preset_Stages[ objData.Preset_Stages.length-1 ];
@@ -456,7 +447,8 @@ postRoutes.route('/artlogdata', checkToken.checkToken).post(function (req, res) 
             objData.cstage=ob.StageNames;
           }
         }
-         objData.totalage=dateDiff(dateCreatedJob, data[dtkey].job_date_finished);
+         objData.currentRTeam =   Meta.getStageRTeam(objData.cstage);
+         objData.totalage     =   dateDiff(dateCreatedJob, data[dtkey].job_date_finished);
          objData.lesson       =   Mdt.lesson;
          objData.lessonlet    =   Mdt.lessonlet;
          objData.component    =   Mdt.component; 
@@ -473,16 +465,16 @@ postRoutes.route('/artlogdata', checkToken.checkToken).post(function (req, res) 
          objData.risk         =   Mdt.riskVal;
          objData.impactId     =   Mdt.impact;
          objData.impact       =   Mdt.impactVal;
-
-        // objData.workflowMeta=WorkFlowJobsMetaData;
-
-         
+         objData.curriculum   =   Mdt.wip;
       }
       //console.log("Object Final VAlues: ==>", objData);
       dataResult.push(objData);
     }
      job_keys=dataResult.filter( (d)=> d.job_key!="" ).map(d=>d.job_key);
-     GridFilters={ 
+     GridFilters={
+       curriculum: [...new Set(dataResult.filter( (v, i)=> !!v.curriculum ).map(d=>d.curriculum))],
+       workflow: [...new Set(dataResult.filter( (v, i)=> !!v.workflow ).map(d=>d.workflow))],
+       currentRTeam: [...new Set(dataResult.filter( (v, i)=> !!v.currentRTeam ).map(d=>d.currentRTeam))],
        lesson: [...new Set(dataResult.filter( (v, i)=> !!v.lesson ).map(d=>d.lesson))],  //.filter((v,i) => grades.indexOf(v) === i),
        component: [...new Set(dataResult.filter( (d)=> !!d.component ).map(d=>d.component))],
        grade: [...new Set(dataResult.filter( (d)=> !!d.grade ).map(d=>d.grade))],
@@ -502,7 +494,6 @@ postRoutes.route('/artlogdata', checkToken.checkToken).post(function (req, res) 
       risk: [...new Set(dataResult.filter( (d)=> !!d.risk ).map(d=>d.risk))],
       impact: [...new Set(dataResult.filter( (d)=> !!d.impact ).map(d=>d.impact))],
     };
-    GlobalDt={ grade: GGrades, module: GModules, artcomplex: GArtComplex, artAssign: GArtAssign, risk: GRisk, impact: GImpact, wip: GCurriculaWIP}
      let assetQ={property_workflowjobkey: {
       $in:  job_keys 
       }};
@@ -515,7 +506,7 @@ postRoutes.route('/artlogdata', checkToken.checkToken).post(function (req, res) 
       //     data.filter(df=> dt.)
       //   }
       // }
-      let result={ artLogData : dataResult, GridFilters : GridFilters, GlobalDt: GlobalDt};
+      let result={ artLogData : dataResult, GridFilters : GridFilters};
       res.send( result );
      //}).catch((Err)=> { console.log("Error in Finding asset:", Err)})
      

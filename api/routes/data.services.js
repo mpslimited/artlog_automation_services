@@ -7,6 +7,7 @@ const await = require("await");
 const async = require("async");
 let Mdb = require('../models/post.model');
 let  AssetTags  =require("../models/AssetTags");
+let  Metadt  =require("../models/Metadt");
 let appConfig=require('../models/config');
 
 const oauth = OAuth({
@@ -15,6 +16,30 @@ const oauth = OAuth({
     return crypto.createHmac('sha1', key).update(base_string).digest('base64');
   }
 });
+
+let d=[], WorkFlowJobsMetaData=[], GGrades=[], GModules=[], GCurriculaWIP=[], GArtComplex=[], GArtAssign=[],
+GRisk=[],GImpact=[];
+let GMeta=new Metadt(d);
+
+Mdb.metaproperties.find().then((metaData)=>{
+  WorkFlowJobsMetaData = metaData;
+  GMeta.iniMeta(metaData);
+  
+  GGrades=GMeta.getAMetaOptionsBykey(GMeta.gradekey);
+  GModules=GMeta.getAMetaOptionsBykey(GMeta.modulekey);
+  GArtComplex=GMeta.getAMetaOptionsBykey(GMeta.artComplexkey);
+  GArtAssign=GMeta.getAMetaOptionsBykey(GMeta.artAssionkey);
+  GRisk=GMeta.getAMetaOptionsBykey(GMeta.riskkey);
+  GImpact=GMeta.getAMetaOptionsBykey(GMeta.impactkey);
+}).catch((Err)=>{
+  console.log("Finding Metadata ERROR:", Err);
+});
+Mdb.assetMeta.find({},{"curricula_wip.options":1}).then((dt)=>{
+  if(dt.length > 0){
+    GCurriculaWIP=dt[0].curricula_wip.options.map(d=>({value:d.id, label: d.label , name: d.name}));
+    GMeta.initAssetMeta(GCurriculaWIP);
+  }
+}).catch((Err)=>{ console.log(" Error in ASset Meta:", Err);});
 
 
 postRoutes.route('/getdata/:campaignId').get(function (req, res) {
@@ -109,14 +134,144 @@ postRoutes.route('/getjobsmeta/').get(function (req, res) {
 
 });
 //
-postRoutes.route('/assetJobs/').post(function (req, res) {
+postRoutes.route('/moveAssetBanktoWorkflow/').post(function (req, res) {
+  Mdb.asset.find(
+    
+    {tagReader:{$exists: true}}
 
-  Mdb.asset.find({ "tags":"SC_0402TE1_L10_L11"}).then((data)=> {
-    if(data.length){
-      let asset = new AssetTags(data[0]);
-      asset.getJobs();
-      //getJobs(data[0]);
+    ).then(data=>{
+    if(data.length > 0){
+      console.log("ASSET Bank Totol Jobs ==>", data.length);
+      let resData=[];
+      for(let temp=0; temp < data.length  ; temp++){
+       let AsBynderJobs={
+        id                  : data[temp].id ,
+        jobID               : data[temp].id.split("-").join(""),
+        name                : data[temp].name ,
+        description         : data[temp].description ,
+        dateCreated         : ((!!data[temp].dateCreated)?data[temp].dateCreated :''),
+        job_date_started    : ((!!data[temp].dateCreated)?data[temp].dateCreated :''),
+        job_date_finished   : ((!!data[temp].datePublished)?data[temp].datePublished :''),
+        dateModified        : ((!!data[temp].dateModified)?data[temp].dateModified :''),
+        job_active_stage    : { status:'Asset Bank' },
+        job_key             : '',
+        presetName          : '',
+        isAssetBank         : true,
+        jobMetaproperties   : {},
+        thumb               : ''
+      };
+      // neet thumbnial
+      //carriculam
+      //
+      
+      if(!!data[temp].property_workflowjobkey && data[temp].property_workflowjobkey.length >0){
+        AsBynderJobs.job_key=data[temp].property_workflowjobkey[0];
+      }
+      if(!!data[temp].property_workflowType && data[temp].property_workflowType.length >0){
+        AsBynderJobs.presetName=" "+data[temp].property_workflowType[0];
+      }
+      if(!!data[temp].thumbnails && data[temp].thumbnails.length > 0){
+        AsBynderJobs.thumb=data[temp].thumbnails['PNG_Web Ready'];
+      }
+      let MetaDT=new Metadt(AsBynderJobs);
+      MetaDT.iniMeta(WorkFlowJobsMetaData);
+      MetaDT.initAssetMeta(GCurriculaWIP);
+
+      if(!!data[temp].tagReader && data[temp].tagReader.length >0){
+        if(!!data[temp].property_art_assignment && data[temp].property_art_assignment.length > 0 ) {
+          MetaDT.setArtAssion(MetaDT.referValueByKey(MetaDT.artAssionkey , data[temp].property_art_assignment[0]));
+        }if(!!data[temp].property_art_complexity && data[temp].property_art_complexity.length){
+          MetaDT.setArtComplex(MetaDT.referValueByKey(MetaDT.artComplexkey , data[temp].property_art_complexity[0]));
+        } if(!!data[temp].tags && data[temp].tags.length > 0){
+          MetaDT.setTag(data[temp].tags.join(","));
+        }
+        if(!!data[temp].thumbnails){
+          if(!!data[temp].thumbnails['PNG_Web Ready']){
+            AsBynderJobs.thumb=data[temp].thumbnails['PNG_Web Ready'];
+          }else if(!!data[temp].thumbnails['thul']){
+            AsBynderJobs.thumb=data[temp].thumbnails['thul'];
+          }else if(!!data[temp].thumbnails['mini']){
+            AsBynderJobs.thumb=data[temp].thumbnails['mini'];
+          }
+        }
+        for(let i=0; i < data[temp].tagReader.length; i++){
+          let reader=data[temp].tagReader[i];
+          if(!!reader.grade ){
+            MetaDT.setGrade(MetaDT.referValueByKey(MetaDT.gradekey , reader.grade.replace('G','')));
+          }if(!!reader.module ){
+            MetaDT.setModule(MetaDT.referValueByKey(MetaDT.modulekey , parseInt(reader.module.replace("M","") ) ));
+          }if(!!reader.comp ){
+            MetaDT.setComponent(reader.comp);
+          }if(!!reader.lesson ){
+            MetaDT.setLesson(reader.lesson);
+          }
+          if(i+1 != data[temp].tagReader.length){
+            console.log("Dulpicate Asset ");
+            let bynder_jobs= new Mdb.bynder_jobs(MetaDT.data);
+            bynder_jobs.save().then((rs)=>{
+              console.log("data saved");
+            }).catch((Err)=>{
+              console.log("data moved field orG ERR:", Err);
+            });
+          }
+        }
+        // other grade module components setting
+      }else{
+        if(!!data[temp].property_Grade && data[temp].property_Grade.length > 0){
+          MetaDT.setGrade(MetaDT.referValueByKey(MetaDT.gradekey , data[temp].property_Grade[0].replace('G','')));
+        }if( !!data[temp].property_GeodesBookNumber && data[temp].property_GeodesBookNumber.length > 0){
+          MetaDT.setModule(MetaDT.referValueByKey(MetaDT.modulekey , parseInt(data[temp].property_GeodesBookNumber[0].replace('B',''))));
+        }
+        if(!!data[temp].property_art_assignment && data[temp].property_art_assignment.length > 0 ) {
+          MetaDT.setArtAssion(MetaDT.referValueByKey(MetaDT.artAssionkey , data[temp].property_art_assignment[0]));
+        }if(!!data[temp].property_art_complexity && data[temp].property_art_complexity.length){
+          MetaDT.setArtComplex(MetaDT.referValueByKey(MetaDT.artComplexkey , data[temp].property_art_complexity[0]));
+        }if(!!data[temp].tags && data[temp].tags.length > 0){
+          MetaDT.setTag(data[temp].tags.join(","));
+        }
+        if(!!data[temp].thumbnails){
+          if(!!data[temp].thumbnails['PNG_Web Ready']){
+            AsBynderJobs.thumb=data[temp].thumbnails['PNG_Web Ready'];
+          }else if(!!data[temp].thumbnails['thul']){
+            AsBynderJobs.thumb=data[temp].thumbnails['thul'];
+          }else if(!!data[temp].thumbnails['mini']){
+            AsBynderJobs.thumb=data[temp].thumbnails['mini'];
+          }
+        }
+      }
+      let bynder_jobs= new Mdb.bynder_jobs(MetaDT.data);
+      bynder_jobs.save().then((rs)=>{
+        console.log("data saved");
+      }).catch((Err)=>{
+        console.log("data moved field orG ERR:", Err);
+      });
+     // console.log("SAVE CODE for single Jobs:",MetaDT.data.jobMetaproperties);
+      }
+      res.send(MetaDT);
     }
+  }).catch(Err=>{ console.log("Error in finding reader jobs from Asset ERROR:", Err)})
+});
+postRoutes.route('/assetJobs/').post(function (req, res) {
+  Mdb.asset.find(
+    //{ "tags":"SC_0402TE1_L10_L11"}
+    //{'id':'4A86BF38-A7D7-4893-ABCC121FC58FC61D'}
+    //{'id':'B1874BF8-165D-42F4-95881737D7487D9E'}
+    //{'id':'90A1FE91-2C56-41EC-88EE1075D6EB7D49'}
+    {tagReader:{$exists: false}}
+  ).limit(200).then((data)=> {
+    console.log("reader working AT:", data.length ," Jobs");
+    for(let i=0; i < data.length; i++){
+      console.log("reading progress AT:", data[i].id);
+      let asset = new AssetTags(data[i]);
+      Mdb.asset.updateOne({ id: data[i].id},{
+        $set:{ tagReader: asset.getJobs() }
+      }).then(dt=>{
+        console.log("asset tagReader has been updated :", data[i].id);
+      }).catch((Err)=>{
+        console.log("Error In Updating asset", data[i].id);
+      });
+    }
+    res.send(data.length," jobs updated");
   }).catch((Err)=>{ 
     console.log("Getting Jobs have error:", Err);
   });

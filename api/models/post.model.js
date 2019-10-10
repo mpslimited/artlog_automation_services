@@ -81,7 +81,9 @@ let bynder_jobs= new Schema({
   comment: {type: String},
   isPaging: {type: String},
   mVerification:  {type : Boolean},
-  duplicate : {type : Boolean}
+  duplicate : {type : Boolean},
+  isAssetBank : {type : Boolean},
+  thumb: { type: String }
  },{
     collection: 'bynder_jobs'
 });
@@ -233,6 +235,7 @@ let asset=new Schema({
     property_ShutterstockImageID : { type: Object},
     property_PriorUses : { type: Object},
     property_Location : { type: Object},
+    tagReader:{type: Array}
   },{
       collection: 'asset'
   });
