@@ -83,6 +83,9 @@ let bynder_jobs= new Schema({
   mVerification:  {type : Boolean},
   duplicate : {type : Boolean},
   isAssetBank : {type : Boolean},
+  generatedTags : { type: String},
+  updateTag   : { type: String},
+  isMailed    : {type: String },
   thumb: { type: String }
  },{
     collection: 'bynder_jobs'

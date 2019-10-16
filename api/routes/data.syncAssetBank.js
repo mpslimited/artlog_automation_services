@@ -315,18 +315,63 @@ postRoutes.route('/assetJobs/').post(function (req, res) {
     console.log("Getting Jobs have error:", Err);
   });
 });
-postRoutes.route('/getAssets/:page').get(function (req, res) {
+async function  getBynderAssetBankCount(){
+  var request_data = appConfig.getActionInfo("getAssets");
+  var token = appConfig.getToken();
+  request_data.data = {};
+  request_data.url = request_data.url + "?limit=0&page=1&total=1";
+  //return await postData(request_data.url, request_data.data, oauth.toHeader(oauth.authorize(request_data, token)))
+ let response= await request({
+    url: request_data.url, method: request_data.method, form: request_data.data, headers: oauth.toHeader(oauth.authorize(request_data, token))
+  }, await function (error, response, body) {
+    console.log(body);
+  })
+}
 
+async function postData(url = '', data = {}, headers= {} , ) {
+  // Default options are marked with *
+  const response = await fetch(url, {
+    method: 'GET', // *GET, POST, PUT, DELETE, etc.
+    mode: 'cors', // no-cors, *cors, same-origin
+    cache: 'no-cache', // *default, no-cache, reload, force-cache, only-if-cached
+    credentials: 'same-origin', // include, *same-origin, omit
+    headers: headers,
+    /*headers: {
+      'Content-Type': 'application/json'
+      // 'Content-Type': 'application/x-www-form-urlencoded',
+    },*/
+    redirect: 'follow', // manual, *follow, error
+    referrer: 'no-referrer', // no-referrer, *client
+    body: JSON.stringify(data) // body data type must match "Content-Type" header
+  });
+  return await response.json(); // parses JSON response into native JavaScript objects
+}
+
+postRoutes.route('/assetSynced/').get(function (req, res) {
+  console.log("assetSynced init");
+      (async () => {
+        //try {
+          const mydnCount= await Mdb.bynder_jobs.find().count();
+          const bynderCount = await getBynderAssetBankCount()
+          res.send(mydnCount)
+
+        //   console.log(`res => ${JSON.stringify(mydnCount)}`);
+        // }
+        // finally {
+        //   console.log("assetSynced init finally");
+        // }
+    })() .catch(err => console.error(err));
+});
+postRoutes.route('/getAssets/:page').get(function (req, res) {
+  console.log("Requesting ");
   let page = req.params.page;
   var request_data = appConfig.getActionInfo("getAssets");
   var token = appConfig.getToken();
   request_data.data = {}; //={ "limit": 5, page: 1 }
-  request_data.url = request_data.url + "?limit=250&page=" + page; //append parra
-  console.log("request_data ==>", request_data, "token=>", token);
+  request_data.url = request_data.url + "?limit=250&page=" + page; 
   request({
     url: request_data.url, method: request_data.method, form: request_data.data, headers: oauth.toHeader(oauth.authorize(request_data, token))
   }, function (error, response, body) {
-    console.log("getting");
     if (error) {
       console.log("GET Asset API Error");
     } else {
@@ -334,41 +379,29 @@ postRoutes.route('/getAssets/:page').get(function (req, res) {
       try {
         var data = JSON.parse(response.body);
         console.log("API responded :", data.length);
-        //res.send(data);
         let Update = 0, Saved = 0;
         for (let temp = 0; temp < data.length; temp++) {
           Mdb.asset.find({ id: data[temp].id }).then((dt) => {
             if (dt.length > 0) {
-              //Update case 
-              //Update++;
-              let set = { id: data[temp].id };
-              let where = { id: data[temp].id };
-              console.log("set:", set, "where:", where)
-
+              console.log("Jobs Updation case")
             } else {
-              //save Case
-
               let asset = new Mdb.asset(data[temp]);
               asset.save().then((rs) => {
-                console.log("asset Saved SUCESSFULLY")
+                console.log("saved id", rs.id);
               }).catch((Err) => console.log("Asset Save ERROR:", Err));
             }
             if (temp == dt.length - 1) {
-              //console.log(" Total :",Saved ,"New Data Added and Total:",Update, " Data Modified SUCESSFULLY" )
               res.send("try to save or update assets AT:" + new Date());
             }
           }).catch((Err) => {
             console.log("Err in checking exist ERROR:", Err);
           })
-
         }
-
       } catch (e) {
         console.log("API response Not Valid. ERROR:", e);
       }
     }
   });
-
 });
 postRoutes.route('/updatePresets').post(function (req, res) {
   Mdb.bynder_jobs.find({ presetName: { $exists: false } }).then(dt => {
@@ -383,13 +416,10 @@ postRoutes.route('/updatePresets').post(function (req, res) {
           request({
             url: request_data.url, method: request_data.method, form: request_data.data, headers: oauth.toHeader(oauth.authorize(request_data, token))
           }, function (error, response, body) {
-            //console.log("API responded ...", JSON.stringify(request_data));
             if (response.statusCode == 200) {
               console.log(response.body);
               let persetDt = JSON.parse(response.body);
-
               let where = { presetID: persetDt.preset.ID, presetName: { $exists: false } };
-              console.log(persetDt);
               Mdb.bynder_jobs.updateMany(where, {
                 $set: {
                   presetName: persetDt.preset.name,
@@ -398,7 +428,6 @@ postRoutes.route('/updatePresets').post(function (req, res) {
               }).then(rs => {
                 console.log('data updated', rs)
               }).catch(ee => { console.log('Error in ', ee) });
-
             }
           });
         }
@@ -406,14 +435,5 @@ postRoutes.route('/updatePresets').post(function (req, res) {
     }
   }).catch(Err => console.log('Error in finding data', Err))
 })
-// postRoutes.route('/checkLogin').get(function (req, res) {
-//   res.send("Testing checkLogin");
-//   // let noSql=[];
-//   // Mdb.bynder_jobs.find(noSql).limit(200).then((dt)=>{
-//   //   res.send(dt);
-//   // }).catch((Err)=>{
-//   //   console.log("art log select error:", Err);
-//   // });
-// });
 
 module.exports = postRoutes;

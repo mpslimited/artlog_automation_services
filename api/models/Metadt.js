@@ -15,6 +15,7 @@
         
         this.lessonkey     =   "b447dc7d70b0420a8ac9ec9aeff78296";
         this.lessonletkey  =   "7b30e1d296d343bdaaffcb6be164a713";
+        this.revisionkey   =   "c94a845346e6490488d9dcc3f763ccfe";
         this.componentkey  =   "87d538e6d3a442468b20426285aef253";
         this.tagkey        =   "dde4714035904b0cb68888e0acf389b2";
         this.gradekey      =   "c0ac0a86e65f4f7ebd88dbd7e77965ef";
@@ -197,6 +198,16 @@
      getM(){
          return this.data.jobMetaproperties;
      }
+     getRevision(){
+        if(this.data.jobMetaproperties.hasOwnProperty(this.revisionkey)){
+            return this.data.jobMetaproperties[this.revisionkey];
+        }else{
+            return '';
+        }
+     }
+     setRevision(value){
+        this.data.jobMetaproperties[this.revisionkey]=value;
+     }
      getGrade(){
         if(this.data.jobMetaproperties.hasOwnProperty(this.gradekey)){
             return this.data.jobMetaproperties[this.gradekey];
@@ -243,6 +254,8 @@
             impactVal    :   this.getValByKeyID(this.impactkey, this.getImpact()),
             risk         :   this.getRisk(),
             riskVal      :   this.getValByKeyID(this.riskkey, this.getRisk()),
+            revision     :   this.getRevision(),
+            revisionVal  :   this.getValByKeyID(this.revisionkey, this.getRevision()),
             artComplex   :   this.getArtComplex(),
             artComplexVal:   this.getValByKeyID(this.artComplexkey, this.getArtComplex()),
             artAssion    :   this.getArtAssion()  ,

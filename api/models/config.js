@@ -18,6 +18,7 @@ var appConfig = {
       { action: 'getjobsmeta', URL:'https://greatminds.getbynder.com/api/workflow/metaproperties/', extraConfog: false, other:''},
       { action: 'getAssets', URL:'https://greatminds.getbynder.com/api/v4/media/', extraConfog: false, other:''},
       { action: 'getAssetsProp', URL:'https://greatminds.getbynder.com/api/v4/metaproperties/', extraConfog: false, other:''},
+      { action: 'updateAsset',URL:'https://greatminds.getbynder.com/api/v4/media/', extraConfog: true, other:''},
       { action: 'test4', URL:'', extraConfog: false, other:''}
 ], getActionInfo (name, id) { // same as "sayHi: function()"
         var data=this.apiAction.filter(function(data) {

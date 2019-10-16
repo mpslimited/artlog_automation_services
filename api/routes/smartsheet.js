@@ -257,25 +257,26 @@ postRoutes.route('/addnewjobs').post(function (req, res) {
     //res.send(req.body);
     if(req.body.jobAdd){
       let rqdata = JSON.parse(req.body.jobAdd);
+      let BynderSaved= Array();
       if(rqdata.length > 0){
         let allJobs=rqdata.map(d => d.jobkey);
         let QueryForC={job_key : {$in : allJobs },  duplicate : {$exists: false } };
+        console.log("adding Query:", JSON.stringify(QueryForC));
         Mdb.bynder_jobs.find(QueryForC ).then((data)=>{
           if(data.length > 0){
            var InsData= data.map(d=> ({id:d.id, name: d.name, Preset_Stages : d.Preset_Stages, campaignID: d.campaignID, dateCreated:d.dateCreated, dateModified:d.dateModified, description:d.description, id: d.id, jobID: d.jobID, autoStage: d.autoStage,  jobMetaproperties: d.jobMetaproperties, job_active_stage:d.job_active_stage, job_date_finished: d.job_date_finished , job_key: d.job_key, presetName:d.presetName 
-              , duplicate: true
+              , duplicate: true, thumb: d.thumb
             }));
-            resultedDt=[];
             for(let i in  InsData ){
              let changes= rqdata.filter(d=> d.jobkey== InsData[i].job_key);
-              // grade : "c0ac0a86e65f4f7ebd88dbd7e77965ef"  Module: 7388493928bc4a9aa57ca65306ed1579"
               for( let ch of changes){
                   if(!!ch.grade && ch.grade.value)
                   InsData[i].jobMetaproperties['c0ac0a86e65f4f7ebd88dbd7e77965ef']=ch.grade.value;
                   if(!!ch.grade && ch.grade.module)
                   InsData[i].jobMetaproperties['7388493928bc4a9aa57ca65306ed1579']=ch.module.value;
-                  
                   let saveBynderJobs= new Mdb.bynder_jobs(InsData[i]);
+                  BynderSaved.push(saveBynderJobs)
+                  /*
                   let Meta= new Metadt(InsData[i]);
                   Meta.iniMeta(WorkFlowJobsMetaData);
                   Meta.initAssetMeta(GCurriculaWIP);
@@ -320,15 +321,74 @@ postRoutes.route('/addnewjobs').post(function (req, res) {
                   InsData[i].impactID=Mdb.impact;
                   InsData[i].impact=Mdb.impactVal;
                   resultedDt.push(InsData[i]);
-                  saveBynderJobs.save().then((rs)=>{
-                  console.log("value saved sucessfully ", rs); 
-                  }).catch(Err=>{
-                    console.log("ERROR in SAVED: ERR:", Err);
-                  })
+                  */
+                  // saveBynderJobs.save().then((rs)=>{
+                  // console.log("value saved sucessfully ", rs); 
+                  // }).catch(Err=>{
+                  //   console.log("ERROR in SAVED: ERR:", Err);
+                  // })
               }
               
             }
-            res.send( resultedDt );
+            let requests = BynderSaved.map(d=> d.save());
+
+            // Promise.all waits until all jobs are resolved
+            Promise.all(requests).then(responses => {
+              let dtt = responses.map(d=> ({ _id: d._id, id: d.id, job_key:d.job_key, jobID:d.jobID, jobMetaproperties:d.jobMetaproperties ,
+                name: d.name, Preset_Stages : d.Preset_Stages, campaignID: d.campaignID, dateCreated:d.dateCreated, dateModified:d.dateModified, description:d.description, id: d.id, jobID: d.jobID, autoStage: d.autoStage,  jobMetaproperties: d.jobMetaproperties, job_active_stage:d.job_active_stage, job_date_finished: d.job_date_finished , job_key: d.job_key, presetName:d.presetName
+                , duplicate: true, isAssetBank : true
+              }))
+              let resDt= Array();
+              dtt.forEach(response => {
+                  let Meta= new Metadt(response);
+                  Meta.iniMeta(WorkFlowJobsMetaData);
+                  Meta.initAssetMeta(GCurriculaWIP);
+                  let Mdt= Meta.getMeta();
+                  response.lesson=Mdt.lesson;
+                  if(response.Preset_Stages.length > 0 ){
+                    let lastChangeCreated= response.Preset_Stages[response.Preset_Stages.length -1].start_date;
+                    let lastChangeComplated=(!!response.Preset_Stages[response.Preset_Stages.length -1].job_date_finished)?
+                    response.Preset_Stages[response.Preset_Stages.length -1].job_date_finished: new Date();
+                    response.lastage=dateDiff(lastChangeCreated, lastChangeComplated);
+                   }
+                   var dateCreatedJob = Mdt.dateCreatedM;
+                   if(response.job_date_finished===null && response.job_active_stage.status!="Approved"){
+                    response.job_date_finished=new Date().toISOString();
+                   }
+                   response.cstage=""; 
+                   
+                   if(response.Preset_Stages.length > 0){
+                     // IT Should be another that we can not captuchred 
+                     let ob=response.Preset_Stages[ response.Preset_Stages.length-1 ];
+                     if(ob.hasOwnProperty('name')){
+                      response.cstage=ob.name;
+                     }else if(ob.hasOwnProperty('StageNames')){
+                      response.cstage=ob.StageNames;
+                     }
+                   }
+                  response.totalage=dateDiff(dateCreatedJob, response.job_date_finished);
+                  response.workflow=Meta.getWorkflow();
+                  response.component=Mdt.component; 
+                  response.tags=Mdt.tag; 
+                  response.gradeID=Mdt.grade;
+                  response.grade=Mdt.gradeVal;
+                  response.moduleID=Mdt.module;
+                  response.module=Mdt.moduleVal;
+                  response.artcomplexId=Mdb.artcomplex;
+                  response.artcomplex=Mdb.artcomplexVal;
+                  response.artassionID=Mdb.artassion;
+                  response.artassion=Mdb.artassionVal;
+                  response.riskID=Mdb.risk;
+                  response.risk=Mdb.riskVal;
+                  response.impactID=Mdb.impact;
+                  response.impact=Mdb.impactVal;
+                  
+                  resDt.push(response);
+                //console.log((responses))
+              });
+              res.send(resDt);
+            });
+            //res.send( resultedDt );
           }
         }).catch((Err)=>{
           console.log("Finding ERROR:", Err);
@@ -337,6 +397,21 @@ postRoutes.route('/addnewjobs').post(function (req, res) {
     }else{
       res.send("Not Saved Msg");
     }
+});
+postRoutes.route('/updateAsset', checkToken.checkToken).post(function (req, res) {
+  console.log("req parameters :" , req.body);
+  let data=JSON.parse(req.body.data)
+  for(let d of data){
+    console.log("data processing =>", JSON.stringify(d));
+  Mdb.bynder_jobs.updateOne({_id: d._id},{
+    $set:{ isMailed: false, updateTag:'Processing', duplicate: false, generatedTags:  d.generatedTags } 
+  }).then((rs)=>{
+    console.log("successfully updated:", rs);
+  }).catch(Err=>{
+    console.log("ERRor:", Err)
+  });
+}
+res.send({'msg': 'processing'});
 });
 postRoutes.route('/artloginit', checkToken.checkToken).post(function (req, res) {
   Mdb.searchState.find({ uid: req.headers['authuser'] }).then((dt)=>{
@@ -386,6 +461,9 @@ postRoutes.route('/artlogdata', checkToken.checkToken).post(function (req, res) 
     }
     if(req.body.status && req.body.status!=""){
       let st=req.body.status.split(",");
+      if(st.indexOf('Active') > 0){
+        st.push('')
+      }
       if(st.length ==0){
         $and.push( {"job_active_stage.status":{"$in": st[0] } });
       }else{
@@ -412,7 +490,7 @@ postRoutes.route('/artlogdata', checkToken.checkToken).post(function (req, res) 
     let fields={isPaging:1, comment:1, mVerification:1, duplicate:1, presetName:1, Preset_Stages:1, id:1, name:1, description:1, job_active_stage:1, jobMetaproperties:1, jobID:1, job_key:1, dateCreated:1, job_date_finished:1, thumb:1};
     console.log("Calling artlogdata Data " , JSON.stringify(q), JSON.stringify(fields));
     //
-    Mdb.bynder_jobs.find(q, fields ).sort({job_key:-1}).limit(200).then((data)=>{
+    Mdb.bynder_jobs.find(q, fields ).sort({job_key:-1}).limit(50).then((data)=>{
     let dataResult=[];
 
     for(let  dtkey in data){
@@ -432,7 +510,7 @@ postRoutes.route('/artlogdata', checkToken.checkToken).post(function (req, res) 
           data[dtkey].Preset_Stages[data[dtkey].Preset_Stages.length -1].job_date_finished: new Date();
           objData.lastage=dateDiff(lastChangeCreated, lastChangeComplated);
         }
-        var dateCreatedJob = Mdt.dateCreatedM;
+        var dateCreatedJob = Mdt.dateCreatedM || data[dtkey].dateCreated;
         if(data[dtkey].job_date_finished===null && data[dtkey].job_active_stage.status!="Approved"){
           data[dtkey].job_date_finished=new Date().toISOString();
         }
@@ -457,6 +535,8 @@ postRoutes.route('/artlogdata', checkToken.checkToken).post(function (req, res) 
          objData.grade        =   Mdt.gradeVal;
          objData.moduleID     =   Mdt.module;
          objData.module       =   Mdt.moduleVal;
+         objData.revisionID   =   Mdt.revision;
+         objData.revision     =   Mdt.revisionVal;
          objData.artcomplexID =   Mdt.artComplex;
          objData.artcomplex   =   Mdt.artComplexVal;
          objData.artassionID  =   Mdt.artAssion;

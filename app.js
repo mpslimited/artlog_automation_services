@@ -1,11 +1,13 @@
 var express = require('express');
 var path = require('path');
+var fs = require('fs');
 var favicon = require('serve-favicon');
 var logger = require('morgan');
 var cookieParser = require('cookie-parser');
 var session = require('express-session');
 var morgan = require('morgan');
 
+require('log-timestamp');
 var bodyParser = require('body-parser');
 var cors = require('cors');
 // [SH] Require Passport
@@ -20,11 +22,16 @@ require('./api/config/passport');
 
 // [SH] Bring in the routes for the API (delete the default routes)
 var routesApi = require('./api/routes/index');
+var syncAssetBank = require('./api/routes/data.syncAssetBank');
 var routessmartsheetApi = require('./api/routes/smartsheet');
 var routesApiData = require('./api/routes/data.services');
 var app = express();
 const publicRoot = 'dist';
 //
+var accessLogStream = fs.createWriteStream(path.join(__dirname, 'logs/access.log'), { flags: 'a' });
+app.use(morgan('combined', { stream: accessLogStream }))
+
+app.use('/sync', syncAssetBank);
 app.use(express.static(publicRoot));
 app.use('/static', express.static(path.join(__dirname,"/public/dist/static/")));
 // app.get('/', function (request, res) {
@@ -62,9 +69,11 @@ app.use(cors());
 app.use(passport.initialize());
 
 // [SH] Use the API routes when path starts with /api
+
 app.use('/api', routesApi);
 app.use('/api', routessmartsheetApi);
 app.use('/apiData', routesApiData);
+
 // app.listen(3000, function(){
 //   console.log('Server is running on Port:',3000);
 // });
