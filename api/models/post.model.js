@@ -238,7 +238,8 @@ let asset=new Schema({
     property_ShutterstockImageID : { type: Object},
     property_PriorUses : { type: Object},
     property_Location : { type: Object},
-    tagReader:{type: Array}
+    tagreaded : {type: Boolean},
+    tagReader : {type: Array}
   },{
       collection: 'asset'
   });

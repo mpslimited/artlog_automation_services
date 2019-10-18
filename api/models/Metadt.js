@@ -13,21 +13,24 @@
             this.metaObj=Object.entries(dt.jobMetaproperties);
         }
         
-        this.lessonkey     =   "b447dc7d70b0420a8ac9ec9aeff78296";
-        this.lessonletkey  =   "7b30e1d296d343bdaaffcb6be164a713";
-        this.revisionkey   =   "c94a845346e6490488d9dcc3f763ccfe";
-        this.componentkey  =   "87d538e6d3a442468b20426285aef253";
-        this.tagkey        =   "dde4714035904b0cb68888e0acf389b2";
-        this.gradekey      =   "c0ac0a86e65f4f7ebd88dbd7e77965ef";
-        this.modulekey     =   "7388493928bc4a9aa57ca65306ed1579";
-        this.artComplexkey =   "c7fbc907710045778ee29863e33d2bd2";
-        this.artAssionkey  =   "cd8809565088496da4955eb3327fea04";
-        this.dateCreatedMkey=  "e9074f5b472f41d4a92ac511e53da775";
-        this.riskkey       =   "309909b0de3f4eb9b5674efe59bee8b9";
-        this.impactkey     =   "f8bf767302224972a79fd80f7fb36d12";
-        this.batchkey      =    "";
-        this.jobkeykey     =    "ccf531b93d1c46428aa5c52bc8cc639f";
-        this.wipkey        =    "0790cd4f2aed4ce0a315ff8034a43994";
+        this.lessonkey     =   "b447dc7d70b0420a8ac9ec9aeff78296";   //static
+        this.lessonletkey  =   "7b30e1d296d343bdaaffcb6be164a713";   // static
+        this.componentkey  =   "87d538e6d3a442468b20426285aef253";   // static
+        this.gradekey      =   "c0ac0a86e65f4f7ebd88dbd7e77965ef";   // dynamic
+        this.modulekey     =   "7388493928bc4a9aa57ca65306ed1579";   // static
+        this.batchkey      =    "662315fccf37435081da009bd3fbe49b";  // static
+
+        this.tagkey        =   "dde4714035904b0cb68888e0acf389b2";   // static
+        this.artComplexkey =   "c7fbc907710045778ee29863e33d2bd2";   // dynamic
+        this.artAssionkey  =   "cd8809565088496da4955eb3327fea04";   // dynamic
+        this.dateCreatedMkey=  "e9074f5b472f41d4a92ac511e53da775";   // static
+        this.riskkey       =   "309909b0de3f4eb9b5674efe59bee8b9";   // static
+        this.impactkey     =   "f8bf767302224972a79fd80f7fb36d12";   // dynamic
+        this.jobkeykey     =    "ccf531b93d1c46428aa5c52bc8cc639f";  // static
+        this.wipkey        =    "0790cd4f2aed4ce0a315ff8034a43994";  // exception
+        this.facingkey     =    "09efaa3bb76c42a88c9441a6af7c218c";  // dynamic
+        this.serieskey     =    "c790de60f6d0405898eb4dd641a3d94b";  // static
+        this.revisionkey   =   "c94a845346e6490488d9dcc3f763ccfe";   
      }
      getAMetaOptionsBykey(key){
       let retdt=[];
@@ -104,6 +107,36 @@
      }
      setImpact(value){
         this.data.jobMetaproperties[this.impactkey]=value;
+     }
+     getFacing(){
+        if(this.data.jobMetaproperties.hasOwnProperty(this.facingkey)){
+            return this.data.jobMetaproperties[this.facingkey];
+        }else{
+            return '';
+        } 
+     }
+     setFacing(value){
+        this.data.jobMetaproperties[this.facingkey]=value;
+     }
+     getSeries(){
+        if(this.data.jobMetaproperties.hasOwnProperty(this.serieskey)){
+            return this.data.jobMetaproperties[this.serieskey];
+        }else{
+            return '';
+        } 
+     }
+     setSeries(value){
+        this.data.jobMetaproperties[this.serieskey]=value;
+     }
+     getBatch(){
+        if(this.data.jobMetaproperties.hasOwnProperty(this.batchkey)){
+            return this.data.jobMetaproperties[this.batchkey];
+        }else{
+            return '';
+        } 
+     }
+     setBatch(value){
+        this.data.jobMetaproperties[this.batchkey]=value;
      }
      getRisk(){
         if(this.data.jobMetaproperties.hasOwnProperty(this.riskkey)){
@@ -243,7 +276,10 @@
             lesson       :   this.getLesson(),
             lessonlet    :   this.getLessonlet(),
             component    :   this.getComponent(),
-            batch        :   "",
+            batch        :   this.getBatch(),
+            facingVal    :   this.getValByKeyID(this.facingkey, this.getFacing()),
+            facing       :   this.getFacing(),
+            series       :   this.getSeries(),
             dateCreatedM :   this.getDateCreatedM(),
             tag          :   this.getTag(),
             grade        :   this.getGrade(),
