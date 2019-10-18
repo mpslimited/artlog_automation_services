@@ -194,7 +194,52 @@ postRoutes.route('/updateartlog').post(function (req, res) {
       res.send("Data Update Successfully");
   }
 });
-
+postRoutes.route('/updateBulkBatch').post(function (req, res) {
+  console.log("ACTION : updateBulkBatch REQ==>",req.body);
+  if(req.body.selectedids ){
+    let ids = JSON.parse(req.body.selectedids);
+    Mdb.bynder_jobs.find({ _id: { $in : ids}}).then(data=>{
+      for(let dt in data){
+        data[dt].jobMetaproperties['662315fccf37435081da009bd3fbe49b']=req.body.batch;
+        Mdb.bynder_jobs.updateOne({ _id : data[dt]._id},{
+          $set : { jobMetaproperties: data[dt].jobMetaproperties }
+        }).then(dt=>{
+          console.log("data Updated Successfully");
+        }).catch(Err=>{
+          console.log('Error In data');
+        });
+      }
+      res.send(data.map(d=> ({_id: d._id, batch: req.body.batch})));
+    }).catch(Err=>{
+      console.log('finding Data have some error');
+    });
+  }
+});
+postRoutes.route('/updateBulkTags').post(function (req, res) {
+  console.log("ACTION : updateBulkTags REQ==>",req.body);
+  if(req.body.selectedids ){
+    let ids = JSON.parse(req.body.selectedids);
+    Mdb.bynder_jobs.find({ _id: { $in : ids}}).then(data=>{
+      for(let dt in data){
+        if(!!data[dt].jobMetaproperties['dde4714035904b0cb68888e0acf389b2']){
+          data[dt].jobMetaproperties['dde4714035904b0cb68888e0acf389b2']=data[dt].jobMetaproperties['dde4714035904b0cb68888e0acf389b2']+','+req.body.tags;
+        }else{
+          data[dt].jobMetaproperties['dde4714035904b0cb68888e0acf389b2']=req.body.tags;
+        }
+        Mdb.bynder_jobs.updateOne({ _id : data[dt]._id},{
+          $set : { jobMetaproperties: data[dt].jobMetaproperties }
+        }).then(dt=>{
+          console.log("data Updated Successfully");
+        }).catch(Err=>{
+          console.log('Error In data');
+        });
+      }
+      res.send(data.map(d=> ({_id: d._id})));
+    }).catch(Err=>{
+      console.log('finding Data have some error');
+    });
+  }
+});
 postRoutes.route('/updateJob').post(function (req, res) {
   console.log("ACTION : addnewjobs REQ==>",req.body);
   if(req.body.newData ){
@@ -456,13 +501,14 @@ postRoutes.route('/artlogdata', checkToken.checkToken).post(function (req, res) 
     }
     if(!!req.body.workflow && req.body.workflow!=""){
       $and.push(
-        {"presetName": /.*Created Image*./}
+        //{"presetName": /.*Created Image*./}
+        {'presetName':{ $regex:  new RegExp(".*"+req.body.workflow+".*") }}
       ) 
     }
     if(req.body.status && req.body.status!=""){
       let st=req.body.status.split(",");
-      if(st.indexOf('Active') > 0){
-        st.push('')
+      if(st.indexOf('Active') > -1){
+        st.push('NeedsChanges')
       }
       if(st.length ==0){
         $and.push( {"job_active_stage.status":{"$in": st[0] } });
@@ -474,20 +520,13 @@ postRoutes.route('/artlogdata', checkToken.checkToken).post(function (req, res) 
         {"job_active_stage.status":{"$ne":"Cancelled"}}
       ) 
     }
-    if(!!req.body.resTeam && req.body.resTeam!=""){
-      //Pending Now 
-      // $and.push(
-      //   {"job_active_stage.status":{"$in": req.body.status } }
-      // ) 
-    }
-    
     let q={"job_active_stage.status": "Active"};
     if(!!req.body.jobkey && req.body.jobkey!=""){
       q={"job_key": req.body.jobkey }
     }else if($and.length >0){
        q= { $and};
     } 
-    let fields={isPaging:1, comment:1, mVerification:1, duplicate:1, presetName:1, Preset_Stages:1, id:1, name:1, description:1, job_active_stage:1, jobMetaproperties:1, jobID:1, job_key:1, dateCreated:1, job_date_finished:1, thumb:1};
+    let fields={isPaging:1, comment:1, mVerification:1, duplicate:1, presetName:1, Preset_Stages:1, id:1, name:1, description:1, job_active_stage:1, jobMetaproperties:1, jobID:1, job_key:1, dateCreated:1, job_date_finished:1, thumb:1, generatedTags:1};
     console.log("Calling artlogdata Data " , JSON.stringify(q), JSON.stringify(fields));
     //
     Mdb.bynder_jobs.find(q, fields ).sort({job_key:-1}).limit(50).then((data)=>{
@@ -496,7 +535,6 @@ postRoutes.route('/artlogdata', checkToken.checkToken).post(function (req, res) 
     for(let  dtkey in data){
       var objData = data[dtkey].toObject();
       //console.log("Object VAlue:", objData);
-      
       if(!!data[dtkey].jobMetaproperties){
         let Meta= new Metadt(data[dtkey])
         Meta.iniMeta(WorkFlowJobsMetaData);
@@ -512,6 +550,8 @@ postRoutes.route('/artlogdata', checkToken.checkToken).post(function (req, res) 
         }
         var dateCreatedJob = Mdt.dateCreatedM || data[dtkey].dateCreated;
         if(data[dtkey].job_date_finished===null && data[dtkey].job_active_stage.status!="Approved"){
+          data[dtkey].job_date_finished=new Date().toISOString();
+        }else if(data[dtkey].job_date_finished===null){
           data[dtkey].job_date_finished=new Date().toISOString();
         }
         objData.cstage=""; objData.workflow=Meta.getWorkflow();
@@ -535,6 +575,11 @@ postRoutes.route('/artlogdata', checkToken.checkToken).post(function (req, res) 
          objData.grade        =   Mdt.gradeVal;
          objData.moduleID     =   Mdt.module;
          objData.module       =   Mdt.moduleVal;
+         objData.batch        =   Mdt.batch;
+         objData.facing       =   Mdt.facingVal;
+         objData.facingID     =   Mdt.facing;
+         objData.series       =   Mdt.series;
+         //test
          objData.revisionID   =   Mdt.revision;
          objData.revision     =   Mdt.revisionVal;
          objData.artcomplexID =   Mdt.artComplex;
@@ -552,31 +597,27 @@ postRoutes.route('/artlogdata', checkToken.checkToken).post(function (req, res) 
     }
      job_keys=dataResult.filter( (d)=> d.job_key!="" ).map(d=>d.job_key);
      GridFilters={
-       curriculum: [...new Set(dataResult.filter( (v, i)=> !!v.curriculum ).map(d=>d.curriculum))],
-       workflow: [...new Set(dataResult.filter( (v, i)=> !!v.workflow ).map(d=>d.workflow))],
-       currentRTeam: [...new Set(dataResult.filter( (v, i)=> !!v.currentRTeam ).map(d=>d.currentRTeam))],
-       lesson: [...new Set(dataResult.filter( (v, i)=> !!v.lesson ).map(d=>d.lesson))],  //.filter((v,i) => grades.indexOf(v) === i),
-       component: [...new Set(dataResult.filter( (d)=> !!d.component ).map(d=>d.component))],
-       grade: [...new Set(dataResult.filter( (d)=> !!d.grade ).map(d=>d.grade))],
-       module: [...new Set(dataResult.filter( (d)=> !!d.module ).map(d=>d.module))],
-       artcomplex: [...new Set(dataResult.filter( (d)=> !!d.artcomplex ).map(d=>d.artcomplex))],
-       artassion: [...new Set( dataResult.filter( (d)=> !!d.artassion ).map(d=>d.artassion))],
-       risk: [...new Set(dataResult.filter( (d)=> !!d.risk ).map(d=>d.risk))],
-       impact: [...new Set(dataResult.filter( (d)=> !!d.impact ).map(d=>d.impact))],
+       curriculum     :   [...new Set(dataResult.filter( (v, i)=> !!v.curriculum ).map(d=>d.curriculum))],
+       workflow       :   [...new Set(dataResult.filter( (v, i)=> !!v.workflow ).map(d=>d.workflow))],
+       currentRTeam   :   [...new Set(dataResult.filter( (v, i)=> !!v.currentRTeam ).map(d=>d.currentRTeam))],
+       lesson         :   [...new Set(dataResult.filter( (v, i)=> !!v.lesson ).map(d=>d.lesson))],  //.filter((v,i) => grades.indexOf(v) === i),
+       lessonlet      :   [...new Set(dataResult.filter( (v, i)=> !!v.lessonlet ).map(d=> d.lessonlet))],
+       component      :   [...new Set(dataResult.filter( (d)=> !!d.component ).map(d=>d.component))],
+       grade          :   [...new Set(dataResult.filter( (d)=> !!d.grade ).map(d=>d.grade))],
+       module         :   [...new Set(dataResult.filter( (d)=> !!d.module ).map(d=>d.module))],
+       artcomplex     :   [...new Set(dataResult.filter( (d)=> !!d.artcomplex ).map(d=>d.artcomplex))],
+       artassion      :   [...new Set( dataResult.filter( (d)=> !!d.artassion ).map(d=>d.artassion))],
+       risk           :   [...new Set(dataResult.filter( (d)=> !!d.risk ).map(d=>d.risk))],
+       impact         :   [...new Set(dataResult.filter( (d)=> !!d.impact ).map(d=>d.impact))],
+       facing         :   [...new Set(dataResult.filter( (d)=> !!d.facing ).map(d=>d.facing))],
+       series         :   [...new Set(dataResult.filter( (d)=> !!d.series ).map(d=>d.series))],
+       batch          :   [...new Set(dataResult.filter( (d)=> !!d.batch ).map(d=>d.batch))],
+       revision       :   [...new Set(dataResult.filter( (d)=> !!d.revision ).map(d=>d.revision))]
      };
-     GridEditing={ 
-      lesson: [...new Set(dataResult.filter( (v, i)=> !!v.lesson ).map(d=> d.lesson))],  //.filter((v,i) => grades.indexOf(v) === i),
-      component: [...new Set(dataResult.filter( (d)=> !!d.component ).map(d=>d.component))],
-      grade: [...new Set(dataResult.filter( (d)=> !!d.grade ).map(d=>d.grade))],
-      module: [...new Set(dataResult.filter( (d)=> !!d.module ).map(d=>d.module))],
-      artcomplex: [...new Set(dataResult.filter( (d)=> !!d.artcomplex ).map(d=>d.artcomplex))],
-      artassion: [...new Set( dataResult.filter( (d)=> !!d.artassion ).map(d=>d.artassion))],
-      risk: [...new Set(dataResult.filter( (d)=> !!d.risk ).map(d=>d.risk))],
-      impact: [...new Set(dataResult.filter( (d)=> !!d.impact ).map(d=>d.impact))],
-    };
-     let assetQ={property_workflowjobkey: {
-      $in:  job_keys 
-      }};
+     
+    //  let assetQ={property_workflowjobkey: {
+    //   $in:  job_keys 
+    //   }};
      // console.log("Query of Assets: ", JSON.stringify(assetQ));
      //Mdb.asset.find({ assetQ }).then((data)=>{
       // console.log("total data is :", data.length);
@@ -585,7 +626,7 @@ postRoutes.route('/artlogdata', checkToken.checkToken).post(function (req, res) 
       //   if(atdt.hasOwnProperty("job_key")){
       //     data.filter(df=> dt.)
       //   }
-      // }
+      // }  Jot51339
       let result={ artLogData : dataResult, GridFilters : GridFilters};
       res.send( result );
      //}).catch((Err)=> { console.log("Error in Finding asset:", Err)})
@@ -593,21 +634,6 @@ postRoutes.route('/artlogdata', checkToken.checkToken).post(function (req, res) 
     }).catch((Err)=>console.log("Error in finder ERROR:", Err));
 });
 
-
-postRoutes.route('/checkLogin').get(function (req, res) {
-  res.send("Testing checkLogin");
-  // let noSql=[];
-  // Mdb.bynder_jobs.find(noSql).limit(200).then((dt)=>{
-  //   res.send(dt);
-  // }).catch((Err)=>{
-  //   console.log("art log select error:", Err);
-  // });
-});
-// jobMetaproperties
-function generateMetaColumans(data){
-
-  return 
-}
 function dateDiff( string1, string2){
   try{
     if(typeof string1 =="object"){

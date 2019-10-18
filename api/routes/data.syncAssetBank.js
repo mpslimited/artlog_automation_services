@@ -156,6 +156,7 @@ postRoutes.route('/getjobsmeta/').get(function (req, res) {
               //Mdb.metaproperties.updateOne({ set} ,{ where })
             } else {
               //Insert 
+              MetaDatas[temp].tempId= MetaDatas[temp].ID.split('-').join('');
               let metaproperties = new Mdb.metaproperties(MetaDatas[temp]);
               metaproperties.save().then((rs) => {
                 console.log("metaproperties Saved SUCESSFULLY")
@@ -175,9 +176,7 @@ postRoutes.route('/getjobsmeta/').get(function (req, res) {
 //
 postRoutes.route('/moveAssetBanktoWorkflow/').post(function (req, res) {
   Mdb.asset.find(
-
-    { tagReader: { $exists: true } }
-
+    { tagreaded: true }
   ).then(data => {
     if (data.length > 0) {
       console.log("ASSET Bank Totol Jobs ==>", data.length);
@@ -201,8 +200,6 @@ postRoutes.route('/moveAssetBanktoWorkflow/').post(function (req, res) {
         };
         // neet thumbnial
         //carriculam
-        //
-
         if (!!data[temp].property_workflowjobkey && data[temp].property_workflowjobkey.length > 0) {
           AsBynderJobs.job_key = data[temp].property_workflowjobkey[0];
         }
@@ -291,21 +288,22 @@ postRoutes.route('/moveAssetBanktoWorkflow/').post(function (req, res) {
   }).catch(Err => { console.log("Error in finding reader jobs from Asset ERROR:", Err) })
 });
 postRoutes.route('/assetJobs/').post(function (req, res) {
+  console.log("Action assetJobs for Tagreader ")
   Mdb.asset.find(
     //{ "tags":"SC_0402TE1_L10_L11"}
     //{'id':'4A86BF38-A7D7-4893-ABCC121FC58FC61D'}
     //{'id':'B1874BF8-165D-42F4-95881737D7487D9E'}
     //{'id':'90A1FE91-2C56-41EC-88EE1075D6EB7D49'}
-    { tagReader: { $exists: false } }
+    { tagreaded: false  }
   ).limit(200).then((data) => {
     console.log("reader working AT:", data.length, " Jobs");
     for (let i = 0; i < data.length; i++) {
       console.log("reading progress AT:", data[i].id);
       let asset = new AssetTags(data[i]);
       Mdb.asset.updateOne({ id: data[i].id }, {
-        $set: { tagReader: asset.getJobs() }
+        $set: { tagReader: asset.getJobs(), tagreaded: true }
       }).then(dt => {
-        console.log("asset tagReader has been updated :", data[i].id);
+        console.log("asset tagReader updated :", data[i].id);
       }).catch((Err) => {
         console.log("Error In Updating asset", data[i].id);
       });
@@ -315,60 +313,63 @@ postRoutes.route('/assetJobs/').post(function (req, res) {
     console.log("Getting Jobs have error:", Err);
   });
 });
-async function  getBynderAssetBankCount(){
+// 
+postRoutes.route('/assetSynced/').get(function (req, res) {
+  console.log("ACTION assetSynced ")
   var request_data = appConfig.getActionInfo("getAssets");
   var token = appConfig.getToken();
   request_data.data = {};
   request_data.url = request_data.url + "?limit=0&page=1&total=1";
-  //return await postData(request_data.url, request_data.data, oauth.toHeader(oauth.authorize(request_data, token)))
- let response= await request({
+
+  let response= request({
     url: request_data.url, method: request_data.method, form: request_data.data, headers: oauth.toHeader(oauth.authorize(request_data, token))
-  }, await function (error, response, body) {
-    console.log(body);
+  },function (error, response, body) {
+    if(!error){
+      try{
+        var data = JSON.parse(response.body);
+        Mdb.asset.find().count().then(totalDB=>{
+          if(data.total.count != totalDB){
+            let page, limit=500;
+            let Totalpage=parseInt(data.total.count/limit);
+            if(data.total.count%limit){
+              Totalpage++;
+            }
+            page= parseInt(totalDB/limit || 1) ;
+            if((page!=1) &&(totalDB%limit > 0 || page < Totalpage)  ){
+              page++;
+            }
+            do{
+              console.log("Init page:", page)
+              excuteURL("http://localhost:3000/sync/getAssets/"+page)
+              if(!( page <  Totalpage)){
+                res.send({data:"jobs merged",d: new Date()});
+              }
+              page++;
+            }
+            while( page <  Totalpage)
+            
+          }else{
+            res.send({data:"No more changes found ",d: new Date()});
+          }
+        }).catch(Err=>{
+          console.log("Error in Data: ", Err);
+        })
+      }
+      catch(e){
+        console.log("Error generated in assetSynced");
+      }
+    }
   })
-}
-
-async function postData(url = '', data = {}, headers= {} , ) {
-  // Default options are marked with *
-  const response = await fetch(url, {
-    method: 'GET', // *GET, POST, PUT, DELETE, etc.
-    mode: 'cors', // no-cors, *cors, same-origin
-    cache: 'no-cache', // *default, no-cache, reload, force-cache, only-if-cached
-    credentials: 'same-origin', // include, *same-origin, omit
-    headers: headers,
-    /*headers: {
-      'Content-Type': 'application/json'
-      // 'Content-Type': 'application/x-www-form-urlencoded',
-    },*/
-    redirect: 'follow', // manual, *follow, error
-    referrer: 'no-referrer', // no-referrer, *client
-    body: JSON.stringify(data) // body data type must match "Content-Type" header
-  });
-  return await response.json(); // parses JSON response into native JavaScript objects
-}
-
-postRoutes.route('/assetSynced/').get(function (req, res) {
-  console.log("assetSynced init");
-      (async () => {
-        //try {
-          const mydnCount= await Mdb.bynder_jobs.find().count();
-          const bynderCount = await getBynderAssetBankCount()
-          res.send(mydnCount)
-
-        //   console.log(`res => ${JSON.stringify(mydnCount)}`);
-        // }
-        // finally {
-        //   console.log("assetSynced init finally");
-        // }
-    })() .catch(err => console.error(err));
 });
+
+// getting assetbank data using Limit
 postRoutes.route('/getAssets/:page').get(function (req, res) {
   console.log("Requesting ");
   let page = req.params.page;
   var request_data = appConfig.getActionInfo("getAssets");
   var token = appConfig.getToken();
   request_data.data = {}; //={ "limit": 5, page: 1 }
-  request_data.url = request_data.url + "?limit=250&page=" + page; 
+  request_data.url = request_data.url + "?limit=500&page=" + page; 
   request({
     url: request_data.url, method: request_data.method, form: request_data.data, headers: oauth.toHeader(oauth.authorize(request_data, token))
   }, function (error, response, body) {
@@ -385,6 +386,7 @@ postRoutes.route('/getAssets/:page').get(function (req, res) {
             if (dt.length > 0) {
               console.log("Jobs Updation case")
             } else {
+              data[temp].tagreaded=false;
               let asset = new Mdb.asset(data[temp]);
               asset.save().then((rs) => {
                 console.log("saved id", rs.id);
@@ -403,6 +405,7 @@ postRoutes.route('/getAssets/:page').get(function (req, res) {
     }
   });
 });
+// updating Missing Jobs MetaProperty 
 postRoutes.route('/updatePresets').post(function (req, res) {
   Mdb.bynder_jobs.find({ presetName: { $exists: false } }).then(dt => {
     if (dt.length > 0) {
@@ -435,5 +438,16 @@ postRoutes.route('/updatePresets').post(function (req, res) {
     }
   }).catch(Err => console.log('Error in finding data', Err))
 })
-
+function  excuteURL(URLexc){
+  console.log("\n\n excuteURL",URLexc );
+  try{
+    var options = { method: 'GET', url: URLexc, headers:{ 'Cache-Control': 'no-cache' }};
+    request(options,  function (error, response, body) {
+      if (error) //throw new Error(error);
+      console.log(error);
+    });
+  }catch(Err){
+    console.log("Error:", Err);
+  }
+}
 module.exports = postRoutes;
