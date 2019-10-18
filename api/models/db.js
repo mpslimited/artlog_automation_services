@@ -6,8 +6,9 @@ const option = {
   keepAlive: true,
   reconnectTries: 30000
 };
-//var dbURI = 'mongodb://localhost/mpsdb';
-var dbURI = 'mongodb://mpst:HBjgmdT649(T2@10.31.1.143:27017/mpsdb';
+var dbURI = 'mongodb://localhost/mpsdb';
+ dbURI = 'mongodb://mpst:HBjgmdT649(T2@10.31.1.143:27017/mpsdb'; // Demo Server
+ dbURI = 'mongodb://mpst:HBjgmdT649(T2@localhost:27017/mpsdb';   // Live Server
 // if (process.env.NODE_ENV === 'production') {
 //   dbURI = 'mongodb://mpst:HBjgmdT649(T2@10.31.1.143:27017/mpsdb'; //process.env.MONGOLAB_URI;
 // }
