@@ -183,6 +183,7 @@ postRoutes.route('/getUserInfo').post(function (req, res) {
       console.log(body);
     });
 });
+
 postRoutes.route('/jobsMetadata').post(function (req, res) {  
   console.log("calling api jobsMetadata");
   res.send(WorkFlowJobsMetaData);
@@ -252,6 +253,8 @@ postRoutes.route('/updateJob').post(function (req, res) {
       Mdt.setLesson(newDt.lesson);
     }if(!!newDt.lessonlet){
       Mdt.setLessonlet(newDt.lessonlet);
+    }if(!!newDt.lessonlet){
+      Mdt.setLessonlet(newDt.lessonlet);
     }if(!!newDt.component){
       Mdt.setComponent(newDt.component);
     }if(!!newDt.tags){
@@ -268,6 +271,8 @@ postRoutes.route('/updateJob').post(function (req, res) {
       Mdt.setModule(Mdt.referValueByKey( Mdt.modulekey, newDt.module));
     }if(!!newDt.grade && newDt.grade!=""){
       Mdt.setGrade( Mdt.referValueByKey(Mdt.gradekey,newDt.grade));
+    }if(!!newDt.batch && newDt.batch!=""){
+      Mdt.setBatch( newDt.batch);
     }
     if(!!Mdt.getM()){
       let where ={ _id: newDt._id};
@@ -494,10 +499,21 @@ postRoutes.route('/artlogdata', checkToken.checkToken).post(function (req, res) 
         { "jobMetaproperties.0790cd4f2aed4ce0a315ff8034a43994" : req.body.curricula }
       ); 
     }
-    if(!!req.body.added && req.body.added== "true"){
-      $and.push(
-        { "duplicate" : req.body.added }
-      ); 
+    if(!!req.body.added && req.body.added!= ""){
+      if(req.body.added==1){
+        $and.push(
+          { "duplicate" : {$exists: false} }
+        );
+      }else if(req.body.added==2){
+        $and.push(
+          { "duplicate" : true }
+        );
+      }else if(req.body.added==3){
+        $and.push(
+          { "duplicate" : false }
+        );
+      }
+       
     }
     if(!!req.body.workflow && req.body.workflow!=""){
       $and.push(
@@ -524,6 +540,7 @@ postRoutes.route('/artlogdata', checkToken.checkToken).post(function (req, res) 
     if(!!req.body.jobkey && req.body.jobkey!=""){
       q={"job_key": req.body.jobkey }
     }else if($and.length >0){
+      // condition for ignore other Jobs 
        q= { $and};
     } 
     let fields={isPaging:1, comment:1, mVerification:1, duplicate:1, presetName:1, Preset_Stages:1, id:1, name:1, description:1, job_active_stage:1, jobMetaproperties:1, jobID:1, job_key:1, dateCreated:1, job_date_finished:1, thumb:1, generatedTags:1};
