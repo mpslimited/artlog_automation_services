@@ -542,7 +542,7 @@ postRoutes.route('/artlogdata', checkToken.checkToken).post(function (req, res) 
       q={"job_key": req.body.jobkey }
     }else if($and.length >0){
       // condition for ignore other Jobs 
-      $and.push( {"campaigniD":{"$in": ['4924dc05-03c5-4086-90ce-41d8bf501684','9618db88-fc78-47a5-9916-e864e696ae11'] } });
+      $and.push( {"campaignID":{"$in": ['4924dc05-03c5-4086-90ce-41d8bf501684','9618db88-fc78-47a5-9916-e864e696ae11'] } });
        q= { $and};
     } 
     let fields={isPaging:1, comment:1, mVerification:1, duplicate:1, presetName:1, Preset_Stages:1, id:1, name:1, description:1, job_active_stage:1, jobMetaproperties:1, jobID:1, job_key:1, dateCreated:1, job_date_finished:1, thumb:1, generatedTags:1};
