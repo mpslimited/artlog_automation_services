@@ -20,6 +20,7 @@
         this.modulekey     =   "7388493928bc4a9aa57ca65306ed1579";   // static
         this.batchkey      =    "662315fccf37435081da009bd3fbe49b";  // static
 
+        this.creditlinekey =   "c0b45231a3f142ac8c9c13af8d0fe31f";   // static
         this.tagkey        =   "dde4714035904b0cb68888e0acf389b2";   // static
         this.artComplexkey =   "c7fbc907710045778ee29863e33d2bd2";   // dynamic
         this.artAssionkey  =   "cd8809565088496da4955eb3327fea04";   // dynamic
@@ -188,6 +189,16 @@
      setModule(value){
         this.data.jobMetaproperties[this.modulekey]=value;
      }
+     getCreditline(){
+        if(this.data.jobMetaproperties.hasOwnProperty(this.creditlinekey)){
+            return this.data.jobMetaproperties[this.creditlinekey];
+        }else{
+            return '';
+        } 
+     }
+     setCreditline(value){
+        this.data.jobMetaproperties[this.creditlinekey]=value;
+     }
      getTag(){
         if(this.data.jobMetaproperties.hasOwnProperty(this.tagkey)){
             return this.data.jobMetaproperties[this.tagkey];
@@ -274,6 +285,7 @@
         let dt={ 
             getjobkey    :   this.getJobkey(),
             lesson       :   this.getLesson(),
+            creditLine   :   this.getCreditline(),
             lessonlet    :   this.getLessonlet(),
             component    :   this.getComponent(),
             batch        :   this.getBatch(),

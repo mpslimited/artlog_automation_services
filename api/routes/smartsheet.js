@@ -321,9 +321,13 @@ postRoutes.route('/addnewjobs').post(function (req, res) {
              let changes= rqdata.filter(d=> d.jobkey== InsData[i].job_key);
               for( let ch of changes){
                   if(!!ch.grade && ch.grade.value)
-                  InsData[i].jobMetaproperties['c0ac0a86e65f4f7ebd88dbd7e77965ef']=ch.grade.value;
-                  if(!!ch.grade && ch.grade.module)
-                  InsData[i].jobMetaproperties['7388493928bc4a9aa57ca65306ed1579']=ch.module.value;
+                  InsData[i].jobMetaproperties['c0ac0a86e65f4f7ebd88dbd7e77965ef']=ch.grade.id;
+                  if(!!ch.module && ch.module)
+                  InsData[i].jobMetaproperties['7388493928bc4a9aa57ca65306ed1579']=ch.module.id;
+                  if(!!ch.component && ch.component)
+                  InsData[i].jobMetaproperties['87d538e6d3a442468b20426285aef253']=ch.component;
+                  if(!!ch.lesson && ch.lesson)
+                  InsData[i].jobMetaproperties['b447dc7d70b0420a8ac9ec9aeff78296']=ch.lesson;
                   let saveBynderJobs= new Mdb.bynder_jobs(InsData[i]);
                   BynderSaved.push(saveBynderJobs)
                   /*
@@ -536,7 +540,7 @@ postRoutes.route('/artlogdata', checkToken.checkToken).post(function (req, res) 
         {"job_active_stage.status":{"$ne":"Cancelled"}}
       ) 
     }
-    let q={"job_active_stage.status": "Active" ,"campaignID":{"$in": ['4924dc05-03c5-4086-90ce-41d8bf501684','9618db88-fc78-47a5-9916-e864e696ae11'] } };
+    let q={"job_active_stage.status": { $in: [ 'Active', 'NeedsChanges']} ,"campaignID":{"$in": ['4924dc05-03c5-4086-90ce-41d8bf501684','9618db88-fc78-47a5-9916-e864e696ae11'] } };
       
     if(!!req.body.jobkey && req.body.jobkey!=""){
       q={"job_key": req.body.jobkey }
@@ -548,7 +552,7 @@ postRoutes.route('/artlogdata', checkToken.checkToken).post(function (req, res) 
     let fields={isPaging:1, comment:1, mVerification:1, duplicate:1, presetName:1, Preset_Stages:1, id:1, name:1, description:1, job_active_stage:1, jobMetaproperties:1, jobID:1, job_key:1, dateCreated:1, job_date_finished:1, thumb:1, generatedTags:1};
     console.log("Calling artlogdata Data " , JSON.stringify(q), JSON.stringify(fields));
     //.limit(50)
-    Mdb.bynder_jobs.find(q, fields ).limit(100).sort({job_key:-1}).then((data)=>{
+    Mdb.bynder_jobs.find(q, fields ).sort({job_key:-1}).then((data)=>{
     let dataResult=[];
 
     for(let  dtkey in data){
@@ -610,6 +614,7 @@ postRoutes.route('/artlogdata', checkToken.checkToken).post(function (req, res) 
          objData.impactId     =   Mdt.impact;
          objData.impact       =   Mdt.impactVal;
          objData.curriculum   =   Mdt.wip;
+         objData.creditLine   =   Mdt.creditLine;
       }
       //console.log("Object Final VAlues: ==>", objData);
       dataResult.push(objData);
