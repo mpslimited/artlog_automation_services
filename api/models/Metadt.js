@@ -20,6 +20,7 @@
         this.modulekey     =   "7388493928bc4a9aa57ca65306ed1579";   // static
         this.batchkey      =    "662315fccf37435081da009bd3fbe49b";  // static
 
+           
         this.creditlinekey =   "c0b45231a3f142ac8c9c13af8d0fe31f";   // static
         this.tagkey        =   "dde4714035904b0cb68888e0acf389b2";   // static
         this.artComplexkey =   "c7fbc907710045778ee29863e33d2bd2";   // dynamic
@@ -31,7 +32,7 @@
         this.wipkey        =    "0790cd4f2aed4ce0a315ff8034a43994";  // exception
         this.facingkey     =    "09efaa3bb76c42a88c9441a6af7c218c";  // dynamic
         this.serieskey     =    "c790de60f6d0405898eb4dd641a3d94b";  // static
-        this.revisionkey   =   "c94a845346e6490488d9dcc3f763ccfe";   
+        this.revisionkey   =   "fe4aa91f5b234d0cb53e481053a21565";   //Dynamic
      }
      getAMetaOptionsBykey(key){
       let retdt=[];
@@ -119,6 +120,7 @@
      setFacing(value){
         this.data.jobMetaproperties[this.facingkey]=value;
      }
+     
      getSeries(){
         if(this.data.jobMetaproperties.hasOwnProperty(this.serieskey)){
             return this.data.jobMetaproperties[this.serieskey];
@@ -302,7 +304,7 @@
             impactVal    :   this.getValByKeyID(this.impactkey, this.getImpact()),
             risk         :   this.getRisk(),
             riskVal      :   this.getValByKeyID(this.riskkey, this.getRisk()),
-            revision     :   this.getRevision(),
+            revisionId   :   this.getRevision(),
             revisionVal  :   this.getValByKeyID(this.revisionkey, this.getRevision()),
             artComplex   :   this.getArtComplex(),
             artComplexVal:   this.getValByKeyID(this.artComplexkey, this.getArtComplex()),

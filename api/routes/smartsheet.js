@@ -604,7 +604,7 @@ postRoutes.route('/artlogdata', checkToken.checkToken).post(function (req, res) 
          objData.series       =   Mdt.series;
          //test
          objData.revisionID   =   Mdt.revision;
-         objData.revision     =   Mdt.revisionVal;
+         objData.revisionC     =   Mdt.revisionVal;
          objData.artcomplexID =   Mdt.artComplex;
          objData.artcomplex   =   Mdt.artComplexVal;
          objData.artassionID  =   Mdt.artAssion;
@@ -636,7 +636,7 @@ postRoutes.route('/artlogdata', checkToken.checkToken).post(function (req, res) 
        facing         :   [...new Set(dataResult.filter( (d)=> !!d.facing ).map(d=>d.facing))],
        series         :   [...new Set(dataResult.filter( (d)=> !!d.series ).map(d=>d.series))],
        batch          :   [...new Set(dataResult.filter( (d)=> !!d.batch ).map(d=>d.batch))],
-       revision       :   [...new Set(dataResult.filter( (d)=> !!d.revision ).map(d=>d.revision))]
+       revision       :   [...new Set(dataResult.filter( (d)=> !!d.revisionC ).map(d=>d.revisionC))]
      };
      
     //  let assetQ={property_workflowjobkey: {
