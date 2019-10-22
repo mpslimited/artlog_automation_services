@@ -498,6 +498,13 @@ postRoutes.route('/artlogdata', checkToken.checkToken).post(function (req, res) 
       }
       $and.push({$or:$or})
     }
+    if(!!req.body.batch && req.body.batch!=""){
+      "jobMetaproperties.662315fccf37435081da009bd3fbe49b"
+      $and.push(
+        { "jobMetaproperties.662315fccf37435081da009bd3fbe49b" : req.body.batch }
+      ); 
+    }
+    //662315fccf37435081da009bd3fbe49b
     if(!!req.body.curricula && req.body.curricula!=""){
       $and.push(
         { "jobMetaproperties.0790cd4f2aed4ce0a315ff8034a43994" : req.body.curricula }
@@ -552,7 +559,7 @@ postRoutes.route('/artlogdata', checkToken.checkToken).post(function (req, res) 
     let fields={isPaging:1, comment:1, mVerification:1, duplicate:1, presetName:1, Preset_Stages:1, id:1, name:1, description:1, job_active_stage:1, jobMetaproperties:1, jobID:1, job_key:1, dateCreated:1, job_date_finished:1, thumb:1, generatedTags:1};
     console.log("Calling artlogdata Data " , JSON.stringify(q), JSON.stringify(fields));
     //.limit(50)
-    Mdb.bynder_jobs.find(q, fields ).sort({job_key:-1}).then((data)=>{
+    Mdb.bynder_jobs.find(q, fields ).sort({job_key:-1}).limit(50).then((data)=>{
     let dataResult=[];
 
     for(let  dtkey in data){
