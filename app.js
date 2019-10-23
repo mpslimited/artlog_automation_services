@@ -28,10 +28,10 @@ var routesApiData = require('./api/routes/data.services');
 var app = express();
 const publicRoot = 'dist';
 //
-var accessLogStream = fs.createWriteStream(path.join(__dirname, 'logs/access.log'), { flags: 'a' });
-app.use(morgan('combined', { stream: accessLogStream }))
+// var accessLogStream = fs.createWriteStream(path.join(__dirname, 'logs/access.log'), { flags: 'a' });
+// app.use(morgan('combined', { stream: accessLogStream }))
 
-app.use('/sync', syncAssetBank);
+
 app.use(express.static(publicRoot));
 app.use('/static', express.static(path.join(__dirname,"/public/dist/static/")));
 // app.get('/', function (request, res) {
@@ -48,7 +48,8 @@ app.get("/*", (request, res, next) => {
   var query = url_parts.query;
   if(query.jssonId){
    // let user=checkUserInfo(query.jssonId);
-    res.cookie('jssonId',query.jssonId, { maxAge: 900000, httpOnly: true });
+   console.log("ses:==>", query.jssonId);
+    res.cookie('jssonId',query.jssonId, { maxAge: 90000000, httpOnly: true });
   }
   res.sendFile("index.html", { root: publicRoot });
 });
@@ -73,7 +74,7 @@ app.use(passport.initialize());
 app.use('/api', routesApi);
 app.use('/api', routessmartsheetApi);
 app.use('/apiData', routesApiData);
-
+app.use('/sync', syncAssetBank);
 // app.listen(3000, function(){
 //   console.log('Server is running on Port:',3000);
 // });

@@ -125,63 +125,68 @@ postRoutes.route('/searchState', verifyToken).post(function (req, res) {
 });
 
 postRoutes.route('/getUserInfo').post(function (req, res) {  
-   console.log(req.cookies);
+   console.log("getUserInfo cookies values :: ", req.cookies);
    if(!req.cookies.jssonId){
     res.status(404);
+   }else{
+     console.log(" else data ");
+     var options = { method: 'POST',
+        url: 'https://greatmindsdemo.mpstechnologies.com/GreatMinds/admin/getLoggedInUserDeatils',
+        headers: 
+        { 'cache-control': 'no-cache', Connection: 'keep-alive', 'Content-Length': '0',
+          Cookie: 'JSESSIONID='+req.cookies.jssonId,  'Accept-Encoding': 'gzip, deflate',
+          Host: 'greatmindsdemo.mpstechnologies.com',
+          'Postman-Token': '253922e1-1531-47b2-b9d7-5ec943db1a91,24e7633e-1344-4d5d-a7d2-1a73fd497799',
+          'Cache-Control': 'no-cache', Accept: '*/*', 'User-Agent': 'PostmanRuntime/7.17.1' } 
+      };
+      res.clearCookie("jssonId");
+      request(options, function (error, response, body) {
+        if (error) throw new Error(error);
+        if(body!=""){
+          let d=JSON.parse(body);
+          let data= {email: d.email, firstName: d.firstName,lastName:d.lastName, roleName:d.roleName, userId: d.userId };
+          var User = mongoose.model('User');
+          let query={ email: d.email, roleName: d.roleName };
+          console.log("finding ", JSON.stringify(query));
+          User.findOne(query, function (err, user) {
+          if(!!user ){
+              let token = user.generateJwt();
+                res.status(200);
+                res.json({
+                  "token" : token,
+                  "Status" : "OK",
+                  "id" : user._id,
+                  "name" : user.name,
+                  "roleName": user.roleName,
+                });
+            }else{
+              //https://gmartlogautomation.mpstechnologies.com?jssonId=804FB9E240D5EF825B8E1EA7F8D9817A"
+              var users = new User();
+              users.name = d.firstName +' '+ d.lastName;
+              users.roleName= d.roleName;
+              users.email = d.email;
+              users.setPassword('gm@remote');
+              users.save(function(err, rest) {
+                console.log("data=>", err, rest);
+                var token;
+                token = rest.generateJwt();
+                res.status(200);
+                res.json({
+                  "token" : token,
+                  "Status": "OK",
+                  "id":rest._id,
+                  "name":rest.name,
+                  "roleName": rest.roleName,
+                });
+              });
+            }
+          });
+        }else{
+          res.send({'msg':'NOTFOUND','para': options});
+        }
+        console.log(body);
+      });
    }
-      var options = { method: 'POST',
-      url: 'https://greatminds.mpstechnologies.com/GreatMinds/admin/getLoggedInUserDeatils',
-      headers: 
-      { 'cache-control': 'no-cache',
-        Connection: 'keep-alive',
-        'Content-Length': '0',
-        Cookie: 'JSESSIONID='+req.cookies.jssonId,
-        'Accept-Encoding': 'gzip, deflate',
-        Host: 'greatminds.mpstechnologies.com',
-        'Postman-Token': '253922e1-1531-47b2-b9d7-5ec943db1a91,24e7633e-1344-4d5d-a7d2-1a73fd497799',
-        'Cache-Control': 'no-cache',
-         Accept: '*/*',
-        'User-Agent': 'PostmanRuntime/7.17.1' } };
-
-    res.clearCookie("jssonId");
-    request(options, function (error, response, body) {
-      if (error) throw new Error(error);
-      if(body!=""){
-        let d=JSON.parse(body);
-        let data= {email: d.email, firstName: d.firstName,lastName:d.lastName, roleName:d.roleName, userId: d.userId };
-        var User = mongoose.model('User');
-        User.findOne({ email: d.email, roleName: d.roleName }, function (err, user) {
-        if(!!user ){
-            let token = user.generateJwt();
-              res.status(200);
-              res.json({
-                "token" : token,
-                "Status": "OK",
-                "id":user._id,
-              });
-          }else{
-            var users = new User();
-            users.name = d.userId;
-            users.roleName= d.roleName;
-            users.email = d.email;
-            users.setPassword('remote');
-            users.save(function(err) {
-              var token;
-              token = users.generateJwt();
-              res.status(200);
-              res.json({
-                "token" : token,
-                "Status": "OK",
-                "id":users._id
-              });
-            });
-          }
-        });
-      }else{
-        res.send({'msg':'NOTFOUND','para': options});
-      }
-      console.log(body);
-    });
 });
 
 postRoutes.route('/jobsMetadata').post(function (req, res) {  
@@ -564,7 +569,7 @@ postRoutes.route('/artlogdata', checkToken.checkToken).post(function (req, res) 
     let fields={isPaging:1, comment:1, mVerification:1, duplicate:1, presetName:1, Preset_Stages:1, id:1, name:1, description:1, job_active_stage:1, jobMetaproperties:1, jobID:1, job_key:1, dateCreated:1, job_date_finished:1, thumb:1, generatedTags:1};
     console.log("Calling artlogdata Data " , JSON.stringify(q), JSON.stringify(fields));
     //.limit(50)
-    Mdb.bynder_jobs.find(q, fields ).sort({job_key:-1}).then((data)=>{
+    Mdb.bynder_jobs.find(q, fields ).sort({job_key:-1}).limit(200).then((data)=>{
     let dataResult=[];
 
     for(let  dtkey in data){
