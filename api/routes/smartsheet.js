@@ -130,14 +130,14 @@ postRoutes.route('/getUserInfo').post(function (req, res) {
     res.status(404);
    }
       var options = { method: 'POST',
-      url: 'https://greatmindsdemo.mpstechnologies.com/GreatMinds/admin/getLoggedInUserDeatils',
+      url: 'https://greatminds.mpstechnologies.com/GreatMinds/admin/getLoggedInUserDeatils',
       headers: 
       { 'cache-control': 'no-cache',
         Connection: 'keep-alive',
         'Content-Length': '0',
         Cookie: 'JSESSIONID='+req.cookies.jssonId,
         'Accept-Encoding': 'gzip, deflate',
-        Host: 'greatmindsdemo.mpstechnologies.com',
+        Host: 'greatminds.mpstechnologies.com',
         'Postman-Token': '253922e1-1531-47b2-b9d7-5ec943db1a91,24e7633e-1344-4d5d-a7d2-1a73fd497799',
         'Cache-Control': 'no-cache',
          Accept: '*/*',
@@ -216,6 +216,11 @@ postRoutes.route('/updateBulkBatch').post(function (req, res) {
     });
   }
 });
+postRoutes.route('/reactiveJobs').post(function (req, res) {
+  if(!!req.body.status &&  !!req.body.id){
+    
+  }
+})
 postRoutes.route('/updateBulkTags').post(function (req, res) {
   console.log("ACTION : updateBulkTags REQ==>",req.body);
   if(req.body.selectedids ){
@@ -559,7 +564,7 @@ postRoutes.route('/artlogdata', checkToken.checkToken).post(function (req, res) 
     let fields={isPaging:1, comment:1, mVerification:1, duplicate:1, presetName:1, Preset_Stages:1, id:1, name:1, description:1, job_active_stage:1, jobMetaproperties:1, jobID:1, job_key:1, dateCreated:1, job_date_finished:1, thumb:1, generatedTags:1};
     console.log("Calling artlogdata Data " , JSON.stringify(q), JSON.stringify(fields));
     //.limit(50)
-    Mdb.bynder_jobs.find(q, fields ).sort({job_key:-1}).limit(200).then((data)=>{
+    Mdb.bynder_jobs.find(q, fields ).sort({job_key:-1}).then((data)=>{
     let dataResult=[];
 
     for(let  dtkey in data){
