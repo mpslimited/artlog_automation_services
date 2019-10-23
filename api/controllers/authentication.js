@@ -37,6 +37,8 @@ module.exports.login = function(req, res) {
         "token" : token,
         "Status": "OK",
         "id":user._id,
+        'name': user.name,
+        'roleName': user.roleName
       });
     } else {
       res.status(401).json(info);
