@@ -405,10 +405,66 @@ postRoutes.route('/getAssets/:page').get(function (req, res) {
     }
   });
 });
+
+// Missing StageName
+postRoutes.route('/missingStages').post(function (req, res) {
+  let q= {"Preset_Stages.StageNames":{$exists: false}};
+  Mdb.bynder_jobs.find(q).then(data=>{
+    for( let dt of data){
+      let allStages=dt.Preset_Stages;
+      for(let temp=0; temp < allStages.length; temp ++){
+        if(!!dt.presetstages && dt.presetstages.length > 0){
+          let stage=dt.presetstages.filter(d=> d.position == allStages[temp].position);
+          if(stage.length > 0){
+            allStages[temp].StageNames = stage[0].name;
+          }else{
+            console.log("Length Not found", JSON.stringify(allStages[temp]))
+          }
+        }
+      }
+      if(dt.presetstages.length > 0 ){
+        Mdb.bynder_jobs.updateMany({ id: dt.id},
+          {  $set:{ Preset_Stages: allStages }  })
+        .then(d=>{
+
+          console.log("data Updated", dt.id);
+        }).catch(Err=>{
+          console.log("Error In data");
+        });
+      }
+    }
+  }).catch(Err=>{
+    console.log("ERr:", Err);
+  });
+})
 // updating Missing Jobs MetaProperty 
+
+// postRoutes.route('/removeSpace').post(function (req, res) {
+//   Mdb.bynder_jobs.find({job_key:{$exists: true}}).then(data=>{
+//     console.log("Total data Procuding :",data.length);
+//     for (let dt of data){
+//       if(dt.job_jey.indexOf(" ") > -1){
+//         Mdb.bynder_jobs.updateOne({ _id: dt._id},
+//           { $set:{
+//             dt.job_key
+//           } })
+//         .then(d=>{
+//           console.log("Updated");
+//         })
+//       }
+//     }
+//   }).catch(Err=>{
+//     console.log(Err);
+//   });
+// })
 postRoutes.route('/updatePresets').post(function (req, res) {
-  Mdb.bynder_jobs.find({ presetName: { $exists: false } }).then(dt => {
+  let testQ={
+    $or: [{  presetName: { $exists: false } }, { presetName: "" }]
+  }
+
+  Mdb.bynder_jobs.find( testQ ).then(dt => {
     if (dt.length > 0) {
+      console.log("Un-updated Preset jobs,", dt.length)
       let persetsIds = [...new Set(dt.map(d => d.presetID))];
       // console.log("Data ", persetsIds);
       for (let t = 0; t < persetsIds.length; t++) {
@@ -419,10 +475,15 @@ postRoutes.route('/updatePresets').post(function (req, res) {
           request({
             url: request_data.url, method: request_data.method, form: request_data.data, headers: oauth.toHeader(oauth.authorize(request_data, token))
           }, function (error, response, body) {
+            if(error){
+              console.log("Error IN Api", error);
+            }
             if (response.statusCode == 200) {
               console.log(response.body);
               let persetDt = JSON.parse(response.body);
               let where = { presetID: persetDt.preset.ID, presetName: { $exists: false } };
+              console.log(persetDt.preset.ID ," ID and => ", JSON.stringify(persetDt.preset.presetstages) );
+              
               Mdb.bynder_jobs.updateMany(where, {
                 $set: {
                   presetName: persetDt.preset.name,
@@ -431,6 +492,9 @@ postRoutes.route('/updatePresets').post(function (req, res) {
               }).then(rs => {
                 console.log('data updated', rs)
               }).catch(ee => { console.log('Error in ', ee) });
+              
+            }else{
+              console.log("Preset API have Some Error: ", response.statusCode);
             }
           });
         }
