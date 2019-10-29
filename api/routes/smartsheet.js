@@ -131,11 +131,11 @@ postRoutes.route('/getUserInfo').post(function (req, res) {
    }else{
      console.log(" else data ");
      var options = { method: 'POST',
-        url: 'https://greatmindsdemo.mpstechnologies.com/GreatMinds/admin/getLoggedInUserDeatils',
+        url: 'https://greatminds.mpstechnologies.com/GreatMinds/admin/getLoggedInUserDeatils',
         headers: 
         { 'cache-control': 'no-cache', Connection: 'keep-alive', 'Content-Length': '0',
           Cookie: 'JSESSIONID='+req.cookies.jssonId,  'Accept-Encoding': 'gzip, deflate',
-          Host: 'greatmindsdemo.mpstechnologies.com',
+          Host: 'greatminds.mpstechnologies.com',
           'Postman-Token': '253922e1-1531-47b2-b9d7-5ec943db1a91,24e7633e-1344-4d5d-a7d2-1a73fd497799',
           'Cache-Control': 'no-cache', Accept: '*/*', 'User-Agent': 'PostmanRuntime/7.17.1' } 
       };
