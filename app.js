@@ -28,8 +28,8 @@ var routesApiData = require('./api/routes/data.services');
 var app = express();
 const publicRoot = 'dist';
 //
-// var accessLogStream = fs.createWriteStream(path.join(__dirname, 'logs/access.log'), { flags: 'a' });
-// app.use(morgan('combined', { stream: accessLogStream }))
+var accessLogStream = fs.createWriteStream(path.join(__dirname, 'logs/access.log'), { flags: 'a' });
+app.use(morgan('combined', { stream: accessLogStream }))
 
 
 app.use(express.static(publicRoot));
