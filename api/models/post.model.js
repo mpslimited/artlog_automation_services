@@ -82,7 +82,7 @@ let bynder_jobs= new Schema({
   isPaging: {type: String},
   mVerification:  {type : Boolean},
   duplicate : {type : Boolean},
-  Cduplicate: {type: Boolean},
+  Cduplicate  : {type: Boolean},
   isAssetBank : {type : Boolean},
   generatedTags : { type: String},
   updateTag   : { type: String},
