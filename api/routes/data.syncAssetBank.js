@@ -314,7 +314,7 @@ postRoutes.route('/assetJobs/').post(function (req, res) {
   });
 });
 // 
-postRoutes.route('/assetSynced/').get(function (req, res) {
+postRoutes.route('/assetSynced/').post(function (req, res) {
   console.log("ACTION assetSynced ")
   var request_data = appConfig.getActionInfo("getAssets");
   var token = appConfig.getToken();
