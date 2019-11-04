@@ -83,11 +83,13 @@ postRoutes.route('/updateAsset/').post(function (req, res) {
 postRoutes.route('/notification').post(function (req, res) {
 
   var transporter = nodemailer.createTransport({
-    service: 'gmail',
+    host: '10.31.3.71',
+    port: 25,
+   /* service: 'gmail',
     auth: {
       user: 'mahi.aayush@gmail.com',
       pass: 'We1c0me@@yush@123'
-    }
+    }*/
   });
   var mailOptions = {
     from: 'ajeet@gmail.com',
