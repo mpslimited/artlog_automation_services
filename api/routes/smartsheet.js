@@ -508,10 +508,10 @@ postRoutes.route('/artlogdata', checkToken.checkToken).post(function (req, res) 
       }
       $and.push({$or:$or})
     }
-    if(!!req.body.batch && req.body.batch!=""){
+    if(!!req.body.topic && req.body.topic!=""){
       "jobMetaproperties.662315fccf37435081da009bd3fbe49b"
       $and.push(
-        { "jobMetaproperties.662315fccf37435081da009bd3fbe49b" : req.body.batch }
+        { "jobMetaproperties.662315fccf37435081da009bd3fbe49b" : req.body.topic }
       ); 
     }
     //662315fccf37435081da009bd3fbe49b
@@ -620,7 +620,7 @@ postRoutes.route('/artlogdata', checkToken.checkToken).post(function (req, res) 
          objData.grade        =   Mdt.gradeVal;
          objData.moduleID     =   Mdt.module;
          objData.module       =   Mdt.moduleVal;
-         objData.batch        =   Mdt.batch;
+         objData.topic        =   Mdt.topic;
          objData.facing       =   Mdt.facingVal;
          objData.facingID     =   Mdt.facing;
          objData.series       =   Mdt.series;
@@ -657,6 +657,7 @@ postRoutes.route('/artlogdata', checkToken.checkToken).post(function (req, res) 
        impact         :   [...new Set(dataResult.filter( (d)=> !!d.impact ).map(d=>d.impact))],
        facing         :   [...new Set(dataResult.filter( (d)=> !!d.facing ).map(d=>d.facing))],
        series         :   [...new Set(dataResult.filter( (d)=> !!d.series ).map(d=>d.series))],
+       topic          :   [...new Set(dataResult.filter( (d)=> !!d.topic ).map(d=>d.topic))],
        batch          :   [...new Set(dataResult.filter( (d)=> !!d.batch ).map(d=>d.batch))],
        revision       :   [...new Set(dataResult.filter( (d)=> !!d.revisionC ).map(d=>d.revisionC))],
        cstages        :   [...new Set(dataResult.filter( (d)=> !!d.cstage ).map(d=>d.cstage))],

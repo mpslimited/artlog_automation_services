@@ -1,4 +1,5 @@
 const express = require('express');
+const nodemailer = require('nodemailer');
 const postRoutes = express.Router();
 const request = require('request');
 const OAuth = require('oauth-1.0a');
@@ -44,9 +45,10 @@ Mdb.assetMeta.find({}, { "curricula_wip.options": 1 }).then((dt) => {
 postRoutes.route('/updateAsset/').post(function (req, res) {
   console.log("updateAssetasset data :", req.body);
   //let id='88021AB3-AA05-4E6C-985CC6AFBBBC2CCB';
-  Mdb.bynder_jobs.find({ updateTag: 'Processing' }).limit(1).then((data) => {
+  Mdb.bynder_jobs.find({ updateTag: 'Processing', assetID: {$exists: true} }).limit(1).then((data) => {
     if(data.length > 0){
       for(let dt of data){
+        //data[0].assetID+'/';
         var request_data = appConfig.getActionInfo("updateAsset", "88021AB3-AA05-4E6C-985CC6AFBBBC2CCB/" );
         request_data.method = 'POST';
         let formData= { tags: dt.generatedTags };
@@ -78,6 +80,32 @@ postRoutes.route('/updateAsset/').post(function (req, res) {
   }).catch(Err => { console.log("Error:", Err); });
   //res.send(request_data);
 });
+postRoutes.route('/notification').post(function (req, res) {
+
+  var transporter = nodemailer.createTransport({
+    service: 'gmail',
+    auth: {
+      user: 'mahi.aayush@gmail.com',
+      pass: 'We1c0me@@yush@123'
+    }
+  });
+  var mailOptions = {
+    from: 'ajeet@gmail.com',
+    to: 'snehasis.parida@mps-in.com',
+    subject: 'E-mail NotificatSending Email using Node.js',
+    text: 'That was easy!'
+  };
+  
+  transporter.sendMail(mailOptions, function(error, info){
+    if (error) {
+      console.log(error);
+    } else {
+      console.log('Email sent: ' + info.response);
+    }
+  });
+
+});
+
 postRoutes.route('/getdata/:campaignId').get(function (req, res) {
 
   let campaignId = req.params.campaignId;
@@ -340,7 +368,7 @@ postRoutes.route('/assetSynced/').post(function (req, res) {
             }
             do{
               console.log("Init page:", page)
-              excuteURL("http://localhost:3000/sync/getAssets/"+page)
+              excuteURL("http://localhost:3000/sync/getAssets/"+page, true)
               if(!( page <  Totalpage)){
                 res.send({data:"jobs merged",d: new Date()});
               }
@@ -363,9 +391,10 @@ postRoutes.route('/assetSynced/').post(function (req, res) {
 });
 
 // getting assetbank data using Limit
-postRoutes.route('/getAssets/:page').get(function (req, res) {
+postRoutes.route('/getAssets/:page').post(function (req, res) {
   console.log("Requesting ");
   let page = req.params.page;
+  page=1;
   var request_data = appConfig.getActionInfo("getAssets");
   var token = appConfig.getToken();
   request_data.data = {}; //={ "limit": 5, page: 1 }
@@ -384,15 +413,16 @@ postRoutes.route('/getAssets/:page').get(function (req, res) {
         for (let temp = 0; temp < data.length; temp++) {
           Mdb.asset.find({ id: data[temp].id }).then((dt) => {
             if (dt.length > 0) {
-              console.log("Jobs Updation case")
+              console.log("Jobs Updation case", data[temp].id, 'jobs:', temp)
             } else {
+              console.log("data for Saving..", data[temp].id , 'jobs:', temp)
               data[temp].tagreaded=false;
               let asset = new Mdb.asset(data[temp]);
               asset.save().then((rs) => {
                 console.log("saved id", rs.id);
               }).catch((Err) => console.log("Asset Save ERROR:", Err));
             }
-            if (temp == dt.length - 1) {
+            if (temp == data.length ) {
               res.send("try to save or update assets AT:" + new Date());
             }
           }).catch((Err) => {
@@ -457,6 +487,56 @@ postRoutes.route('/missingStages').post(function (req, res) {
 //     console.log(Err);
 //   });
 // })
+postRoutes.route('/approvedworkfolwasset').post(function (req, res) {
+  console.log('approvedworkfolwasset action for merging approved job which is in asset bank');
+  let Founded=[], NotFounded=[];
+  Mdb.bynder_jobs.find({ "job_active_stage.status": 'Approved', job_key: {$ne: ''}}).then(data=>{
+    console.log( "total Active Jonbs :", data.length);
+    for(let temp =0; temp < data.length ; temp ++){
+
+        Mdb.asset.find(
+          {  "property_workflowjobkey": data[temp].job_key }
+          //{ "property_workflowjob" : data[temp].jobID }
+          ).then(CData=> {
+        if(CData.length > 0){
+          Founded.push( data[temp].job_key );
+          console.log("Finded CData : ", CData.length, CData[0].id);
+          // code hear for Update Thumb & tags in Workflow Jobs // and also aknowledge about job exist both side //
+          let thumb =CData[0].thumbnails.webimage || CData[0].thumbnails.thul
+          Mdb.bynder_jobs.updateMany({ id : data[temp].id },
+              { $set:{ 
+                thumb : thumb ,
+                assetTags: CData[0].tags,
+                assetID : CData[0].id
+              } })
+          .then(rs=>{
+            console.log('updated', rs);
+          }).catch(Err=>{ 
+            console.log("Error In Updating:", Err) 
+          });
+          Mdb.asset.updateMany({ id: CData[0].id }, { $set: { isWorkflow: true}})
+          .then(rs2=> { 
+            console.log( 'updated data ', rs2);
+          }).catch(Err=>{ 
+            console.log("Error in Update jobs in asset bank: ", Err)
+          })
+        }else{
+          NotFounded.push(data[temp].job_key);
+          console.log("Not Finded CData : ", data[temp].job_key );
+        }
+        if(temp ==  data.length-1){
+          console.log("Founded Jobs : ", Founded.length ,' Not Founded Is ', NotFounded.length);
+          //job_active_stage
+        }
+      }).catch(Err=> {
+        console.log("Error in finding CData: ", Err);
+      });
+    }
+  }).catch(Err=>{ console.log("Error In finding :", Err); });
+})
+
+
+
 postRoutes.route('/updatePresets').post(function (req, res) {
   let testQ={
     $or: [{  presetName: { $exists: false } }, { presetName: "" }]
@@ -502,10 +582,13 @@ postRoutes.route('/updatePresets').post(function (req, res) {
     }
   }).catch(Err => console.log('Error in finding data', Err))
 })
-function  excuteURL(URLexc){
+function  excuteURL(URLexc, ispost){
   console.log("\n\n excuteURL",URLexc );
   try{
     var options = { method: 'GET', url: URLexc, headers:{ 'Cache-Control': 'no-cache' }};
+    if(ispost){
+      options.method='POST'; 
+    }
     request(options,  function (error, response, body) {
       if (error) //throw new Error(error);
       console.log(error);
@@ -514,4 +597,5 @@ function  excuteURL(URLexc){
     console.log("Error:", Err);
   }
 }
+
 module.exports = postRoutes;

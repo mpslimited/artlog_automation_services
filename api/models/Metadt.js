@@ -18,7 +18,7 @@
         this.componentkey  =   "87d538e6d3a442468b20426285aef253";   // static
         this.gradekey      =   "c0ac0a86e65f4f7ebd88dbd7e77965ef";   // dynamic
         this.modulekey     =   "7388493928bc4a9aa57ca65306ed1579";   // static
-        this.batchkey      =    "662315fccf37435081da009bd3fbe49b";  // static
+        this.topickey      =    "662315fccf37435081da009bd3fbe49b";  // static
 
            
         this.creditlinekey =   "c0b45231a3f142ac8c9c13af8d0fe31f";   // static
@@ -131,15 +131,15 @@
      setSeries(value){
         this.data.jobMetaproperties[this.serieskey]=value;
      }
-     getBatch(){
-        if(this.data.jobMetaproperties.hasOwnProperty(this.batchkey)){
-            return this.data.jobMetaproperties[this.batchkey];
+     getTopic(){
+        if(this.data.jobMetaproperties.hasOwnProperty(this.topickey)){
+            return this.data.jobMetaproperties[this.topickey];
         }else{
             return '';
         } 
      }
-     setBatch(value){
-        this.data.jobMetaproperties[this.batchkey]=value;
+     setTopic(value){
+        this.data.jobMetaproperties[this.topickey]=value;
      }
      getRisk(){
         if(this.data.jobMetaproperties.hasOwnProperty(this.riskkey)){
@@ -290,7 +290,7 @@
             creditLine   :   this.getCreditline(),
             lessonlet    :   this.getLessonlet(),
             component    :   this.getComponent(),
-            batch        :   this.getBatch(),
+            topic        :   this.getTopic(),
             facingVal    :   this.getValByKeyID(this.facingkey, this.getFacing()),
             facing       :   this.getFacing(),
             series       :   this.getSeries(),

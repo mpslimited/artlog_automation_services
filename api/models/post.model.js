@@ -43,7 +43,7 @@ let overdue_jobs= new Schema({
     collection: 'overdue_jobs'
 });
 let bynder_jobs= new Schema({
-  
+  assetID   : {type : String},
   id: { type: String},
   jobID:{type:String},
   risk:{type: String},
@@ -85,9 +85,11 @@ let bynder_jobs= new Schema({
   Cduplicate  : {type: Boolean},
   isAssetBank : {type : Boolean},
   generatedTags : { type: String},
+  assetTags : { type : Array},
   updateTag   : { type: String},
   isMailed    : {type: String },
-  thumb: { type: String }
+  thumb: { type: String },
+  batch: {type: String}
  },{
     collection: 'bynder_jobs'
 });
@@ -240,7 +242,8 @@ let asset=new Schema({
     property_PriorUses : { type: Object},
     property_Location : { type: Object},
     tagreaded : {type: Boolean},
-    tagReader : {type: Array}
+    tagReader : {type: Array},
+    isWorkflow: { type : Boolean}
   },{
       collection: 'asset'
   });
