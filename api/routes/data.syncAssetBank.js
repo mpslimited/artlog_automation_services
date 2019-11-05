@@ -81,31 +81,54 @@ postRoutes.route('/updateAsset/').post(function (req, res) {
   //res.send(request_data);
 });
 postRoutes.route('/notification').post(function (req, res) {
-
+  console.log("notification action")
   var transporter = nodemailer.createTransport({
-    host: '10.31.3.71',
-    port: 25,
-   /* service: 'gmail',
-    auth: {
-      user: 'mahi.aayush@gmail.com',
-      pass: 'We1c0me@@yush@123'
-    }*/
-  });
+    host: '10.31.3.71', port: 25});
   var mailOptions = {
-    from: 'ajeet@gmail.com',
+    from: 'greatminds-support@mpslimited.com',
     to: 'snehasis.parida@mps-in.com',
-    subject: 'E-mail NotificatSending Email using Node.js',
-    text: 'That was easy!'
+    subject: 'Tag pushing activity status report',
+    html: ''
   };
-  
-  transporter.sendMail(mailOptions, function(error, info){
-    if (error) {
-      console.log(error);
-    } else {
-      console.log('Email sent: ' + info.response);
-    }
-  });
-
+  let table =`<table border="1" width="100%">
+      <tr>
+      <th> ProcessID</th><th> Job Key</th><th>Tag Pushing Status</th>
+      </tr>`;
+  Mdb.bynder_jobs.find(
+    { updateTag: { $exists: true, $ne: 'Processing' },  isMailed: 'false'}
+    ).then(data=>{
+      if(data.length > 0){
+        /*jshint esversion: 6 */
+        console.log("data is:", data.length);
+        for( let temp =0; temp < data.length; temp ++){
+          table= table + `<tr>
+            <td> ${data[temp]._id }</td>
+            <td> ${data[temp].job_key }</td>
+            <td> ${data[temp].updateTag }</td>
+          </tr>` ;
+        }
+        table=table+`</table>`;
+        let msg='<p>Dear User,<p><p>Automated tag generation and pushing to asset bank activity has been completed. Please see the status report below for complete details.</p>';
+        msg=msg + table +`<br> Thanks,<br> Administrator`;
+        mailOptions.html=msg;
+        transporter.sendMail(mailOptions, function(error, info){
+          if (error) {
+            console.log(error);
+          } else {
+            console.log('Email sent: ' + info.response, info.messageId);
+            let serIds=data.map(d=>d._id);
+            Mdb.bynder_jobs.updateMany({ _id: {$in : serIds}},{ $set: { isMailed: 'true'}}).then(d=>{
+              console.log("Mail sended");
+            });
+            res.send({"sended": new Date()});
+          }
+        });
+      }else{
+        res.send({"Not send": new Date()});
+      }
+    }).catch(Err=>{
+      console.log("Error In data", Err);
+    });
 });
 
 postRoutes.route('/getdata/:campaignId').get(function (req, res) {
@@ -492,7 +515,7 @@ postRoutes.route('/missingStages').post(function (req, res) {
 postRoutes.route('/approvedworkfolwasset').post(function (req, res) {
   console.log('approvedworkfolwasset action for merging approved job which is in asset bank');
   let Founded=[], NotFounded=[];
-  Mdb.bynder_jobs.find({ "job_active_stage.status": 'Approved', job_key: {$ne: ''}}).then(data=>{
+  Mdb.bynder_jobs.find({ "job_active_stage.status": 'Approved', assetID: { $exists: false} ,  job_key: { $exists: true, $ne: ''}}).then(data=>{
     console.log( "total Active Jonbs :", data.length);
     for(let temp =0; temp < data.length ; temp ++){
 
@@ -527,7 +550,7 @@ postRoutes.route('/approvedworkfolwasset').post(function (req, res) {
           console.log("Not Finded CData : ", data[temp].job_key );
         }
         if(temp ==  data.length-1){
-          console.log("Founded Jobs : ", Founded.length ,' Not Founded Is ', NotFounded.length);
+          req.send("Founded Jobs : ", Founded.length ,' Not Founded Is ', NotFounded.length);
           //job_active_stage
         }
       }).catch(Err=> {
