@@ -51,7 +51,7 @@ postRoutes.route('/updateAsset/').post(function (req, res) {
         //data[0].assetID+'/';
         var request_data = appConfig.getActionInfo("updateAsset", "88021AB3-AA05-4E6C-985CC6AFBBBC2CCB/" );
         request_data.method = 'POST';
-        let formData= { tags: dt.generatedTags };
+        let formData= { tags: dt.generatedTags + dt.tags };
         request_data.data={ } //tags : dt.generatedTags };
         let authheader= oauth.toHeader( oauth.authorize(request_data, appConfig.getToken()) );
 
@@ -86,7 +86,7 @@ postRoutes.route('/notification').post(function (req, res) {
     host: '10.31.3.71', port: 25});
   var mailOptions = {
     from: 'greatminds-support@mpslimited.com',
-    to: 'snehasis.parida@mps-in.com',
+    to: 'snehasis.parida@mps-in.com,ajeet.mishta@mpslimited.com',
     subject: 'Tag pushing activity status report',
     html: ''
   };
@@ -494,24 +494,6 @@ postRoutes.route('/missingStages').post(function (req, res) {
 })
 // updating Missing Jobs MetaProperty 
 
-// postRoutes.route('/removeSpace').post(function (req, res) {
-//   Mdb.bynder_jobs.find({job_key:{$exists: true}}).then(data=>{
-//     console.log("Total data Procuding :",data.length);
-//     for (let dt of data){
-//       if(dt.job_jey.indexOf(" ") > -1){
-//         Mdb.bynder_jobs.updateOne({ _id: dt._id},
-//           { $set:{
-//             dt.job_key
-//           } })
-//         .then(d=>{
-//           console.log("Updated");
-//         })
-//       }
-//     }
-//   }).catch(Err=>{
-//     console.log(Err);
-//   });
-// })
 postRoutes.route('/approvedworkfolwasset').post(function (req, res) {
   console.log('approvedworkfolwasset action for merging approved job which is in asset bank');
   let Founded=[], NotFounded=[];

@@ -206,9 +206,12 @@ postRoutes.route('/updateBulkBatch').post(function (req, res) {
     let ids = JSON.parse(req.body.selectedids);
     Mdb.bynder_jobs.find({ _id: { $in : ids}}).then(data=>{
       for(let dt in data){
-        data[dt].jobMetaproperties['662315fccf37435081da009bd3fbe49b']=req.body.batch;
+        //data[dt].jobMetaproperties['662315fccf37435081da009bd3fbe49b']=req.body.batch;
         Mdb.bynder_jobs.updateOne({ _id : data[dt]._id},{
-          $set : { jobMetaproperties: data[dt].jobMetaproperties }
+          $set : { 
+            //jobMetaproperties: data[dt].jobMetaproperties
+            batch : req.body.batch
+           }
         }).then(dt=>{
           console.log("data Updated Successfully");
         }).catch(Err=>{
@@ -281,8 +284,8 @@ postRoutes.route('/updateJob').post(function (req, res) {
       Mdt.setModule(Mdt.referValueByKey( Mdt.modulekey, newDt.module));
     }if(!!newDt.grade && newDt.grade!=""){
       Mdt.setGrade( Mdt.referValueByKey(Mdt.gradekey,newDt.grade));
-    }if(!!newDt.batch && newDt.batch!=""){
-      Mdt.setBatch( newDt.batch);
+    }if(!!newDt.topic && newDt.topic!=""){
+      Mdt.setTopic( newDt.topic);
     }
     if(!!Mdt.getM()){
       let where ={ _id: newDt._id};
@@ -292,8 +295,10 @@ postRoutes.route('/updateJob').post(function (req, res) {
           $set:{
             jobMetaproperties: Mdt.getM(),
             description: newDt.description,
-            comment : newDt.comment,
-            isPaging : newDt.isPaging
+            comment  : newDt.comment,
+            isPaging : newDt.isPaging,
+            batch    : newDt.batch,
+            mVerification : newDt.mVerification
           }
         }).then((rs)=>{
            console.log("data updated",rs, newDt._id);
@@ -566,7 +571,7 @@ postRoutes.route('/artlogdata', checkToken.checkToken).post(function (req, res) 
       $and.push( {"campaignID":{"$in": ['4924dc05-03c5-4086-90ce-41d8bf501684','9618db88-fc78-47a5-9916-e864e696ae11'] } });
        q= { $and};
     } 
-    let fields={presetstages:1,isPaging:1, comment:1, mVerification:1, duplicate:1, presetName:1, Preset_Stages:1, id:1, name:1, description:1, job_active_stage:1, jobMetaproperties:1, jobID:1, job_key:1, dateCreated:1, job_date_finished:1, thumb:1, generatedTags:1};
+    let fields={batch:1,presetstages:1,isPaging:1, comment:1, mVerification:1, duplicate:1, presetName:1, Preset_Stages:1, id:1, name:1, description:1, job_active_stage:1, jobMetaproperties:1, jobID:1, job_key:1, dateCreated:1, job_date_finished:1, thumb:1, generatedTags:1};
     console.log("Calling artlogdata Data " , JSON.stringify(q), JSON.stringify(fields));
     //.limit(50) testing in Live Build with Pradeep Sir
     Mdb.bynder_jobs.find(q, fields ).sort({job_key:-1}).limit(50).then((data)=>{
