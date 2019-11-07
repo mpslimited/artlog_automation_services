@@ -80,7 +80,7 @@ let bynder_jobs= new Schema({
   isUpdated: {type : Boolean},
   comment: {type: String},
   isPaging: {type: String},
-  mVerification:  {type : String},
+  mverification:  {type : String},
   duplicate : {type : Boolean},
   Cduplicate  : {type: Boolean},
   isAssetBank : {type : Boolean},
@@ -89,7 +89,8 @@ let bynder_jobs= new Schema({
   updateTag   : { type: String},
   isMailed    : {type: String },
   thumb: { type: String },
-  batch: {type: String}
+  batch: {type: String},
+  flaged: {type: Boolean}
  },{
     collection: 'bynder_jobs'
 });

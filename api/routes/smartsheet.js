@@ -254,6 +254,35 @@ postRoutes.route('/updateBulkTags').post(function (req, res) {
     });
   }
 });
+postRoutes.route('/unflagedRows').post(function (req, res) {
+  console.log("ACTION : unflagedRows REQ==>",req.body);
+  if(req.body.UnflagedID ){ 
+    Mdb.bynder_jobs.updateMany({ _id: req.body.UnflagedID},{
+      $set: { flaged: true}
+    }).then(dt=>{
+      res.send({'msg':'Rows Un-flaged successfully', code:2000});
+    }).catch(Er=>{
+      console.log("Error in flagging data : ", Er);
+    });
+  }else{
+    res.send({'msg':'There have some Error to Unflaged record', code : 5000})
+  }
+})
+postRoutes.route('/flagedRows').post(function (req, res) {
+  console.log("ACTION : flagedRows REQ==>",req.body);
+  if(req.body.flagedID ){ 
+    let flagedID= JSON.parse(req.body.flagedID);
+    Mdb.bynder_jobs.updateMany({ _id: { $in : flagedID}},{
+      $set: { flaged: true}
+    }).then(dt=>{
+      res.send({'msg':'Rows flaged successfully', code:2000});
+    }).catch(Er=>{
+      console.log("Error in flagging data : ", Er);
+    });
+  }else{
+    res.send({'msg':'Please Select at least once row', code : 5000})
+  }
+})
 postRoutes.route('/updateJob').post(function (req, res) {
   console.log("ACTION : addnewjobs REQ==>",req.body);
   if(req.body.newData ){
@@ -298,7 +327,7 @@ postRoutes.route('/updateJob').post(function (req, res) {
             comment  : newDt.comment,
             isPaging : newDt.isPaging,
             batch    : newDt.batch,
-            mVerification : newDt.mVerification
+            mverification : newDt.mverification
           }
         }).then((rs)=>{
            console.log("data updated",rs, newDt._id);
@@ -514,9 +543,9 @@ postRoutes.route('/artlogdata', checkToken.checkToken).post(function (req, res) 
       $and.push({$or:$or})
     }
     if(!!req.body.topic && req.body.topic!=""){
-      "jobMetaproperties.662315fccf37435081da009bd3fbe49b"
+      //"jobMetaproperties.662315fccf37435081da009bd3fbe49b"
       $and.push(
-        { "jobMetaproperties.662315fccf37435081da009bd3fbe49b" : req.body.topic }
+        { "batch" : req.body.topic }
       ); 
     }
     //662315fccf37435081da009bd3fbe49b
@@ -571,7 +600,7 @@ postRoutes.route('/artlogdata', checkToken.checkToken).post(function (req, res) 
       $and.push( {"campaignID":{"$in": ['4924dc05-03c5-4086-90ce-41d8bf501684','9618db88-fc78-47a5-9916-e864e696ae11'] } });
        q= { $and};
     } 
-    let fields={batch:1,presetstages:1,isPaging:1, comment:1, mVerification:1, duplicate:1, presetName:1, Preset_Stages:1, id:1, name:1, description:1, job_active_stage:1, jobMetaproperties:1, jobID:1, job_key:1, dateCreated:1, job_date_finished:1, thumb:1, generatedTags:1};
+    let fields={flaged:1,batch:1,presetstages:1,isPaging:1, comment:1, mverification:1, duplicate:1, presetName:1, Preset_Stages:1, id:1, name:1, description:1, job_active_stage:1, jobMetaproperties:1, jobID:1, job_key:1, dateCreated:1, job_date_finished:1, thumb:1, generatedTags:1};
     console.log("Calling artlogdata Data " , JSON.stringify(q), JSON.stringify(fields));
     //.limit(50) testing in Live Build with Pradeep Sir
     Mdb.bynder_jobs.find(q, fields ).sort({job_key:-1}).limit(50).then((data)=>{
@@ -642,6 +671,8 @@ postRoutes.route('/artlogdata', checkToken.checkToken).post(function (req, res) 
          objData.impact       =   Mdt.impactVal;
          objData.curriculum   =   Mdt.wip;
          objData.creditLine   =   Mdt.creditLine;
+
+        
       }
       //console.log("Object Final VAlues: ==>", objData);
       dataResult.push(objData);
