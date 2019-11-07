@@ -89,8 +89,9 @@ let bynder_jobs= new Schema({
   updateTag   : { type: String},
   isMailed    : {type: String },
   thumb: { type: String },
-  batch: {type: String},
-  flaged: {type: Boolean}
+  batch: { type: String},
+  flaged: { type: Boolean},
+  killed: { type: Boolean}
  },{
     collection: 'bynder_jobs'
 });

@@ -258,9 +258,9 @@ postRoutes.route('/unflagedRows').post(function (req, res) {
   console.log("ACTION : unflagedRows REQ==>",req.body);
   if(req.body.UnflagedID ){ 
     Mdb.bynder_jobs.updateMany({ _id: req.body.UnflagedID},{
-      $set: { flaged: true}
+      $set: { flaged: false}
     }).then(dt=>{
-      res.send({'msg':'Rows Un-flaged successfully', code:2000});
+      res.send({'msg':'Row Un-flaged successfully', code:2000});
     }).catch(Er=>{
       console.log("Error in flagging data : ", Er);
     });
@@ -275,7 +275,36 @@ postRoutes.route('/flagedRows').post(function (req, res) {
     Mdb.bynder_jobs.updateMany({ _id: { $in : flagedID}},{
       $set: { flaged: true}
     }).then(dt=>{
-      res.send({'msg':'Rows flaged successfully', code:2000});
+      res.send({'msg':'Selected rows has been flagged successfully', code:2000});
+    }).catch(Er=>{
+      console.log("Error in flagging data : ", Er);
+    });
+  }else{
+    res.send({'msg':'Please select at least once row', code : 5000})
+  }
+})
+postRoutes.route('/killedRows').post(function (req, res) {
+  console.log("ACTION : killedRows REQ==>",req.body);
+  if(req.body.killedID ){ 
+    let killedID= JSON.parse(req.body.killedID);
+    Mdb.bynder_jobs.updateMany({ _id: { $in : killedID}},{
+      $set: { killed: true}
+    }).then(dt=>{
+      res.send({'msg':'Selected rows has been killed successfully', code:2000});
+    }).catch(Er=>{
+      console.log("Error in flagging data : ", Er);
+    });
+  }else{
+    res.send({'msg':'Please Select at least once row', code : 5000})
+  }
+});
+postRoutes.route('/unkilledRows').post(function (req, res) {
+  console.log("ACTION : unkilledRows REQ==>",req.body);
+  if(req.body.UnkilledID ){ 
+    Mdb.bynder_jobs.updateOne({ _id: req.body.UnkilledID},{
+      $set: { killed: false}
+    }).then(dt=>{
+      res.send({'msg':'Row has been re-activated successfully', code:2000});
     }).catch(Er=>{
       console.log("Error in flagging data : ", Er);
     });
@@ -284,7 +313,7 @@ postRoutes.route('/flagedRows').post(function (req, res) {
   }
 })
 postRoutes.route('/updateJob').post(function (req, res) {
-  console.log("ACTION : addnewjobs REQ==>",req.body);
+  console.log("ACTION : updateJob  REQ==>",req.body);
   if(req.body.newData ){
     let newDt=JSON.parse(req.body.newData);
     // Lesson, components, tags, artComplex, artAssign, Risk, Impact, module, grade,
@@ -353,11 +382,12 @@ postRoutes.route('/addnewjobs').post(function (req, res) {
       let rqdata = JSON.parse(req.body.jobAdd);
       let BynderSaved= Array();
       if(rqdata.length > 0){
-        let allJobs=rqdata.map(d => d.jobkey);
+        let allJobs=rqdata.map(d => d.jobkey.trim());
         let QueryForC={job_key : {$in : allJobs },  duplicate : {$exists: false } };
         console.log("adding Query:", JSON.stringify(QueryForC));
         Mdb.bynder_jobs.find(QueryForC ).then((data)=>{
           if(data.length > 0){
+            
            var InsData= data.map(d=> ({id:d.id, name: d.name, Preset_Stages : d.Preset_Stages, campaignID: d.campaignID, dateCreated:d.dateCreated, dateModified:d.dateModified, description:d.description, id: d.id, jobID: d.jobID, autoStage: d.autoStage,  jobMetaproperties: d.jobMetaproperties, job_active_stage:d.job_active_stage, job_date_finished: d.job_date_finished , job_key: d.job_key, presetName:d.presetName 
               , duplicate: true, thumb: d.thumb
             }));
@@ -428,6 +458,14 @@ postRoutes.route('/addnewjobs').post(function (req, res) {
               }
               
             }
+            let jobsInfo=Array();
+            for(let d in rqdata){
+              if(BynderSaved.filter(o=>o.job_key == rqdata[d].jobkey).length > 0){
+                jobsInfo.push({'jobkey': rqdata[d].jobkey,'exist':true});
+              }else{
+                jobsInfo.push({'jobkey': rqdata[d].jobkey,'exist':false});
+              }
+            }
             let requests = BynderSaved.map(d=> d.save());
 
             // Promise.all waits until all jobs are resolved
@@ -484,9 +522,15 @@ postRoutes.route('/addnewjobs').post(function (req, res) {
                   resDt.push(response);
                 //console.log((responses))
               });
-              res.send(resDt);
+              
+              res.send({jobsInfo:jobsInfo, resDt: resDt});
             });
             //res.send( resultedDt );
+          }else{
+            //res.send({'msg':'Invalid Job Key'});
+            let resDt= Array();
+            let jobsInfo=rqdata.map(d=>({jobkey:d.jobkey, exist:false}));
+            res.send({jobsInfo:jobsInfo, resDt: resDt});
           }
         }).catch((Err)=>{
           console.log("Finding ERROR:", Err);
@@ -600,7 +644,7 @@ postRoutes.route('/artlogdata', checkToken.checkToken).post(function (req, res) 
       $and.push( {"campaignID":{"$in": ['4924dc05-03c5-4086-90ce-41d8bf501684','9618db88-fc78-47a5-9916-e864e696ae11'] } });
        q= { $and};
     } 
-    let fields={flaged:1,batch:1,presetstages:1,isPaging:1, comment:1, mverification:1, duplicate:1, presetName:1, Preset_Stages:1, id:1, name:1, description:1, job_active_stage:1, jobMetaproperties:1, jobID:1, job_key:1, dateCreated:1, job_date_finished:1, thumb:1, generatedTags:1};
+    let fields={killed:1,flaged:1,batch:1,presetstages:1,isPaging:1, comment:1, mverification:1, duplicate:1, presetName:1, Preset_Stages:1, id:1, name:1, description:1, job_active_stage:1, jobMetaproperties:1, jobID:1, job_key:1, dateCreated:1, job_date_finished:1, thumb:1, generatedTags:1};
     console.log("Calling artlogdata Data " , JSON.stringify(q), JSON.stringify(fields));
     //.limit(50) testing in Live Build with Pradeep Sir
     Mdb.bynder_jobs.find(q, fields ).sort({job_key:-1}).limit(50).then((data)=>{
