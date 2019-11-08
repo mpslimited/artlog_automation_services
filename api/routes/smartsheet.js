@@ -647,7 +647,7 @@ postRoutes.route('/artlogdata', checkToken.checkToken).post(function (req, res) 
     let fields={killed:1,flaged:1,batch:1,presetstages:1,isPaging:1, comment:1, mverification:1, duplicate:1, presetName:1, Preset_Stages:1, id:1, name:1, description:1, job_active_stage:1, jobMetaproperties:1, jobID:1, job_key:1, dateCreated:1, job_date_finished:1, thumb:1, generatedTags:1};
     console.log("Calling artlogdata Data " , JSON.stringify(q), JSON.stringify(fields));
     //.limit(50) testing in Live Build with Pradeep Sir
-    Mdb.bynder_jobs.find(q, fields ).sort({job_key:-1}).then((data)=>{
+    Mdb.bynder_jobs.find(q, fields ).sort({job_key:-1}).limit(50).then((data)=>{
     let dataResult=[];
 
     for(let  dtkey in data){
@@ -723,25 +723,25 @@ postRoutes.route('/artlogdata', checkToken.checkToken).post(function (req, res) 
     }
      job_keys=dataResult.filter( (d)=> d.job_key!="" ).map(d=>d.job_key);
      GridFilters={
-       curriculum     :   [...new Set(dataResult.filter( (v, i)=> !!v.curriculum ).map(d=>d.curriculum))],
-       workflow       :   [...new Set(dataResult.filter( (v, i)=> !!v.workflow ).map(d=>d.workflow))],
-       currentRTeam   :   [...new Set(dataResult.filter( (v, i)=> !!v.currentRTeam ).map(d=>d.currentRTeam))],
-       lesson         :   [...new Set(dataResult.filter( (v, i)=> !!v.lesson ).map(d=>d.lesson))],  //.filter((v,i) => grades.indexOf(v) === i),
-       lessonlet      :   [...new Set(dataResult.filter( (v, i)=> !!v.lessonlet ).map(d=> d.lessonlet))],
-       component      :   [...new Set(dataResult.filter( (d)=> !!d.component ).map(d=>d.component))],
-       grade          :   [...new Set(dataResult.filter( (d)=> !!d.grade ).map(d=>d.grade))],
-       module         :   [...new Set(dataResult.filter( (d)=> !!d.module ).map(d=>d.module))],
-       artcomplex     :   [...new Set(dataResult.filter( (d)=> !!d.artcomplex ).map(d=>d.artcomplex))],
-       artassion      :   [...new Set( dataResult.filter( (d)=> !!d.artassion ).map(d=>d.artassion))],
-       risk           :   [...new Set(dataResult.filter( (d)=> !!d.risk ).map(d=>d.risk))],
-       impact         :   [...new Set(dataResult.filter( (d)=> !!d.impact ).map(d=>d.impact))],
-       facing         :   [...new Set(dataResult.filter( (d)=> !!d.facing ).map(d=>d.facing))],
-       series         :   [...new Set(dataResult.filter( (d)=> !!d.series ).map(d=>d.series))],
-       topic          :   [...new Set(dataResult.filter( (d)=> !!d.topic ).map(d=>d.topic))],
-       batch          :   [...new Set(dataResult.filter( (d)=> !!d.batch ).map(d=>d.batch))],
-       revision       :   [...new Set(dataResult.filter( (d)=> !!d.revisionC ).map(d=>d.revisionC))],
-       cstages        :   [...new Set(dataResult.filter( (d)=> !!d.cstage ).map(d=>d.cstage))],
-       cstatus        :   [...new Set(dataResult.filter( (d)=> !!d.job_active_stage.status ).map(d=>d.job_active_stage.status))],
+       curriculum     :   [...new Set(dataResult.filter( (v, i)=> !!v.curriculum ).map(d=>d.curriculum))].sort(),
+       workflow       :   [...new Set(dataResult.filter( (v, i)=> !!v.workflow ).map(d=>d.workflow))].sort(),
+       currentRTeam   :   [...new Set(dataResult.filter( (v, i)=> !!v.currentRTeam ).map(d=>d.currentRTeam))].sort(),
+       lesson         :   [...new Set(dataResult.filter( (v, i)=> !!v.lesson ).map(d=>d.lesson))].sort(),  //.filter((v,i) => grades.indexOf(v) === i),
+       lessonlet      :   [...new Set(dataResult.filter( (v, i)=> !!v.lessonlet ).map(d=> d.lessonlet))].sort(),
+       component      :   [...new Set(dataResult.filter( (d)=> !!d.component ).map(d=>d.component))].sort(),
+       grade          :   [...new Set(dataResult.filter( (d)=> !!d.grade ).map(d=>d.grade))].sort(),
+       module         :   [...new Set(dataResult.filter( (d)=> !!d.module ).map(d=>d.module))].sort(),
+       artcomplex     :   [...new Set(dataResult.filter( (d)=> !!d.artcomplex ).map(d=>d.artcomplex))].sort(),
+       artassion      :   [...new Set( dataResult.filter( (d)=> !!d.artassion ).map(d=>d.artassion))].sort(),
+       risk           :   [...new Set(dataResult.filter( (d)=> !!d.risk ).map(d=>d.risk))].sort(),
+       impact         :   [...new Set(dataResult.filter( (d)=> !!d.impact ).map(d=>d.impact))].sort(),
+       facing         :   [...new Set(dataResult.filter( (d)=> !!d.facing ).map(d=>d.facing))].sort(),
+       series         :   [...new Set(dataResult.filter( (d)=> !!d.series ).map(d=>d.series))].sort(),
+       topic          :   [...new Set(dataResult.filter( (d)=> !!d.topic ).map(d=>d.topic))].sort(),
+       batch          :   [...new Set(dataResult.filter( (d)=> !!d.batch ).map(d=>d.batch))].sort(),
+       revision       :   [...new Set(dataResult.filter( (d)=> !!d.revisionC ).map(d=>d.revisionC))].sort(),
+       cstages        :   [...new Set(dataResult.filter( (d)=> !!d.cstage ).map(d=>d.cstage))].sort(),
+       cstatus        :   [...new Set(dataResult.filter( (d)=> !!d.job_active_stage.status ).map(d=>d.job_active_stage.status))].sort(),
      };
      
     //  let assetQ={property_workflowjobkey: {
