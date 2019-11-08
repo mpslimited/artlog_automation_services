@@ -664,6 +664,7 @@ postRoutes.route('/artlogdata', checkToken.checkToken).post(function (req, res) 
 
     for(let  dtkey in data){
       var objData = data[dtkey].toObject();
+      
       //console.log("Object VAlue:", objData);
       if(!!data[dtkey].jobMetaproperties){
         let Meta= new Metadt(data[dtkey])
