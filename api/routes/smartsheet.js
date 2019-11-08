@@ -611,6 +611,18 @@ postRoutes.route('/artlogdata', checkToken.checkToken).post(function (req, res) 
         $and.push(
           { "duplicate" : false }
         );
+      }else if(req.body.added==4){
+        $and.push(
+          { "flaged" : true }
+        );
+      }else if(req.body.added==5){
+        $and.push(
+          { "killed" : true }
+        );
+      }else if(req.body.added==6){
+        $and.push(
+          { "killed" : {$ne: true} }
+        );
       }
        
     }
@@ -647,7 +659,7 @@ postRoutes.route('/artlogdata', checkToken.checkToken).post(function (req, res) 
     let fields={killed:1,flaged:1,batch:1,presetstages:1,isPaging:1, comment:1, mverification:1, duplicate:1, presetName:1, Preset_Stages:1, id:1, name:1, description:1, job_active_stage:1, jobMetaproperties:1, jobID:1, job_key:1, dateCreated:1, job_date_finished:1, thumb:1, generatedTags:1};
     console.log("Calling artlogdata Data " , JSON.stringify(q), JSON.stringify(fields));
     //.limit(50) testing in Live Build with Pradeep Sir
-    Mdb.bynder_jobs.find(q, fields ).sort({job_key:-1}).limit(50).then((data)=>{
+    Mdb.bynder_jobs.find(q, fields ).sort({job_key:-1}).limit(200).then((data)=>{
     let dataResult=[];
 
     for(let  dtkey in data){
