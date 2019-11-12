@@ -180,7 +180,7 @@ postRoutes.route('/getAssetsProp/:id').get(function (req, res) {
   });
 
 });
-postRoutes.route('/getjobsmeta/').get(function (req, res) {
+postRoutes.route('/getjobsmeta/').post(function (req, res) {
 
   console.log("getjobsmeta");
 

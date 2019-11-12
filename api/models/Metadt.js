@@ -279,6 +279,28 @@
          }
          return res;
      }
+     getValByMuMKeyID(key, tempID){
+        let res=new Array();
+        if(tempID.indexOf(',') > -1){
+            let mIDS=tempID.split(',');
+            for(let tt=0; tt < mIDS.length; tt++){
+                let Mdt=this.Meta.filter(d=>d.tempId== key);
+                if(Mdt.length > 0){
+                let opt= Mdt[0].options.filter( d=> d.ID.split('-').join('') ==  mIDS[tt]);
+                if(opt.length >0 ) 
+                res.push(opt[0].label);
+                }
+            }
+        }else{
+            let Mdt=this.Meta.filter(d=>d.tempId==key);
+            if(Mdt.length > 0){
+            let opt= Mdt[0].options.filter(d=>d.ID.split('-').join('')== tempID);
+            if(opt.length >0 ) 
+            res.push(opt[0].label);
+            }
+        }
+        return res.join(',');
+    }
      
      setGrade(value){
         this.data.jobMetaproperties[this.gradekey]=value;
@@ -291,7 +313,7 @@
             lessonlet    :   this.getLessonlet(),
             component    :   this.getComponent(),
             topic        :   this.getTopic(),
-            facingVal    :   this.getValByKeyID(this.facingkey, this.getFacing()),
+            facingVal    :   this.getValByMuMKeyID(this.facingkey, this.getFacing()),
             facing       :   this.getFacing(),
             series       :   this.getSeries(),
             dateCreatedM :   this.getDateCreatedM(),
