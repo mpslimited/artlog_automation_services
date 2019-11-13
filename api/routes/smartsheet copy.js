@@ -623,7 +623,7 @@ postRoutes.route('/artlogdata', checkToken.checkToken).post(function (req, res) 
     let fields={killed:1,flaged:1,batch:1,presetstages:1,isPaging:1, comment:1, mverification:1, duplicate:1, presetName:1, Preset_Stages:1, id:1, name:1, description:1, job_active_stage:1, jobMetaproperties:1, jobID:1, job_key:1, dateCreated:1, job_date_finished:1, thumb:1, generatedTags:1};
     console.log("Calling artlogdata Data " , JSON.stringify(q), JSON.stringify(fields));
     // testing in Live Build with Pradeep Sir
-    Mdb.bynder_jobs.find(q, fields ).sort({job_key:-1}).then((data)=>{
+    Mdb.bynder_jobs.find(q, fields ).sort({job_key:-1}).limit(50).then((data)=>{
     let dataResult=[];
 
     for(let  dtkey in data){
@@ -718,11 +718,7 @@ postRoutes.route('/artlogdata', checkToken.checkToken).post(function (req, res) 
        cstages        :   [...new Set(dataResult.filter( (d)=> !!d.cstage ).map(d=>d.cstage))].sort(),
        cstatus        :   [...new Set(dataResult.filter( (d)=> !!d.job_active_stage.status ).map(d=>d.job_active_stage.status))].sort(),
      };
-    /* Mdb.bynder_jobs.find(q, fields ).sort({job_key:-1}).skip(0).limit(100).then((rowData)=>{
-      let result={ artLogData : rowData, totalPage: dataResult.length, GridFilters : GridFilters};
-      res.send( result );
-     })
-     */
+     
     //  let assetQ={property_workflowjobkey: {
     //   $in:  job_keys 
     //   }};
@@ -735,10 +731,8 @@ postRoutes.route('/artlogdata', checkToken.checkToken).post(function (req, res) 
       //     data.filter(df=> dt.)
       //   }
       // }  Jot51339
-      console.log("result length:", dataResult.length )
       let result={ artLogData : dataResult, GridFilters : GridFilters};
       res.send( result );
-      
      //}).catch((Err)=> { console.log("Error in Finding asset:", Err)})
      
     }).catch((Err)=>console.log("Error in finder ERROR:", Err));
