@@ -6,6 +6,8 @@ var logger = require('morgan');
 var cookieParser = require('cookie-parser');
 var session = require('express-session');
 var morgan = require('morgan');
+var responseTime = require('response-time')
+var StatsD = require('node-statsd')
 
 require('log-timestamp');
 var bodyParser = require('body-parser');
@@ -26,6 +28,18 @@ var syncAssetBank = require('./api/routes/data.syncAssetBank');
 var routessmartsheetApi = require('./api/routes/smartsheet');
 var routesApiData = require('./api/routes/data.services');
 var app = express();
+var stats = new StatsD()
+stats.socket.on('error', function (error) {
+  console.error(error.stack)
+})
+ 
+app.use(responseTime(function (req, res, time) {
+  var stat = (req.method + req.url).toLowerCase()
+    .replace(/[:\.]/g, '')
+    .replace(/\//g, '_')
+  stats.timing(stat, time)
+}));
+
 const publicRoot = 'dist';
 //
 var accessLogStream = fs.createWriteStream(path.join(__dirname, 'logs/access.log'), { flags: 'a' });
