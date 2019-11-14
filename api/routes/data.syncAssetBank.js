@@ -86,7 +86,7 @@ postRoutes.route('/notification').post(function (req, res) {
     host: '10.31.3.71', port: 25});
   var mailOptions = {
     from: 'greatminds-support@mpslimited.com',
-    to: 'snehasis.parida@mps-in.com,ajeet.mishta@mpslimited.com',
+    to: 'snehasis.parida@mps-in.com,ajeet.mishra@mpslimited.com',
     subject: 'Tag pushing activity status report',
     html: ''
   };
