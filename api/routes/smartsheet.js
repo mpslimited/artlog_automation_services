@@ -388,7 +388,7 @@ postRoutes.route('/addnewjobs').post(function (req, res) {
         Mdb.bynder_jobs.find(QueryForC ).then((data)=>{
           if(data.length > 0){
             var InsData= data.map(d=> ({id:d.id, name: d.name, Preset_Stages : d.Preset_Stages, campaignID: d.campaignID, dateCreated:d.dateCreated, dateModified:d.dateModified, description:d.description, id: d.id, jobID: d.jobID, autoStage: d.autoStage,  jobMetaproperties: d.jobMetaproperties, job_active_stage:d.job_active_stage, job_date_finished: d.job_date_finished , job_key: d.job_key, presetName:d.presetName 
-              , duplicate: true, thumb: d.thumb
+              , duplicate: true, thumb: d.thumb,  assetID:d.assetID
             }));
             let k=0;
             for(let i in  InsData ){
