@@ -394,7 +394,7 @@ postRoutes.route('/addnewjobs').post(function (req, res) {
             for(let i in  InsData ){
               let Meta= new Metadt(InsData[i])
               Meta.iniMeta(WorkFlowJobsMetaData);
-             let changes= rqdata.filter(d=> d.jobkey== InsData[i].job_key);
+              let changes= rqdata.filter(d=> d.jobkey== InsData[i].job_key);
               for( let ch of changes){
                   if(!!ch.grade && ch.grade)
                   InsData[i].jobMetaproperties['c0ac0a86e65f4f7ebd88dbd7e77965ef']= Meta.referValueByKey(Meta.gradekey,ch.grade);
@@ -509,15 +509,15 @@ postRoutes.route('/updateAsset', checkToken.checkToken).post(function (req, res)
   let data=JSON.parse(req.body.data)
   for(let d of data){
     console.log("data processing =>", JSON.stringify(d));
-  Mdb.bynder_jobs.updateOne({_id: d._id},{
-    $set:{ isMailed: false, updateTag:'Processing', duplicate: false, generatedTags:  d.generatedTags } 
-  }).then((rs)=>{
-    console.log("successfully updated:", rs);
-  }).catch(Err=>{
-    console.log("ERRor:", Err)
-  });
-}
-res.send({'msg': 'processing'});
+      Mdb.bynder_jobs.updateOne({_id: d._id},{
+        $set:{ isMailed: false, updateTag:'Processing', generatedTags:  d.generatedTags } 
+      }).then((rs)=>{
+        console.log("successfully updated:", rs);
+      }).catch(Err=>{
+        console.log("ERRor:", Err)
+      });
+  }
+  res.send({'msg': 'processing'});
 });
 postRoutes.route('/artloginit', checkToken.checkToken).post(function (req, res) {
   Mdb.searchState.find({ uid: req.headers['authuser'] }).then((dt)=>{

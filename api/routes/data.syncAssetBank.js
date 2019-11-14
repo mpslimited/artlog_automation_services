@@ -51,7 +51,8 @@ postRoutes.route('/updateAsset/').post(function (req, res) {
         //data[0].assetID+'/';
         var request_data = appConfig.getActionInfo("updateAsset", "88021AB3-AA05-4E6C-985CC6AFBBBC2CCB/" );
         request_data.method = 'POST';
-        let formData= { tags: dt.generatedTags + dt.tags };
+        let tags =dt.jobMetaproperties['dde4714035904b0cb68888e0acf389b2'] ||'';
+        let formData= { tags: dt.generatedTags + tags };
         request_data.data={ } //tags : dt.generatedTags };
         let authheader= oauth.toHeader( oauth.authorize(request_data, appConfig.getToken()) );
 
@@ -86,13 +87,14 @@ postRoutes.route('/notification').post(function (req, res) {
     host: '10.31.3.71', port: 25});
   var mailOptions = {
     from: 'greatminds-support@mpslimited.com',
-    to: 'snehasis.parida@mps-in.com,ajeet.mishra@mpslimited.com',
-    subject: 'Tag pushing activity status report',
+    to: appConfig.getNotification(),
+    subject: appConfig.getNotificationSub(),
     html: ''
   };
+  //abbi.hoerst@greatminds.org need to be intregated In Live
   let table =`<table border="1" width="100%">
       <tr>
-      <th> ProcessID</th><th> Job Key</th><th>Tag Pushing Status</th>
+      <th> ProcessID</th><th> Job Key</th><th>Tag Pushing Status</th><th>Is Index</th>
       </tr>`;
   Mdb.bynder_jobs.find(
     { updateTag: { $exists: true, $ne: 'Processing' },  isMailed: 'false'}
@@ -101,10 +103,12 @@ postRoutes.route('/notification').post(function (req, res) {
         /*jshint esversion: 6 */
         console.log("data is:", data.length);
         for( let temp =0; temp < data.length; temp ++){
+          let isindex= ( typeof data[temp].depopulate === 'undefined ')? "Index": "Duplicate";
           table= table + `<tr>
             <td> ${data[temp]._id }</td>
             <td> ${data[temp].job_key }</td>
             <td> ${data[temp].updateTag }</td>
+            <td> ${ isindex  }</td>
           </tr>` ;
         }
         table=table+`</table>`;
