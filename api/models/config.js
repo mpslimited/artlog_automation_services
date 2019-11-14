@@ -41,15 +41,15 @@ var appConfig = {
     },
     getNotification(){
         // demo
-        return 'snehasis.parida@mps-in.com,ajeet.mishra@mpslimited.com';
+       // return 'snehasis.parida@mps-in.com,ajeet.mishra@mpslimited.com';
         // Live 
-        // return 'abbi.hoerst@greatminds.org,ajeet.mishra@mpslimited.com';
+         return 'abbi.hoerst@greatminds.org,ajeet.mishra@mpslimited.com';
     },
     getNotificationSub(){
         // demo
-        return 'Tag pushing activity status report @143 Demo';
+        //return 'Tag pushing activity status report @143 Demo';
         // Live 
-        //return 'Tag pushing activity status report Live';
+        return 'Tag pushing activity status report Live';
     }
     
 };

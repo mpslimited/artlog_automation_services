@@ -48,8 +48,8 @@ postRoutes.route('/updateAsset/').post(function (req, res) {
   Mdb.bynder_jobs.find({ updateTag: 'Processing', assetID: {$exists: true} }).limit(1).then((data) => {
     if(data.length > 0){
       for(let dt of data){
-        //data[0].assetID+'/';
-        var request_data = appConfig.getActionInfo("updateAsset", "88021AB3-AA05-4E6C-985CC6AFBBBC2CCB/" );
+        //data[0].assetID+'/'; // "88021AB3-AA05-4E6C-985CC6AFBBBC2CCB/"
+        var request_data = appConfig.getActionInfo("updateAsset", data[0].assetID +"/" );
         request_data.method = 'POST';
         let tags =dt.jobMetaproperties['dde4714035904b0cb68888e0acf389b2'] ||'';
         let allTags=dt.generatedTags.split(",");
