@@ -43,7 +43,7 @@ var appConfig = {
         // demo
        // return 'snehasis.parida@mps-in.com,ajeet.mishra@mpslimited.com';
         // Live 
-         return 'abbi.hoerst@greatminds.org,ajeet.mishra@mpslimited.com';
+         return 'abbi.hoerst@greatminds.org,Nathan.Hall@greatminds.org,ajeet.mishra@mpslimited.com';
     },
     getNotificationSub(){
         // demo
