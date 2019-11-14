@@ -52,7 +52,14 @@ postRoutes.route('/updateAsset/').post(function (req, res) {
         var request_data = appConfig.getActionInfo("updateAsset", "88021AB3-AA05-4E6C-985CC6AFBBBC2CCB/" );
         request_data.method = 'POST';
         let tags =dt.jobMetaproperties['dde4714035904b0cb68888e0acf389b2'] ||'';
-        let formData= { tags: dt.generatedTags + tags };
+        let allTags=dt.generatedTags.split(",");
+        if(tags.split(",").length > 0){
+          for(let t=0; t < tags.split(",").length; t++ ){
+            if(tags.split(",")[t]!="")
+            allTags.push(tags.split(",")[t]);
+          }
+        }
+        let formData= { tags: allTags.join(',') };
         request_data.data={ } //tags : dt.generatedTags };
         let authheader= oauth.toHeader( oauth.authorize(request_data, appConfig.getToken()) );
 
