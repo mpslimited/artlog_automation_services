@@ -80,6 +80,7 @@ let bynder_jobs= new Schema({
   isUpdated: {type : Boolean},
   comment: {type: String},
   isPaging: {type: String},
+  pageNo: { type: String},
   mverification:  {type : String},
   duplicate : {type : Boolean},
   Cduplicate  : {type: Boolean},
@@ -91,6 +92,7 @@ let bynder_jobs= new Schema({
   thumb: { type: String },
   batch: { type: String},
   flaged: { type: Boolean},
+  flagedTeam: {type: String},
   killed: { type: Boolean}
  },{
     collection: 'bynder_jobs'
@@ -119,6 +121,7 @@ let bynder_jobs= new Schema({
     let assetMeta= new Schema({
       usedfor: { type: Object},
       curricula_wip: { type: Object},
+      print_ready: {type: Object}
     },{
       collection: 'assetMeta'
     })

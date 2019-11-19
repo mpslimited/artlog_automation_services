@@ -33,7 +33,11 @@
         this.facingkey     =    "09efaa3bb76c42a88c9441a6af7c218c";  // dynamic
         this.serieskey     =    "c790de60f6d0405898eb4dd641a3d94b";  // static
         this.revisionkey   =   "fe4aa91f5b234d0cb53e481053a21565";   //Dynamic
+        this.permissiontypeKey = '262f92ed59b14c3aa74d6877d7f8ba4c';  //Dynamic
+        this.printAssetKey =    '47a0e9db948541b2820a32425bd6dd60';   //Dynamic
+        this.printReadyKey =    '37a38eb9dcfd4bd19c976b3e38cc7821';   //Dynamic
      }
+     
      getAMetaOptionsBykey(key){
       let retdt=[];
       let Gradopt=this.Meta.filter(d=>d.tempId==key); 
@@ -48,6 +52,9 @@
      }
      initAssetMeta(assetMeta){
         this.assetMeta=assetMeta; 
+     }
+     PrintAssetMeta(d){
+        this.printAssetMeta=d;
      }
      reIniMeta( dt, meta){
         this.data = dt;
@@ -80,6 +87,16 @@
         }
         return ret;
      }
+     getAssetPrintReady( val ){
+       let ret ="";
+       if( !!val && this.printAssetMeta.filter(d=> d.value== val).length > 0 ){
+           let ele=this.printAssetMeta.filter(d=> d.value== val);
+           if(ele.length > 0){
+            ret= ele[0].label;
+           }
+       }
+       return ret;
+     }
      getWip(){
         if( this.data.jobMetaproperties.hasOwnProperty(this.wipkey)){
             return this.data.jobMetaproperties[this.wipkey];
@@ -90,15 +107,26 @@
      setWip(){
         this.data.jobMetaproperties[this.wipkey]=value;
      }
-     getJobkey(){
-        if( this.data.jobMetaproperties.hasOwnProperty(this.jobkey)){
-            return this.data.jobMetaproperties[this.jobkeykey];
+     getPermissiontype(){
+        if( this.data.jobMetaproperties.hasOwnProperty(this.permissiontypeKey)){
+            return this.data.jobMetaproperties[this.permissiontypeKey];
         }else{
             return '';
-        } 
+        }
+     }
+     
+     setPermissiontype(value){
+        this.data.jobMetaproperties[this.permissiontypeKey]=value;
      }
      setJobkey(value){
         this.data.jobMetaproperties[this.jobkeykey]=value;
+     }
+     getJobkey(){
+        if(this.data.jobMetaproperties.hasOwnProperty(this.jobkeykey)){
+            return this.data.jobMetaproperties[this.jobkeykey];
+        }else{
+            return '';
+        }
      }
      getImpact(){
         if(this.data.jobMetaproperties.hasOwnProperty(this.impactkey)){
@@ -120,7 +148,20 @@
      setFacing(value){
         this.data.jobMetaproperties[this.facingkey]=value;
      }
-     
+     getPrintReady(){
+        if(this.data.jobMetaproperties.hasOwnProperty(this.printReadyKey)){
+            return this.data.jobMetaproperties[this.printReadyKey];
+        }else{
+            return '';
+        } 
+     }
+     getPrintAsset(){
+        if(this.data.jobMetaproperties.hasOwnProperty(this.printAssetKey)){
+            return this.data.jobMetaproperties[this.printAssetKey];
+        }else{
+            return '';
+        } 
+     }
      getSeries(){
         if(this.data.jobMetaproperties.hasOwnProperty(this.serieskey)){
             return this.data.jobMetaproperties[this.serieskey];
@@ -334,7 +375,12 @@
             artAssionVal :   this.getValByKeyID(this.artAssionkey, this.getArtAssion()),
             wipVal       :   this.getWip(),
             wip          :   this.getAssetWipByID(this.wipkey, this.getWip()),   
-            workflow     :   this.getWorkflow()
+            workflow     :   this.getWorkflow(),
+
+            printAsset   :   this.getValByKeyID(this.printAssetKey, this.getPrintAsset()),
+            printReady   :   this.getAssetPrintReady(this.getPrintReady()),
+            permissionType :  this.getValByKeyID(this.permissiontypeKey, this.getPermissiontype())
+
             
         };
         return dt;

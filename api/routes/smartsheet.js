@@ -28,13 +28,14 @@ function verifyToken(req, res, next) {
 }
 
 let d=[], WorkFlowJobsMetaData=[], GGrades=[], GModules=[], GCurriculaWIP=[], GArtComplex=[], GArtAssign=[],
-GRisk=[],GImpact=[];
+GRisk=[],GImpact=[], GPrintReady = [];
 let GMeta=new Metadt(d);
 
 Mdb.metaproperties.find().then((metaData)=>{
   WorkFlowJobsMetaData = metaData;
   GMeta.iniMeta(metaData);
   GMeta.initAssetMeta(GCurriculaWIP);
+  GMeta.PrintAssetMeta(GPrintReady);
   GGrades=GMeta.getAMetaOptionsBykey(GMeta.gradekey);
   GModules=GMeta.getAMetaOptionsBykey(GMeta.modulekey);
   GArtComplex=GMeta.getAMetaOptionsBykey(GMeta.artComplexkey);
@@ -44,9 +45,11 @@ Mdb.metaproperties.find().then((metaData)=>{
 }).catch((Err)=>{
   console.log("Finding Metadata ERROR:", Err);
 });
-Mdb.assetMeta.find({},{"curricula_wip.options":1}).then((dt)=>{
+Mdb.assetMeta.find({},{"curricula_wip.options":1, "print_ready.options":1}).then((dt)=>{
   if(dt.length > 0){
-    GCurriculaWIP=dt[0].curricula_wip.options.map(d=>({value:d.id, label: d.label , name: d.name}));
+    GCurriculaWIP = dt[0].curricula_wip.options.map(d=>({value:d.id, label: d.label , name: d.name}));
+    GPrintReady   = dt[0].print_ready.options.map(d=>({value:d.id, label: d.label , name: d.name}));
+    GMeta.PrintAssetMeta(GPrintReady);
   }
 }).catch((Err)=>{ console.log(" Error in ASset Meta:", Err);});
 postRoutes.route('/dt').get(function (req, res) {  
@@ -258,7 +261,8 @@ postRoutes.route('/unflagedRows').post(function (req, res) {
   console.log("ACTION : unflagedRows REQ==>",req.body);
   if(req.body.UnflagedID ){ 
     Mdb.bynder_jobs.updateMany({ _id: req.body.UnflagedID},{
-      $set: { flaged: false}
+     // $set: { flaged: false},
+      $unset:{ flaged:1, flagedTeam:1}
     }).then(dt=>{
       res.send({'msg':'Row Un-flaged successfully', code:2000});
     }).catch(Er=>{
@@ -273,7 +277,7 @@ postRoutes.route('/flagedRows').post(function (req, res) {
   if(req.body.flagedID ){ 
     let flagedID= JSON.parse(req.body.flagedID);
     Mdb.bynder_jobs.updateMany({ _id: { $in : flagedID}},{
-      $set: { flaged: true}
+      $set: { flaged: true, flagedTeam: req.body.flagedTeam }
     }).then(dt=>{
       res.send({'msg':'Selected rows has been flagged successfully', code:2000});
     }).catch(Er=>{
@@ -312,6 +316,35 @@ postRoutes.route('/unkilledRows').post(function (req, res) {
     res.send({'msg':'Please Select at least once row', code : 5000})
   }
 })
+postRoutes.route('/updateJobVerified').post(function (req, res) {
+  console.log("ACTION : updateJobVerified  REQ==>",req.body);
+  if(req.body.newData ){
+    let newDt=JSON.parse(req.body.newData);
+    for(let t =0; t< newDt.length; t++){
+      let Mdt= new Metadt(newDt[t]);
+      let set={};
+      Mdt.iniMeta(WorkFlowJobsMetaData);
+      if(!!newDt[t].mverification){
+        set.mverification= newDt[t].mverification;
+      }if(!!newDt[t].isPaging){
+        set.isPaging= newDt[t].isPaging;
+      }
+      if(!!newDt[t].pageNo){
+        set.pageNo= newDt[t].pageNo;
+      }
+      Mdb.bynder_jobs.updateOne({ _id: newDt[t]._id},{
+        $set: set
+      }).then((d)=>{
+        console.log("updated", d)
+      }).catch((err)=>{
+        console.log("ERROR:", err)
+      })
+      console.log(" records:", newDt[t]);
+    }
+    let ress=[{'msg':"SUCCESS"}];
+    res.send(ress);
+  }
+})
 postRoutes.route('/updateJob').post(function (req, res) {
   console.log("ACTION : updateJob  REQ==>",req.body);
   if(req.body.newData ){
@@ -345,8 +378,10 @@ postRoutes.route('/updateJob').post(function (req, res) {
     }if(!!newDt.topic && newDt.topic!=""){
       Mdt.setTopic( newDt.topic);
     }
+  
     if(!!Mdt.getM()){
       let where ={ _id: newDt._id};
+
       //let set={ jobMetaproperties: Mdt.getM() };
       try{
         Mdb.bynder_jobs.updateOne({ _id : newDt._id },{
@@ -356,7 +391,8 @@ postRoutes.route('/updateJob').post(function (req, res) {
             comment  : newDt.comment,
             isPaging : newDt.isPaging,
             batch    : newDt.batch,
-            mverification : newDt.mverification
+            mverification : newDt.mverification,
+            pageNo : newDt.pageNo
           }
         }).then((rs)=>{
            console.log("data updated",rs, newDt._id);
@@ -387,11 +423,41 @@ postRoutes.route('/addnewjobs').post(function (req, res) {
         console.log("adding Query:", JSON.stringify(QueryForC));
         Mdb.bynder_jobs.find(QueryForC ).then((data)=>{
           if(data.length > 0){
-            var InsData= data.map(d=> ({id:d.id, name: d.name, Preset_Stages : d.Preset_Stages, campaignID: d.campaignID, dateCreated:d.dateCreated, dateModified:d.dateModified, description:d.description, id: d.id, jobID: d.jobID, autoStage: d.autoStage,  jobMetaproperties: d.jobMetaproperties, job_active_stage:d.job_active_stage, job_date_finished: d.job_date_finished , job_key: d.job_key, presetName:d.presetName 
-              , duplicate: true, thumb: d.thumb,  assetID:d.assetID
+            data.forEach(function(x){ delete x._id });
+            var InsData= data.map(d=> ({
+              id        	  : d.id, 
+              name      	  : d.name, 
+              Preset_Stages : d.Preset_Stages, 
+              campaignID	  : d.campaignID, 
+              dateCreated	  : d.dateCreated, 
+              dateModified	: d.dateModified, 
+              description	  : d.description, 
+              id			      : d.id, 
+              jobID			    : d.jobID, 
+              autoStage		  : d.autoStage,  
+              jobMetaproperties	: d.jobMetaproperties, 
+              job_active_stage	: d.job_active_stage, 
+              job_date_finished	: d.job_date_finished , 
+              job_key			      : d.job_key,
+              presetName		: d.presetName, 
+              duplicate			: true, 
+              thumb				  : d.thumb,  
+              assetID			  : d.assetID,
+              flagedTeam	  : d.flagedTeam,
+              pageNo 			  : d.pageNo,
+              killed			  : d.killed,
+              flaged			  : d.flaged,
+              batch				  : d.batch,		
+              presetstages	: d.presetstages,
+              isPaging			: d.isPaging,
+              comment			  : d.comment,
+              mverification		: d.mverification,
+              generatedTags		: d.generatedTags
             }));
+
             let k=0;
             for(let i in  InsData ){
+              //delete InsData[i]._id;
               let Meta= new Metadt(InsData[i])
               Meta.iniMeta(WorkFlowJobsMetaData);
               let changes= rqdata.filter(d=> d.jobkey== InsData[i].job_key);
@@ -434,13 +500,84 @@ postRoutes.route('/addnewjobs').post(function (req, res) {
 
             // Promise.all waits until all jobs are resolved
             Promise.all(requests).then(responses => {
-              let dtt = responses.map(d=> ({ _id: d._id, id: d.id, job_key:d.job_key, jobID:d.jobID, jobMetaproperties:d.jobMetaproperties ,
+              /*let dtt = responses.map(d=> ({ _id: d._id, id: d.id, job_key:d.job_key, jobID:d.jobID, jobMetaproperties:d.jobMetaproperties ,
                 name: d.name, Preset_Stages : d.Preset_Stages, campaignID: d.campaignID, dateCreated:d.dateCreated, dateModified:d.dateModified, description:d.description, id: d.id, jobID: d.jobID, autoStage: d.autoStage,  jobMetaproperties: d.jobMetaproperties, job_active_stage:d.job_active_stage, job_date_finished: d.job_date_finished , job_key: d.job_key, presetName:d.presetName
                 , duplicate: true, isAssetBank : true
               }))
+              */
+              let dtt= responses;
               let resDt= Array();
               dtt.forEach(response => {
-                  let Meta= new Metadt(response);
+                var objData = response.toObject();
+                if(!!response.jobMetaproperties){
+                  let Meta= new Metadt(response)
+                  Meta.iniMeta(WorkFlowJobsMetaData);
+                  Meta.initAssetMeta(GCurriculaWIP);
+                  Meta.PrintAssetMeta(GPrintReady)
+                  let Mdt= Meta.getMeta();
+                  //console.log("Metadata", response.jobMetaproperties);
+                  let metaObj=Object.entries(response.jobMetaproperties);
+                  if(response.Preset_Stages.length > 0 ){
+                   let lastChangeCreated= response.Preset_Stages[response.Preset_Stages.length -1].start_date;
+                   let lastChangeComplated=(!!response.Preset_Stages[response.Preset_Stages.length -1].job_date_finished)?
+                    response.Preset_Stages[response.Preset_Stages.length -1].job_date_finished: new Date();
+                    objData.lastage=dateDiff(lastChangeCreated, lastChangeComplated);
+                  }
+                  var dateCreatedJob = Mdt.dateCreatedM || response.dateCreated;
+                  if(response.job_date_finished===null && response.job_active_stage.status!="Approved"){
+                    response.job_date_finished=new Date().toISOString();
+                  }else if(response.job_date_finished===null){
+                    response.job_date_finished=new Date().toISOString();
+                  }
+                  objData.cstage=""; objData.workflow=Meta.getWorkflow();
+                 
+                  if(objData.Preset_Stages.length > 0){
+                    // IT Should be another that we can not captuchred 
+                    let ob=objData.Preset_Stages[ objData.Preset_Stages.length-1 ];
+                    if(ob.hasOwnProperty('name')){
+                      objData.cstage=ob.name;
+                    }else if(ob.hasOwnProperty('StageNames')){
+                      objData.cstage=ob.StageNames;
+                    }
+                    if(objData.cstage=="" && !!ob.position && objData.presetstages.length > 0){
+                      let objdt=objData.presetstages.filter(d=> d.position == ob.position);
+                      if(objdt.length > 0)
+                      objData.cstage = objdt[0].name;
+                    }
+                  }
+                   objData.currentRTeam =   Meta.getStageRTeam(objData.cstage);
+                   objData.totalage     =   dateDiff(dateCreatedJob, response.job_date_finished);
+                   objData.lesson       =   Mdt.lesson;
+                   objData.lessonlet    =   Mdt.lessonlet;
+                   objData.component    =   Mdt.component; 
+                   objData.tags         =   Mdt.tag; 
+                   objData.gradeID      =   Mdt.grade;
+                   objData.grade        =   Mdt.gradeVal;
+                   objData.moduleID     =   Mdt.module;
+                   objData.module       =   Mdt.moduleVal;
+                   objData.topic        =   Mdt.topic;
+                   objData.facing       =   Mdt.facingVal;
+                   objData.facingID     =   Mdt.facing;
+                   objData.series       =   Mdt.series;
+                   //test
+                   objData.revisionID   =   Mdt.revision;
+                   objData.revisionC    =   Mdt.revisionVal;
+                   objData.artcomplexID =   Mdt.artComplex;
+                   objData.artcomplex   =   Mdt.artComplexVal;
+                   objData.artassionID  =   Mdt.artAssion;
+                   objData.artassion    =   Mdt.artAssionVal;
+                   objData.riskID       =   Mdt.risk;
+                   objData.risk         =   Mdt.riskVal;
+                   objData.impactId     =   Mdt.impact;
+                   objData.impact       =   Mdt.impactVal;
+                   objData.curriculum   =   Mdt.wip;
+                   objData.creditLine   =   Mdt.creditLine;
+                   objData.printAsset   =   Mdt.printAsset;
+                   objData.printReady   =   Mdt.printReady;
+                   objData.permissionType = Mdt.permissionType
+                }
+                /*
+                let Meta= new Metadt(response);
                   Meta.iniMeta(WorkFlowJobsMetaData);
                   Meta.initAssetMeta(GCurriculaWIP);
                   let Mdt= Meta.getMeta();
@@ -466,6 +603,14 @@ postRoutes.route('/addnewjobs').post(function (req, res) {
                       response.cstage=ob.StageNames;
                      }
                    }
+                   response.currentRTeam =   Meta.getStageRTeam(response.cstage);
+                   response.lesson       =   Mdt.lesson;
+                   response.lessonlet    =   Mdt.lessonlet;
+                   response.topic        =   Mdt.topic;
+                   response.facing       =   Mdt.facingVal;
+                   response.facingID     =   Mdt.facing;
+                   response.series       =   Mdt.series;
+
                   response.totalage=dateDiff(dateCreatedJob, response.job_date_finished);
                   response.workflow=Meta.getWorkflow();
                   response.component=Mdt.component; 
@@ -482,8 +627,13 @@ postRoutes.route('/addnewjobs').post(function (req, res) {
                   response.risk=Mdb.riskVal;
                   response.impactID=Mdb.impact;
                   response.impact=Mdb.impactVal;
-                  
-                  resDt.push(response);
+                  response.curriculum   =   Mdt.wip;
+                  response.creditLine   =   Mdt.creditLine;
+                  response.printAsset   =   Mdt.printAsset;
+                  response.printReady   =   Mdt.printReady;
+                  response.permissionType = Mdt.permissionType
+                  */
+                  resDt.push(objData);
                 //console.log((responses))
               });
               
@@ -620,7 +770,7 @@ postRoutes.route('/artlogdata', checkToken.checkToken).post(function (req, res) 
       $and.push( {"campaignID":{"$in": ['4924dc05-03c5-4086-90ce-41d8bf501684','9618db88-fc78-47a5-9916-e864e696ae11'] } });
        q= { $and};
     } 
-    let fields={killed:1,flaged:1,batch:1,presetstages:1,isPaging:1, comment:1, mverification:1, duplicate:1, presetName:1, Preset_Stages:1, id:1, name:1, description:1, job_active_stage:1, jobMetaproperties:1, jobID:1, job_key:1, dateCreated:1, job_date_finished:1, thumb:1, generatedTags:1};
+    let fields={flagedTeam:1,dateCreated:1, job_date_finished:1,pageNo:1,killed:1,flaged:1,batch:1,presetstages:1,isPaging:1, comment:1, mverification:1, duplicate:1, presetName:1, Preset_Stages:1, id:1, name:1, description:1, job_active_stage:1, jobMetaproperties:1, jobID:1, job_key:1, dateCreated:1, job_date_finished:1, thumb:1, generatedTags:1};
     console.log("Calling artlogdata Data " , JSON.stringify(q), JSON.stringify(fields));
     // testing in Live Build with Pradeep Sir
     Mdb.bynder_jobs.find(q, fields ).sort({job_key:-1}).then((data)=>{
@@ -634,6 +784,7 @@ postRoutes.route('/artlogdata', checkToken.checkToken).post(function (req, res) 
         let Meta= new Metadt(data[dtkey])
         Meta.iniMeta(WorkFlowJobsMetaData);
         Meta.initAssetMeta(GCurriculaWIP);
+        Meta.PrintAssetMeta(GPrintReady)
         let Mdt= Meta.getMeta();
         //console.log("Metadata", data[dtkey].jobMetaproperties);
         let metaObj=Object.entries(data[dtkey].jobMetaproperties);
@@ -681,7 +832,7 @@ postRoutes.route('/artlogdata', checkToken.checkToken).post(function (req, res) 
          objData.series       =   Mdt.series;
          //test
          objData.revisionID   =   Mdt.revision;
-         objData.revisionC     =  Mdt.revisionVal;
+         objData.revisionC    =   Mdt.revisionVal;
          objData.artcomplexID =   Mdt.artComplex;
          objData.artcomplex   =   Mdt.artComplexVal;
          objData.artassionID  =   Mdt.artAssion;
@@ -692,12 +843,20 @@ postRoutes.route('/artlogdata', checkToken.checkToken).post(function (req, res) 
          objData.impact       =   Mdt.impactVal;
          objData.curriculum   =   Mdt.wip;
          objData.creditLine   =   Mdt.creditLine;
+         objData.printAsset   =   Mdt.printAsset;
+         objData.printReady   =   Mdt.printReady;
+         objData.permissionType = Mdt.permissionType
       }
       //console.log("Object Final VAlues: ==>", objData);
       dataResult.push(objData);
     }
      job_keys=dataResult.filter( (d)=> d.job_key!="" ).map(d=>d.job_key);
      GridFilters={
+      pageNos          :   [...new Set(dataResult.filter( (v, i)=> !!v.pageNo ).map(d=>d.pageNo))].sort(),
+      flagedTeams      :   [...new Set(dataResult.filter( (v, i)=> !!v.flagedTeam ).map(d=>d.flagedTeam))].sort(),
+      printAssets      :   [...new Set(dataResult.filter( (v, i)=> !!v.printAsset ).map(d=>d.printAsset))].sort(),
+      printReadys      :   [...new Set(dataResult.filter( (v, i)=> !!v.printReady ).map(d=>d.printReady))].sort(),
+      permissionTypes  :   [...new Set(dataResult.filter( (v, i)=> !!v.permissionType ).map(d=>d.permissionType))].sort(),
        curriculum     :   [...new Set(dataResult.filter( (v, i)=> !!v.curriculum ).map(d=>d.curriculum))].sort(),
        workflow       :   [...new Set(dataResult.filter( (v, i)=> !!v.workflow ).map(d=>d.workflow))].sort(),
        currentRTeam   :   [...new Set(dataResult.filter( (v, i)=> !!v.currentRTeam ).map(d=>d.currentRTeam))].sort(),

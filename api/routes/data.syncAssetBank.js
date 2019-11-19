@@ -471,11 +471,36 @@ postRoutes.route('/getAssets/:page').post(function (req, res) {
     }
   });
 });
-
+postRoutes.route('/updateStageName').post(function (req, res) {
+  console.log("Action updateStageName ")
+  Mdb.bynder_jobs.find({"Preset_Stages.name":{$exists:true}, "Preset_Stages.StageNames":{$exists:true} }).then(data=>{
+    let notStageName=new Array();
+    for( let dt of data){
+      let allStages=dt.Preset_Stages;
+      for(let temp=0; temp < allStages.length; temp ++){
+        //) && (typeof allStages[temp].name == 'undefined' || allStages[temp].name=="" ) 
+        //if( typeof allStages[temp].StageNames == 'undefined' || allStages[temp].StageNames=="" ){
+         // notStageName.push(dt);
+          if(allStages[temp].has){
+            allStages[temp].StageNames=allStages[temp].name;
+            delete allStages[temp].name;
+            console.log("stage data", allStages)
+            Mdb.bynder_jobs.updateMany({
+              id: dt.id
+            },{ $set :{ Preset_Stages: allStages  }}).then(d=>{
+              console.log( "Modified:", d);
+            });
+          }
+        }
+      //}
+    }
+    res.send({ length: notStageName.length, data:notStageName })
+  });
+})
 // Missing StageName
 postRoutes.route('/missingStages').post(function (req, res) {
-  let q= {"Preset_Stages.StageNames":{$exists: false}};
-  Mdb.bynder_jobs.find(q).then(data=>{
+  //let q= {"Preset_Stages.StageNames":{$exists: false}};
+  Mdb.bynder_jobs.find({}).then(data=>{
     for( let dt of data){
       let allStages=dt.Preset_Stages;
       for(let temp=0; temp < allStages.length; temp ++){
@@ -492,7 +517,6 @@ postRoutes.route('/missingStages').post(function (req, res) {
         Mdb.bynder_jobs.updateMany({ id: dt.id},
           {  $set:{ Preset_Stages: allStages }  })
         .then(d=>{
-
           console.log("data Updated", dt.id);
         }).catch(Err=>{
           console.log("Error In data");
