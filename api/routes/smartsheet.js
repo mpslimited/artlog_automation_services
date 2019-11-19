@@ -472,7 +472,7 @@ postRoutes.route('/addnewjobs').post(function (req, res) {
                   InsData[i].jobMetaproperties['b447dc7d70b0420a8ac9ec9aeff78296']=ch.lesson;
                   if(!!ch.topic && ch.topic)
                     InsData[i].topic=ch.topic;
-                  if(!!ch.topic && ch.facing.length > 0){
+                  if(!!ch.facing && ch.facing.length > 0){
                     if( ch.facing.length > 1){
                       let facingVal=new Array();
                       for( let t=0; t < ch.facing.length; t++){
