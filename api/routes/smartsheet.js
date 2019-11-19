@@ -789,6 +789,7 @@ postRoutes.route('/artlogdata', checkToken.checkToken).post(function (req, res) 
         //console.log("Metadata", data[dtkey].jobMetaproperties);
         let metaObj=Object.entries(data[dtkey].jobMetaproperties);
         if(data[dtkey].Preset_Stages.length > 0 ){
+          
          let lastChangeCreated= data[dtkey].Preset_Stages[data[dtkey].Preset_Stages.length -1].start_date;
          let lastChangeComplated=(!!data[dtkey].Preset_Stages[data[dtkey].Preset_Stages.length -1].job_date_finished)?
           data[dtkey].Preset_Stages[data[dtkey].Preset_Stages.length -1].job_date_finished: new Date();

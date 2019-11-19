@@ -624,6 +624,45 @@ postRoutes.route('/updatePresets').post(function (req, res) {
     }
   }).catch(Err => console.log('Error in finding data', Err))
 })
+postRoutes.route('/fixcurrentDuration').post(function (req, res) {
+  console.log("ACTION: fixcurrentDuration")
+  let q={ "job_active_stage.status":'Approved'};
+  //, "Preset_Stages.job_date_finished":{$exists: false}
+    Mdb.bynder_jobs.find(q,{Preset_Stages:1, job_date_finished:1 }).then(data=>{
+      if(data.length > 0){
+        for(let t=0; t< data.length; t++){
+          if(data[t].Preset_Stages.length > 0 && !data[t].Preset_Stages[ data[t].Preset_Stages.length -1].job_date_finished ){
+            if(!!data[t].job_date_finished && data[t].job_date_finished.toISOString() == data[t].Preset_Stages[ data[t].Preset_Stages.length -1].start_date.toISOString() ){
+                data[t].Preset_Stages[data[t].Preset_Stages.length -1].job_date_finished = data[t].job_date_finished;
+                Mdb.bynder_jobs.updateOne({_id: data[t]._id},{
+                  Preset_Stages: data[t].Preset_Stages
+                }).then(data=>{
+                  console.log("Data Updated");
+                }).catch(Err=>{
+                  console.log("Update Error:", Err);
+                });
+            }else{
+              data[t].Preset_Stages[data[t].Preset_Stages.length -1].job_date_finished = data[t].Preset_Stages[ data[t].Preset_Stages.length -1].start_date ;
+              data[t].job_date_finished = data[t].Preset_Stages[ data[t].Preset_Stages.length -1].start_date;
+              Mdb.bynder_jobs.updateOne({_id: data[t]._id},{
+                Preset_Stages: data[t].Preset_Stages,
+                job_date_finished : data[t].job_date_finished
+              }).then(data=>{
+                console.log("Data Updated");
+              }).catch(Err=>{
+                console.log("Update Error:", Err);
+              });
+            }
+            
+          }
+        }
+      }else{
+        res.send({'msg':'No Data found for current stage currection!'})
+      }
+    }).catch(e=>{
+      console.log("Error in find Data", e)
+    })
+})
 function  excuteURL(URLexc, ispost){
   console.log("\n\n excuteURL",URLexc );
   try{
