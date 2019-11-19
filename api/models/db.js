@@ -7,7 +7,7 @@ const option = {
   reconnectTries: 30000
 };
 var dbURI = 'mongodb://localhost/mpsdb';
-  dbURI = 'mongodb://mpst:HBjgmdT649(T2@10.31.1.143:27017/mpsdb'; // Demo Server
+ // dbURI = 'mongodb://mpst:HBjgmdT649(T2@10.31.1.143:27017/mpsdb'; // Demo Server
   //dbURI = 'mongodb://mpst:HBjgmdT649(T2@localhost:27017/mpsdb';   // Live Server
  // dbURI = 'mongodb://mpst:HBjgmdT649(T2@10.31.1.150:27017/mpsdb';   // Live Server
   

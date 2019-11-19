@@ -264,7 +264,7 @@ postRoutes.route('/unflagedRows').post(function (req, res) {
      // $set: { flaged: false},
       $unset:{ flaged:1, flagedTeam:1}
     }).then(dt=>{
-      res.send({'msg':'Row Un-flaged successfully', code:2000});
+      res.send({'msg':'Row Un-flagged successfully', code:2000});
     }).catch(Er=>{
       console.log("Error in flagging data : ", Er);
     });
