@@ -522,7 +522,7 @@ postRoutes.route('/addnewjobs').post(function (req, res) {
                    let lastChangeCreated= response.Preset_Stages[response.Preset_Stages.length -1].start_date;
                    let lastChangeComplated=(!!response.Preset_Stages[response.Preset_Stages.length -1].job_date_finished)?
                     response.Preset_Stages[response.Preset_Stages.length -1].job_date_finished: new Date();
-                    objData.lastage=dateDiff(lastChangeCreated, lastChangeComplated);
+                    objData.lastage=dateDiffinDurationStage( lastChangeComplated , lastChangeCreated,);
                   }
                   var dateCreatedJob = Mdt.dateCreatedM || response.dateCreated;
                   if(response.job_date_finished===null && response.job_active_stage.status!="Approved"){
@@ -547,7 +547,7 @@ postRoutes.route('/addnewjobs').post(function (req, res) {
                     }
                   }
                    objData.currentRTeam =   Meta.getStageRTeam(objData.cstage);
-                   objData.totalage     =   dateDiff(dateCreatedJob, response.job_date_finished);
+                   objData.totalage     =   dateDiffinDurationStage( response.job_date_finished, dateCreatedJob);
                    objData.lesson       =   Mdt.lesson;
                    objData.lessonlet    =   Mdt.lessonlet;
                    objData.component    =   Mdt.component; 
@@ -923,7 +923,7 @@ function dateDiff( string1, string2){
 function dateDiffinDurationStage(d2, d1){
   try{
   if(typeof d1 == "string"){ d1= new Date(d1);}
-
+  if(typeof d2 == "string"){ d2= new Date(d2);}
   var timeDiff = Math.abs(d2.getTime() - d1.getTime());
   return parseFloat(timeDiff/86400000).toFixed(1);
   }catch(e){
