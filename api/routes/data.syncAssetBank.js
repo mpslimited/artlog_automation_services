@@ -592,6 +592,7 @@ postRoutes.route('/updatePresets').post(function (req, res) {
       // console.log("Data ", persetsIds.length);
       for (let t = 0; t < persetsIds.length; t++) {
         if (!!persetsIds[t]) {
+          //persetsIds[0]='ff808081-657b-163d-0165-7b8ce6000018';
           console.log("finding preset id:", persetsIds[t]);
           var token = appConfig.getToken();
           var request_data = appConfig.getActionInfo("getPresetByJobs", persetsIds[t]);
@@ -656,6 +657,15 @@ postRoutes.route('/updatePresets').post(function (req, res) {
     }
   }).catch(Err => console.log('Error in finding data', Err))
 })
+postRoutes.route('/duplicatejobs').post(function (req, res) {
+  console.log("ACTION: duplicatejobs");
+  let q={ presetID: {$exists: false}, duplicate:{$exists: true}};
+  Mdb.bynder_jobs.find(q).then(data=>{
+    let JobsKey= data.map(d=>job_key);
+
+  })
+})
+
 postRoutes.route('/fixcurrentDuration').post(function (req, res) {
   console.log("ACTION: fixcurrentDuration")
   let q={ "job_active_stage.status":'Approved'};
