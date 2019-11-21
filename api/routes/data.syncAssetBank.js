@@ -583,12 +583,13 @@ postRoutes.route('/updatePresets').post(function (req, res) {
   let testQ={
     $or: [{  presetName: { $exists: false } }, { presetName: "" }]
   }
-
   Mdb.bynder_jobs.find( testQ ).then(dt => {
     if (dt.length > 0) {
       console.log("Un-updated Preset jobs,", dt.length)
       let persetsIds = [...new Set(dt.map(d => d.presetID))];
-      // console.log("Data ", persetsIds);
+      persetsIds= persetsIds.filter(d=>d!=null);
+
+      // console.log("Data ", persetsIds.length);
       for (let t = 0; t < persetsIds.length; t++) {
         if (!!persetsIds[t]) {
           console.log("finding preset id:", persetsIds[t]);
@@ -605,7 +606,38 @@ postRoutes.route('/updatePresets').post(function (req, res) {
               let persetDt = JSON.parse(response.body);
               let where = { presetID: persetDt.preset.ID, presetName: { $exists: false } };
               console.log(persetDt.preset.ID ," ID and => ", JSON.stringify(persetDt.preset.presetstages) );
-              
+              Mdb.bynder_jobs.find(where).then(data=>{
+                for(let t=0; t < data.length; t++ ){
+                 let AllStages= data[t].Preset_Stages;
+                 let PresetStage=persetDt.preset.presetstages;
+                 if( !!persetDt.preset.presetstages && persetDt.preset.presetstages.length > 0){
+                   PresetStage=persetDt.preset.presetstages.map(d=>({ ID:d.ID, name:d.name, position:d.position}));
+                 }
+                 for(let stageDt of AllStages){
+                   if((! stageDt.name && stageDt.name!="") || !stageDt.StageNames || stageDt.StageNames ==""){
+                     let Ele=PresetStage.filter(d=> d.position == stageDt.position);
+                     if(Ele.length > 0){
+                      stageDt.StageNames= Ele[0].name;
+                     }
+                   }
+                 }
+                 // Update Referance Data
+                 Mdb.bynder_jobs.updateOne({_id: data[t]._id},{
+                   $set: {
+                    presetName    : persetDt.preset.name,
+                    presetstages  : persetDt.preset.presetstages,
+                    Preset_Stages : AllStages
+                   }
+                 }).then(dt=>{
+                   console.log("data Updated", dt)
+                 }).catch(Err=>{
+                   console.log("Error in Update data:", Err)
+                 })
+                }
+              }).catch(Err=>{
+                console.log("Error in Finding data:", Err)
+              })
+              /*
               Mdb.bynder_jobs.updateMany(where, {
                 $set: {
                   presetName: persetDt.preset.name,
@@ -614,7 +646,7 @@ postRoutes.route('/updatePresets').post(function (req, res) {
               }).then(rs => {
                 console.log('data updated', rs)
               }).catch(ee => { console.log('Error in ', ee) });
-              
+              */
             }else{
               console.log("Preset API have Some Error: ", response.statusCode);
             }

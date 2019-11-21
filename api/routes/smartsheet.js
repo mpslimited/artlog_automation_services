@@ -426,6 +426,7 @@ postRoutes.route('/addnewjobs').post(function (req, res) {
             data.forEach(function(x){ delete x._id });
             var InsData= data.map(d=> ({
               id        	  : d.id, 
+              presetID      : d.presetID,
               name      	  : d.name, 
               Preset_Stages : d.Preset_Stages, 
               campaignID	  : d.campaignID, 
@@ -793,9 +794,9 @@ postRoutes.route('/artlogdata', checkToken.checkToken).post(function (req, res) 
          let lastChangeCreated= data[dtkey].Preset_Stages[data[dtkey].Preset_Stages.length -1].start_date;
          let lastChangeComplated=(!!data[dtkey].Preset_Stages[data[dtkey].Preset_Stages.length -1].job_date_finished)?
           data[dtkey].Preset_Stages[data[dtkey].Preset_Stages.length -1].job_date_finished: new Date();
-          objData.lastage=dateDiff(lastChangeCreated, lastChangeComplated);
+          objData.lastage=dateDiffinDurationStage(lastChangeComplated, lastChangeCreated);
         }
-        var dateCreatedJob = Mdt.dateCreatedM || data[dtkey].dateCreated;
+        var dateCreatedJob =  data[dtkey].dateCreated ||Mdt.dateCreatedM ;
         if(data[dtkey].job_date_finished===null && data[dtkey].job_active_stage.status!="Approved"){
           data[dtkey].job_date_finished=new Date().toISOString();
         }else if(data[dtkey].job_date_finished===null){
@@ -818,7 +819,7 @@ postRoutes.route('/artlogdata', checkToken.checkToken).post(function (req, res) 
           }
         }
          objData.currentRTeam =   Meta.getStageRTeam(objData.cstage);
-         objData.totalage     =   dateDiff(dateCreatedJob, data[dtkey].job_date_finished);
+         objData.totalage     =   dateDiffinDurationStage(data[dtkey].job_date_finished , dateCreatedJob );
          objData.lesson       =   Mdt.lesson;
          objData.lessonlet    =   Mdt.lessonlet;
          objData.component    =   Mdt.component; 
@@ -919,6 +920,14 @@ function dateDiff( string1, string2){
     return Math.floor(diffDays+'.'+ Math.ceil(diffForH));
   }catch(E){ console.log("Error:",E)}
 }
-module.exports = postRoutes;
+function dateDiffinDurationStage(d2, d1){
+  try{
+  if(typeof d1 == "string"){ d1= new Date(d1);}
 
-//[export]="false"
+  var timeDiff = Math.abs(d2.getTime() - d1.getTime());
+  return parseFloat(timeDiff/86400000).toFixed(1);
+  }catch(e){
+    console.log("time Errpr:", e)
+  }
+}
+module.exports = postRoutes;
