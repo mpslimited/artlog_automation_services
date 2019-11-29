@@ -134,11 +134,11 @@ postRoutes.route('/getUserInfo').post(function (req, res) {
    }else{
      console.log(" else data ");
      var options = { method: 'POST',
-        url: 'https://greatminds.mpstechnologies.com/GreatMinds/admin/getLoggedInUserDeatils',
+        url: 'https://greatmindsdemo.mpstechnologies.com/GreatMinds/admin/getLoggedInUserDeatils',
         headers: 
         { 'cache-control': 'no-cache', Connection: 'keep-alive', 'Content-Length': '0',
           Cookie: 'JSESSIONID='+req.cookies.jssonId,  'Accept-Encoding': 'gzip, deflate',
-          Host: 'greatminds.mpstechnologies.com',
+          Host: 'greatmindsdemo.mpstechnologies.com',
           'Postman-Token': '253922e1-1531-47b2-b9d7-5ec943db1a91,24e7633e-1344-4d5d-a7d2-1a73fd497799',
           'Cache-Control': 'no-cache', Accept: '*/*', 'User-Agent': 'PostmanRuntime/7.17.1' } 
       };
@@ -147,9 +147,9 @@ postRoutes.route('/getUserInfo').post(function (req, res) {
         if (error) throw new Error(error);
         if(body!=""){
           let d=JSON.parse(body);
-          let data= {email: d.email, firstName: d.firstName,lastName:d.lastName, roleName:d.roleName, userId: d.userId };
+          let data= { userGroupName: d.userGroupName, email: d.email, firstName: d.firstName,lastName:d.lastName, roleName:d.roleName, userId: d.userId };
           var User = mongoose.model('User');
-          let query={ email: d.email, roleName: d.roleName };
+          let query={ email: d.email, roleName: d.roleName, userGroupName: d.userGroupName };
           console.log("finding ", JSON.stringify(query));
           User.findOne(query, function (err, user) {
           if(!!user ){
@@ -160,6 +160,7 @@ postRoutes.route('/getUserInfo').post(function (req, res) {
                   "Status" : "OK",
                   "id" : user._id,
                   "name" : user.name,
+                  "userGroupName":user.userGroupName,
                   "roleName": user.roleName,
                 });
             }else{
@@ -168,6 +169,7 @@ postRoutes.route('/getUserInfo').post(function (req, res) {
               users.name = d.firstName +' '+ d.lastName;
               users.roleName= d.roleName;
               users.email = d.email;
+              users.userGroupName= d.userGroupName;
               users.setPassword('gm@remote');
               users.save(function(err, rest) {
                 console.log("data=>", err, rest);
@@ -180,6 +182,7 @@ postRoutes.route('/getUserInfo').post(function (req, res) {
                   "id":rest._id,
                   "name":rest.name,
                   "roleName": rest.roleName,
+                  "userGroupName":rest.userGroupName
                 });
               });
             }
