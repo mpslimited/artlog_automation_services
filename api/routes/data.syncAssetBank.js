@@ -720,5 +720,20 @@ function  excuteURL(URLexc, ispost){
     console.log("Error:", Err);
   }
 }
+postRoutes.route('/checkAPI').post(function (req, res) {
+  var request = require("request");
 
+  var options = { method: 'GET',
+    url: 'http://staging.mpstrak-service-rpt.mpstechnologies.com/mpstrak-service-rpt/rest/journal/task_process_time_by_date/ALL/ALL',
+    headers: 
+     { 'postman-token': '7f9924a3-f6d4-327f-5863-029bb8e4e8a3',
+       'cache-control': 'no-cache',
+       authorization: 'Basic cHJvdG9uQHN0YWdpbmc6cHJvdG9uQDE4MQ==' } };
+  
+  request(options, function (error, response, body) {
+    if (error) throw new Error(error);
+  
+    console.log("API DATA",body);
+  });
+})
 module.exports = postRoutes;
