@@ -404,7 +404,9 @@ postRoutes.route('/assetSynced/').post(function (req, res) {
             }
             do{
               console.log("Init page:", page)
-              excuteURL("http://localhost:3000/sync/getAssets/"+page, true)
+              //https://gmartlogautomation.mpstechnologies.com
+              //excuteURL("http://localhost:3000/sync/getAssets/"+page, true);
+              excuteURL("https://gmartlogautomation.mpstechnologies.com/sync/getAssets/"+page, true);
               if(!( page <  Totalpage)){
                 res.send({data:"jobs merged",d: new Date()});
               }
@@ -535,16 +537,22 @@ postRoutes.route('/approvedworkfolwasset').post(function (req, res) {
   Mdb.bynder_jobs.find({ "job_active_stage.status": 'Approved', assetID: { $exists: false} ,  job_key: { $exists: true, $ne: ''}}).then(data=>{
     console.log( "total Active Jonbs :", data.length);
     for(let temp =0; temp < data.length ; temp ++){
-
-        Mdb.asset.find(
-          {  "property_workflowjobkey": data[temp].job_key }
+      let NoSql={
+        $or: [{
+            property_workflowjob: data[temp].jobID
+        }, {
+            property_workflowjobkey: data[temp].job_key
+        }]
+    };
+        Mdb.asset.find( NoSql
+         // {  "property_workflowjobkey": data[temp].job_key }
           //{ "property_workflowjob" : data[temp].jobID }
           ).then(CData=> {
         if(CData.length > 0){
           Founded.push( data[temp].job_key );
           console.log("Finded CData : ", CData.length, CData[0].id);
           // code hear for Update Thumb & tags in Workflow Jobs // and also aknowledge about job exist both side //
-          let thumb =CData[0].thumbnails.webimage || CData[0].thumbnails.thul
+          let thumb = CData[0].thumbnails.webimage || CData[0].thumbnails.thul || '';
           Mdb.bynder_jobs.updateMany({ id : data[temp].id },
               { $set:{ 
                 thumb : thumb ,
