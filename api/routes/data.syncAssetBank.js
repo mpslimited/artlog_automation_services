@@ -552,7 +552,10 @@ postRoutes.route('/approvedworkfolwasset').post(function (req, res) {
           Founded.push( data[temp].job_key );
           console.log("Finded CData : ", CData.length, CData[0].id);
           // code hear for Update Thumb & tags in Workflow Jobs // and also aknowledge about job exist both side //
-          let thumb = CData[0].thumbnails.webimage || CData[0].thumbnails.thul || '';
+          let thumb ="";
+          if(!!CData[0].thumbnails){
+            let thumb = CData[0].thumbnails.webimage || CData[0].thumbnails.thul || '';
+          }
           Mdb.bynder_jobs.updateMany({ id : data[temp].id },
               { $set:{ 
                 thumb : thumb ,
@@ -600,7 +603,7 @@ postRoutes.route('/updatePresets').post(function (req, res) {
       // console.log("Data ", persetsIds.length);
       for (let t = 0; t < persetsIds.length; t++) {
         if (!!persetsIds[t]) {
-          persetsIds[0]='ff808081-67bc-14ff-0167-bdd13fd1009c';
+          //persetsIds[0]='ff808081-67bc-14ff-0167-bdd13fd1009c';
           console.log("finding preset id:", persetsIds[t]);
           var token = appConfig.getToken();
           var request_data = appConfig.getActionInfo("getPresetByJobs", persetsIds[t]);
