@@ -93,7 +93,8 @@ let bynder_jobs= new Schema({
   batch: { type: String},
   flaged: { type: Boolean},
   flagedTeam: {type: String},
-  killed: { type: Boolean}
+  killed: { type: Boolean},
+  mathAuditor: { type: String}
  },{
     collection: 'bynder_jobs'
 });

@@ -275,6 +275,23 @@ postRoutes.route('/unflagedRows').post(function (req, res) {
     res.send({'msg':'There have some Error to Unflaged record', code : 5000})
   }
 })
+postRoutes.route('/assignAuditors').post(function (req, res) {
+  console.log("ACTION : assignAuditors REQ==>",req.body);
+  if(req.body.mathAuditor ){
+    let mathAuditor = JSON.parse(req.body.mathAuditor);
+    let selectedData = JSON.parse(req.body.selectedData);
+    Mdb.bynder_jobs.updateMany({ _id: { $in : selectedData}},{
+      $set: { mathAuditor:  mathAuditor.name }
+    }).then(dt=>{
+      res.send({'status':'SUCCESS','msg':'Selected rows auditor assign successfully', code:2000});
+    }).catch(Er=>{
+      console.log("Error in flagging data : ", Er);
+      res.send({'status':'ERROR','msg':'somthing wrong', desc: Er});
+    });
+
+  }
+});
+
 postRoutes.route('/flagedRows').post(function (req, res) {
   console.log("ACTION : flagedRows REQ==>",req.body);
   if(req.body.flagedID ){ 
@@ -774,10 +791,10 @@ postRoutes.route('/artlogdata', checkToken.checkToken).post(function (req, res) 
       $and.push( {"campaignID":{"$in": ['4924dc05-03c5-4086-90ce-41d8bf501684','9618db88-fc78-47a5-9916-e864e696ae11'] } });
        q= { $and};
     } 
-    let fields={flagedTeam:1,dateCreated:1, job_date_finished:1,pageNo:1,killed:1,flaged:1,batch:1,presetstages:1,isPaging:1, comment:1, mverification:1, duplicate:1, presetName:1, Preset_Stages:1, id:1, name:1, description:1, job_active_stage:1, jobMetaproperties:1, jobID:1, job_key:1, dateCreated:1, job_date_finished:1, thumb:1, generatedTags:1};
+    let fields={mathAuditor:1,flagedTeam:1,dateCreated:1, job_date_finished:1,pageNo:1,killed:1,flaged:1,batch:1,presetstages:1,isPaging:1, comment:1, mverification:1, duplicate:1, presetName:1, Preset_Stages:1, id:1, name:1, description:1, job_active_stage:1, jobMetaproperties:1, jobID:1, job_key:1, dateCreated:1, job_date_finished:1, thumb:1, generatedTags:1};
     console.log("Calling artlogdata Data " , JSON.stringify(q), JSON.stringify(fields));
     // testing in Live Build with Pradeep Sir
-    Mdb.bynder_jobs.find(q, fields ).sort({job_key:-1}).then((data)=>{
+    Mdb.bynder_jobs.find(q, fields ).sort({job_key:-1}).limit(50).then((data)=>{
     let dataResult=[];
 
     for(let  dtkey in data){
@@ -857,6 +874,7 @@ postRoutes.route('/artlogdata', checkToken.checkToken).post(function (req, res) 
     }
      job_keys=dataResult.filter( (d)=> d.job_key!="" ).map(d=>d.job_key);
      GridFilters={
+      mathAuditors      :    [...new Set(dataResult.filter( (v, i)=> !!v.mathAuditor ).map(d=>d.mathAuditor))].sort(),
       pageNos          :   [...new Set(dataResult.filter( (v, i)=> !!v.pageNo ).map(d=>d.pageNo))].sort(),
       flagedTeams      :   [...new Set(dataResult.filter( (v, i)=> !!v.flagedTeam ).map(d=>d.flagedTeam))].sort(),
       printAssets      :   [...new Set(dataResult.filter( (v, i)=> !!v.printAsset ).map(d=>d.printAsset))].sort(),
