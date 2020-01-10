@@ -1,6 +1,7 @@
 var express = require('express');
 var path = require('path');
 var fs = require('fs');
+var util = require('util');
 var favicon = require('serve-favicon');
 var logger = require('morgan');
 var cookieParser = require('cookie-parser');
@@ -43,6 +44,14 @@ app.use(responseTime(function (req, res, time) {
 const publicRoot = 'dist';
 //
 var accessLogStream = fs.createWriteStream(path.join(__dirname, 'logs/access.log'), { flags: 'a' });
+var logStdout = process.stdout;
+
+console.log = function () {
+  accessLogStream.write(util.format.apply(null, arguments) + '\n');
+  logStdout.write(util.format.apply(null, arguments) + '\n');
+}
+console.error = console.log;
+
 app.use(morgan('combined', { stream: accessLogStream }))
 
 
