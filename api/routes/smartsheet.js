@@ -699,6 +699,45 @@ postRoutes.route('/artloginit', checkToken.checkToken).post(function (req, res) 
     console.log("Finding error from searchState: ", Err);
   });
 })
+postRoutes.route('/updatelaststage').post(function (req, res) {
+  console.log('Data testing.. in updatelaststage action');
+  Mdb.bynder_jobs.find({
+    job_key: {
+        $in: [
+          'SCI-2233','EM2-3673','EM2-3672','EM2-3671','EM2-3670','EM2-3669','EM2-3668','EM2-3667','EM2-3666','EM2-3665','EM2-3664','EM2-3662','EM2-3661','EM2-3660','EM2-3659','EM2-3658','EM2-3657','EM2-3656','EM2-3655','EM2-3654','EM2-3653','EM2-3652','EM2-3651','EM2-3650','EM2-3649','EM2-3648','EM2-3647','EM2-3646','EM2-3645','EM2-3644','EM2-3643','EM2-3642','EM2-3641','EM2-3640','EM2-3639','EM2-3638','EM2-3637','EM2-3636','EM2-3635','EM2-3634','EM2-3633','EM2-3632','EM2-3631','EM2-3630','EM2-3629','EM2-3628','EM2-3627','EM2-3626','EM2-3624','EM2-3623','EM2-3622','EM2-3621','EM2-3620','EM2-3619','EM2-3618','EM2-3617','EM2-3616','EM2-3615','EM2-3614','EM2-3613','EM2-3612','EM2-3611','EM2-3610','EM2-3609','EM2-3608','EM2-3607','EM2-3606','EM2-3605','EM2-3604','EM2-3603','EM2-3602','EM2-3601','EM2-3600','EM2-3599','EM2-3598','EM2-3597','EM2-3596','EM2-3595','EM2-3594','EM2-3593','EM2-3592','EM2-3591','EM2-3590','EM2-3589','EM2-3588','EM2-3587','EM2-3586','EM2-3585','EM2-3584','EM2-3583','EM2-3582','EM2-3581','EM2-3580','EM2-3579','EM2-3578','EM2-3577','EM2-3575','EM2-3574','EM2-3573','EM2-3572','EM2-3571','EM2-3570','EM2-3569','EM2-3568','EM2-3567','EM2-3566','EM2-3565','EM2-3564','EM2-3563','EM2-3562','EM2-3561','EM2-3560','EM2-3559','EM2-3558','EM2-3557','EM2-3556','EM2-3555','EM2-3554','EM2-3553','EM2-3552','EM2-3551','EM2-3550','EM2-3549','EM2-3548','EM2-3547','EM2-3546','EM2-3545','EM2-3544','EM2-3543','EM2-3542','EM2-3541','EM2-3540','EM2-3539','EM2-3538','EM2-3537','EM2-3536','EM2-3535','EM2-3534','EM2-3533','EM2-3532','EM2-3531','EM2-3530','EM2-3529','EM2-3528','EM2-3527','EM2-3526','EM2-3525','EM2-3524','EM2-3523','EM2-3522','EM2-3521','EM2-3520','EM2-3519','EM2-3518','EM2-3517','EM2-3516','EM2-3515','EM2-3514','EM2-3513','EM2-3512','EM2-3511','EM2-3510','EM2-3509','EM2-3508','EM2-3507','EM2-3506','EM2-3505','EM2-3504','EM2-3503','EM2-3502','EM2-3501','EM2-3500','EM2-3499','EM2-3498','EM2-3497','EM2-3496','EM2-3495','EM2-3494','EM2-3493','EM2-3492','EM2-3491','EM2-3490','EM2-3489','EM2-3488','EM2-3487','EM2-3486','EM2-3485','EM2-3484','EM2-3483','EM2-3482','EM2-3481','EM2-3480','EM2-3479','EM2-3478','EM2-3477','EM2-3476','EM2-3475','EM2-3474','EM2-3473','EM2-3472','EM2-3471','EM2-3470','EM2-3469','EM2-3468','EM2-3467','EM2-3466','EM2-3465','EM2-3464','EM2-3463','EM2-3462','EM2-3461','EM2-3460','EM2-3459','EM2-3457','EM2-3456','EM2-3455','EM2-3454','EM2-3453','EM2-3452','EM2-3451','EM2-3450','EM2-3449','EM2-3448','EM2-3447','EM2-3446','EM2-3445','EM2-3444','EM2-3443','EM2-3442','EM2-3441','EM2-3440','EM2-3439','EM2-3438','EM2-3437','EM2-3436','EM2-3435','EM2-3434','EM2-3433','EM2-3432','EM2-3431','EM2-3430','EM2-3429','EM2-3428','EM2-3427','EM2-3426','EM2-3425','EM2-3424','EM2-3423','EM2-3422','EM2-3421','EM2-3420','EM2-3418','EM2-3417','EM2-3416','EM2-3415','EM2-3414','EM2-3413','EM2-3412','EM2-3411','EM2-3410','EM2-3409','EM2-3408','EM2-3407','EM2-3406','EM2-3405','EM2-3404',' EM2-3625',' EM2-3576',' EM2-3458',' EM2-3419'
+        ]
+    }
+   }).then((data) => {
+     for(let dt of data){
+       if(dt.Preset_Stages.length > 0 && dt.presetstages.length > 0 && dt.Preset_Stages[ dt.Preset_Stages.length -1 ].StageNames=="" ) {
+        dt.presetstages[dt.presetstages.length-1] 
+        dt.Preset_Stages[ dt.Preset_Stages.length -1 ].StageNames = 'Waiting Room Preflight';
+        if(dt.presetstages[dt.presetstages.length-1].name != 'Waiting Room Preflight'){
+          dt.presetstages.push(
+            {
+              "ID" : "523a1262-5bb9-45dc-ae85-f29882a0fde5",
+              "name" : "Waiting Room Preflight",
+              "position" : 8
+            }
+          );
+        }
+        console.log(dt);
+        Mdb.bynder_jobs.updateOne({_id : dt._id.toString() },{
+          $set:{
+            presetstages: dt.presetstages,
+            Preset_Stages : dt.Preset_Stages
+          }
+        }).then((dd)=> {
+          console.log("data update successfully: ", dd);
+        }).catch((Err) => {
+          console.log("ERROR in Data: ", Err);
+        });
+       }
+     }
+   }).catch((Err) => {
+    console.log( "Error in ", Err);
+   });
+});
 postRoutes.route('/artlogdata', checkToken.checkToken).post(function (req, res) {
     console.log("req parameters :" , req.body);
     let $and = [ ];
@@ -771,6 +810,8 @@ postRoutes.route('/artlogdata', checkToken.checkToken).post(function (req, res) 
       let st=req.body.status.split(",");
       if(st.indexOf('Active') > -1){
         st.push('NeedsChanges')
+      } else if(st.indexOf('On Hold')){
+        console.log('Pending condations');
       }
       if(st.length ==0){
         $and.push( {"job_active_stage.status":{"$in": st[0] } });
@@ -794,7 +835,7 @@ postRoutes.route('/artlogdata', checkToken.checkToken).post(function (req, res) 
     let fields={mathAuditor:1,flagedTeam:1,dateCreated:1, job_date_finished:1,pageNo:1,killed:1,flaged:1,batch:1,presetstages:1,isPaging:1, comment:1, mverification:1, duplicate:1, presetName:1, Preset_Stages:1, id:1, name:1, description:1, job_active_stage:1, jobMetaproperties:1, jobID:1, job_key:1, dateCreated:1, job_date_finished:1, thumb:1, generatedTags:1};
     console.log("Calling artlogdata Data " , JSON.stringify(q), JSON.stringify(fields));
     // testing in Live Build with Pradeep Sir
-    Mdb.bynder_jobs.find(q, fields ).sort({job_key:-1}).then((data)=>{
+    Mdb.bynder_jobs.find(q, fields ).sort({job_key:-1}).limit(100).then((data)=>{
     let dataResult=[];
 
     for(let  dtkey in data){
@@ -823,9 +864,10 @@ postRoutes.route('/artlogdata', checkToken.checkToken).post(function (req, res) 
           data[dtkey].job_date_finished=new Date().toISOString();
         }
         objData.cstage=""; objData.workflow=Meta.getWorkflow();
-       
+        objData.mathAuditRC = 0;
         if(objData.Preset_Stages.length > 0){
           // IT Should be another that we can not captuchred 
+          objData.mathAuditRC= objData.Preset_Stages.filter( d => d.StageNames =='Math Audit Review' ).length;
           let ob=objData.Preset_Stages[ objData.Preset_Stages.length-1 ];
           if(ob.hasOwnProperty('name')){
             objData.cstage=ob.name;
