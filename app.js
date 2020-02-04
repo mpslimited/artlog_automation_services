@@ -48,9 +48,7 @@ const publicRoot = 'dist';
 var accessLogStream = fs.createWriteStream(path.join(__dirname, 'logs/access.log'), { flags: 'a' })
       , error = fs.createWriteStream(path.join(__dirname, 'logs/error.log'), { flags: 'a' });
 
-// redirect stdout / stderr
-proc.stdout.pipe(access);
-proc.stderr.pipe(error);
+
 var logStdout = process.stdout;
 
 console.log = function () {
