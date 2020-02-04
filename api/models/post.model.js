@@ -187,6 +187,8 @@ let campaign=new Schema({
   campaignMetaproperties: { type: Object} ,
   presetID: { type: String} ,
   thumbnailURL: { type: String} ,
+  activePage: {type: Number},
+  needchangePage: {type: Number },
 },{ collection: 'campaign'});
 let tempAssetCount = new Schema({
   count: { type: String} ,

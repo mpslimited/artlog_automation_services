@@ -24,10 +24,12 @@ require('./api/config/passport');
 
 
 // [SH] Bring in the routes for the API (delete the default routes)
+var poRoutes = require('./api/routes/postapis.route');
 var routesApi = require('./api/routes/index');
 var syncAssetBank = require('./api/routes/data.syncAssetBank');
 var routessmartsheetApi = require('./api/routes/smartsheet');
 var routesApiData = require('./api/routes/data.services');
+
 var app = express();
 var stats = new StatsD()
 stats.socket.on('error', function (error) {
@@ -88,16 +90,15 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(cors());
-
 // [SH] Initialise Passport before using the route middleware
 app.use(passport.initialize());
-
 // [SH] Use the API routes when path starts with /api
-
+app.use('/dataApi', poRoutes);
 app.use('/api', routesApi);
 app.use('/api', routessmartsheetApi);
 app.use('/apiData', routesApiData);
 app.use('/sync', syncAssetBank);
+
 // app.listen(3000, function(){
 //   console.log('Server is running on Port:',3000);
 // });
