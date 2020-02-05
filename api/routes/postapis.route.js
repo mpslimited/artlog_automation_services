@@ -25,9 +25,9 @@ const oauth = OAuth({
 });
 let UpdatingRequest= new Array(
  // { ID: 'ee19e14d-bdb9-407b-ab56-17292d585787' , ExeOrder: false, name:"Marketing"}, 
-  { ID: '12087c22-260a-4fb8-834e-d231c4c277a3' , ExeOrder: true , name: 'Geodes Readable Library'}, 
-  { ID: '3d39f53b-3123-4eb1-a3f1-274cd4160efe' , ExeOrder: true, name :"Wit & Wisdom"}, 
-  { ID: '9618db88-fc78-47a5-9916-e864e696ae11' , ExeOrder: true, name: 'Eureka Math 2'}, 
+ // { ID: '12087c22-260a-4fb8-834e-d231c4c277a3' , ExeOrder: true , name: 'Geodes Readable Library'}, 
+ // { ID: '3d39f53b-3123-4eb1-a3f1-274cd4160efe' , ExeOrder: true, name :"Wit & Wisdom"}, 
+  //{ ID: '9618db88-fc78-47a5-9916-e864e696ae11' , ExeOrder: true, name: 'Eureka Math 2'}, 
   { ID: '4924dc05-03c5-4086-90ce-41d8bf501684' , ExeOrder: true, name: "PhD Science"}, 
 );
 
