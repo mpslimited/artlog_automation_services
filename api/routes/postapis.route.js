@@ -44,6 +44,7 @@ poRoutes.route('/synccampaignId').post(function (req, res) {
   }
   if(UpdatingRequest.filter(d=> d.ExeOrder === false).length ==0){
     UpdatingRequest = UpdatingRequest.map(d=> ({ ID : d.ID, ExeOrder : true, name : d.name }));
+    console.log("Round Complated");
   }
 });
 

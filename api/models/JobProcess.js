@@ -210,7 +210,6 @@ class JobProcess {
 
                }else {
                   //save data Case
-                  
                   //save code for bynder jobs
                   console.log("save job case");
                   var job_active_stage= JobsResult[k].job_active_stage;
