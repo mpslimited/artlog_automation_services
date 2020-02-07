@@ -1,5 +1,4 @@
 const request = require('request');
-
 class JobProcess {
    constructor(db){
       this.Mdb = db;

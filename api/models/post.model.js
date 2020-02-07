@@ -189,6 +189,10 @@ let campaign=new Schema({
   thumbnailURL: { type: String} ,
   activePage: {type: Number},
   needchangePage: {type: Number },
+  process: {type: Boolean},
+  ExeOrder: {type: Boolean},
+  totalPage: {type: Number},
+  processedPage: {type:Number},
 },{ collection: 'campaign'});
 let tempAssetCount = new Schema({
   count: { type: String} ,
