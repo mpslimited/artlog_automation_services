@@ -6,7 +6,7 @@
     "start": "node ./bin/www"
   },
   "dependencies": {
-    "async": "^3.1.0",
+    "async": "^3.1.1",
     "await": "^0.2.6",
     "body-parser": "~1.10.2",
     "cookie-parser": "~1.3.3",
@@ -21,14 +21,21 @@
     "jwt-decode": "^2.2.0",
     "lodash": "^4.17.5",
     "log-timestamp": "^0.3.0",
+    "memcached": "^2.2.2",
     "mongoose": "^4.1.2",
     "mongoose-aggregate-paginate": "^1.1.3",
     "morgan": "^1.9.1",
+    "mysql": "^2.18.1",
+    "node-fetch": "^2.6.0",
+    "node-statsd": "^0.1.1",
+    "nodemailer": "^6.3.1",
     "oauth-1.0a": "^2.2.6",
     "passport": "^0.2.2",
     "passport-local": "^1.0.0",
     "request": "^2.88.0",
+    "response-time": "^2.3.2",
     "serve-favicon": "^2.5.0",
+    "slashes": "^1.0.5",
     "uglify-js": "^3.4.9"
   },
   "devDependencies": {
