@@ -415,7 +415,7 @@
      getStageRTeam(name){
         //this.getWorkflow()
         var Teamname="";
-        if(name!=""){
+        if( a!=null &&  name!=""){
           if(name.toLowerCase().indexOf("research asset and original source")!=-1 ||
           name.toLowerCase().indexOf("select job type")!=-1 ||
           name.toLowerCase().indexOf("copyright status")!=-1 ||

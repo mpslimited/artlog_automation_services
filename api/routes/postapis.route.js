@@ -170,7 +170,29 @@ poRoutes.route('/jobprocessing').post( function (req, res) {
       });
   });
 });
-
+poRoutes.route('/checkstagedr').post(function (req, res) {
+  Mdb.bynder_jobs.find({"job_active_stage.status":{"$in":["Active","NeedsChanges"]}}).then(data=>{
+    for( dt of data){
+      if( dt.job_active_stage.position != dt.Preset_Stages[dt.Preset_Stages.length-1].position ){
+        console.log(dt.job_active_stage, ":::", dt.Preset_Stages[dt.Preset_Stages.length-1]);
+        let StageArray= dt.Preset_Stages;
+        dt.job_active_stage.name =  dt.job_active_stage.StageNames
+        StageArray.push(dt.job_active_stage);
+        Mdb.bynder_jobs.updateOne({
+          jobID: dt.jobID
+        },{
+          $set:{
+            Preset_Stages: StageArray
+          }
+        }).then(dt=>{
+          console.log("Update dt:", dt);
+        }).catch(Err=>{
+          console.log("Error in Date:", Err);
+        })
+      }
+    }
+  });
+});
 poRoutes.route('/jobsbycampaignid/:campaignId').post( function (req, res) {
   let campaignId = req.params.campaignId;
   console.log("ACT: jobsbycampaignid and :", campaignId );
