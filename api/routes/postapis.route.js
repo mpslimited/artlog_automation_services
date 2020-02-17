@@ -75,15 +75,13 @@ poRoutes.route('/jobprocessing').post( function (req, res) {
             process: true,
             processedPage:0
            }
-          }).then(d=>{
-            reject();
+          }).then(d=>{ 
           }).catch(e=>{
             console.log(e.message);
           });
         }
       }).catch((e) => {
-        console.log("Error:", Err);
-        reject();
+         reject( new Error('REJECTError:', Err));
       });
   });
   // Promish 1 For Data Selection 
@@ -107,15 +105,14 @@ poRoutes.route('/jobprocessing').post( function (req, res) {
           }, function(error, response, body) {
           //console.log(error, response.body);
           if(error){
-            reject();
-            console.log("API ERROR==>", error.message);
+             reject(new Error( error));
            }else if(response.body.indexOf("504 Gateway Time-out") >-1){
             console.log("API Response : ==>504 Gateway Time-out");
-            reject();
+             reject(new Error( '504 Gateway Time-out'));
           }else if(response.body.indexOf("400 Bad Request") >-1 && response.body.indexOf("page is higher than amount of pages") >-1){
             console.log("API Response : ==>page is higher than amount of pages");
             //code hear for highre than amout of pages //
-            reject();
+             reject(new Error( 'page is higher than amount of pages'));
           }else{
             let dt=[];
             try{
@@ -123,9 +120,7 @@ poRoutes.route('/jobprocessing').post( function (req, res) {
               console.log("Data getting at Bynder End Total:", dt.length );
               resolve( { ID: data[0].ID,  name: data[0].name , data : dt, });
             }catch(e){
-              // self.mainTainError(response, e.error);
-               throw new Error('API Responce Have Invalid Error: ', e.message);
-               reject();
+                reject( new Error('API Responce Have Invalid Error: ', e.message));
             }
          }
         })
@@ -199,11 +194,10 @@ poRoutes.route('/jobsbycampaignid/:campaignId').post( function (req, res) {
           }, function(error, response, body) {
           //console.log(error, response.body);
           if(error){
-            reject();
-            console.log("API ERROR==>", error.message);
+            reject(new Error('API Responce Have Invalid Error: ', error.message));
            }else if(response.body.indexOf("504 Gateway Time-out") >-1){
             console.log("API Response : ==>504 Gateway Time-out");
-            reject();
+            reject(new Error('504 Gateway Time-out: '));
          }else{
             let dt=[];
             try{
@@ -212,8 +206,7 @@ poRoutes.route('/jobsbycampaignid/:campaignId').post( function (req, res) {
               resolve(dt);
             }catch(e){
                self.mainTainError(response, e.error);
-               throw new Error('API Responce Have Invalid Error: ', e.message);
-               reject();
+               reject(new Error('API Responce Have Invalid Error: ', e.message));
             }
          }
         })
