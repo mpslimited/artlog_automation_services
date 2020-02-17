@@ -16,6 +16,7 @@ const Memcached = require('memcached');
 // Metadt.print("hello this is metdt class");
 var memcached = new Memcached();
 /* code to connect with your memecahced server */
+/*
 memcached.connect( 'localhost:11211', function( err, conn ){
   if( err ) {
   console.log( conn.server,'error while memcached connection!!');
