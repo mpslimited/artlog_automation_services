@@ -69,6 +69,7 @@ let bynder_jobs= new Schema({
   Preset_Stages : { type:  Array },
   presetDataC:{type: Array},
   autoStage:{type: Array},
+  backupStage: { type: Array},
   accountableID: { type: String},
   createdByID: { type: String},
   jobMetaproperties:{ type: Object},
@@ -94,9 +95,68 @@ let bynder_jobs= new Schema({
   flaged: { type: Boolean},
   flagedTeam: {type: String},
   killed: { type: Boolean},
+  updateDt: {type: Boolean},
   mathAuditor: { type: String}
  },{
     collection: 'bynder_jobs'
+});
+let bynder_jobs_old= new Schema({
+  assetID   : {type : String},
+  id: { type: String},
+  jobID:{type:String},
+  risk:{type: String},
+  impact:{type: String},
+  name: { type: String},
+  deadline: { type: String},
+  description: { type: String},
+  dateCreated: { type:  Date },
+  job_date_started: { type:  Date },
+  basedOnPreset: Boolean,
+  presetID: { type: String},
+  presetName: { type: String},
+  presetstages:{ type: Array}, 
+  dateModified: { type: String},
+  campaignID: { type: String},
+  job_previous_stage :{ type: Object},
+  job_active_stage:{ type: Object },
+  job_next_stage:{ type:Object },
+  job_stages:{ type : Array },
+  job_key : { type:  String },
+  job_date_finished : { type:  Date },
+  job_duration : { type:  String },
+  Preset_Stages : { type:  Array },
+  presetDataC:{type: Array},
+  autoStage:{type: Array},
+  backupStage: { type: Array},
+  accountableID: { type: String},
+  createdByID: { type: String},
+  jobMetaproperties:{ type: Object},
+  isStartedFromBrandstore: { type: Boolean},
+  useBrandstoreApproval: { type: Boolean},
+  loadPreset:{ type: Boolean},
+  loadMeta:{ type: Boolean},
+  isMerged:{type : Boolean},
+  isUpdated: {type : Boolean},
+  comment: {type: String},
+  isPaging: {type: String},
+  pageNo: { type: String},
+  mverification:  {type : String},
+  duplicate : {type : Boolean},
+  Cduplicate  : {type: Boolean},
+  isAssetBank : {type : Boolean},
+  generatedTags : { type: String},
+  assetTags : { type : Array},
+  updateTag   : { type: String},
+  isMailed    : {type: String },
+  thumb: { type: String },
+  batch: { type: String},
+  flaged: { type: Boolean},
+  flagedTeam: {type: String},
+  killed: { type: Boolean},
+  updateDt: {type: Boolean},
+  mathAuditor: { type: String}
+ },{
+    collection: 'bynder_jobs_old'
 });
 //bynder_jobs.plugin(mongooseAggregatePaginate);
 
@@ -192,7 +252,8 @@ let campaign=new Schema({
   process: {type: Boolean},
   ExeOrder: {type: Boolean},
   totalPage: {type: Number},
-  processedPage: {type:Number},
+  processedPage: {type:Number}
+  
 },{ collection: 'campaign'});
 let tempAssetCount = new Schema({
   count: { type: String} ,
@@ -275,6 +336,7 @@ let asset=new Schema({
       apiErrors: mongoose.model('apiErrors', apiErrors),
       job_presets: mongoose.model('job_presets', job_presets),
       bynder_jobs: mongoose.model('bynder_jobs', bynder_jobs),
+      bynder_jobs_old: mongoose.model('bynder_jobs_old', bynder_jobs_old),
       presetdataupdate: mongoose.model('presetdataupdate', presetdataupdate),
       searchState: mongoose.model('searchState', searchState),
       metaproperties : mongoose.model('metaproperties', metaproperties),

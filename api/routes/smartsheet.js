@@ -5,14 +5,32 @@ const OAuth   = require('oauth-1.0a');
 const crypto  = require('crypto');
 const await = require("await");
 const async = require("async");
-let  Metadt  =require("../models/Metadt");
-let Mdb  = require('../models/post.model');
-let checkToken = require('../models/middleware');
-var mongoose = require( 'mongoose' );
-var jwt = require('jsonwebtoken');
+const  Metadt  =require("../models/Metadt");
+const Mdb  = require('../models/post.model');
+const checkToken = require('../models/middleware');
+const mongoose = require( 'mongoose' );
+const jwt = require('jsonwebtoken');
+const Memcached = require('memcached');
 //let appConfig=require('./config');
 // Metadt= new Metadt('dddd');
 // Metadt.print("hello this is metdt class");
+var memcached = new Memcached();
+/* code to connect with your memecahced server */
+memcached.connect( 'localhost:11211', function( err, conn ){
+  if( err ) {
+  console.log( conn.server,'error while memcached connection!!');
+  }else {
+    console.log("mamcached connected sucessfully ");
+  }
+});
+/*
+Mdb.bynder_jobs.find({ }).then((data)=>{
+   console.log("data", data.length);
+}).catch(Err=>{ 
+  console.log("Error In Data: ", Err);
+});
+*/
+
 function verifyToken(req, res, next) {
   const bearerHeader = req.headers['authorization'];
 
@@ -597,72 +615,12 @@ postRoutes.route('/addnewjobs').post(function (req, res) {
                    objData.printReady   =   Mdt.printReady;
                    objData.permissionType = Mdt.permissionType
                 }
-                /*
-                let Meta= new Metadt(response);
-                  Meta.iniMeta(WorkFlowJobsMetaData);
-                  Meta.initAssetMeta(GCurriculaWIP);
-                  let Mdt= Meta.getMeta();
-                  response.lesson=Mdt.lesson;
-                  if(response.Preset_Stages.length > 0 ){
-                    let lastChangeCreated= response.Preset_Stages[response.Preset_Stages.length -1].start_date;
-                    let lastChangeComplated=(!!response.Preset_Stages[response.Preset_Stages.length -1].job_date_finished)?
-                    response.Preset_Stages[response.Preset_Stages.length -1].job_date_finished: new Date();
-                    response.lastage=dateDiff(lastChangeCreated, lastChangeComplated);
-                   }
-                   var dateCreatedJob = Mdt.dateCreatedM;
-                   if(response.job_date_finished===null && response.job_active_stage.status!="Approved"){
-                    response.job_date_finished=new Date().toISOString();
-                   }
-                   response.cstage=""; 
-                   
-                   if(response.Preset_Stages.length > 0){
-                     // IT Should be another that we can not captuchred 
-                     let ob=response.Preset_Stages[ response.Preset_Stages.length-1 ];
-                     if(ob.hasOwnProperty('name')){
-                      response.cstage=ob.name;
-                     }else if(ob.hasOwnProperty('StageNames')){
-                      response.cstage=ob.StageNames;
-                     }
-                   }
-                   response.currentRTeam =   Meta.getStageRTeam(response.cstage);
-                   response.lesson       =   Mdt.lesson;
-                   response.lessonlet    =   Mdt.lessonlet;
-                   response.topic        =   Mdt.topic;
-                   response.facing       =   Mdt.facingVal;
-                   response.facingID     =   Mdt.facing;
-                   response.series       =   Mdt.series;
-
-                  response.totalage=dateDiff(dateCreatedJob, response.job_date_finished);
-                  response.workflow=Meta.getWorkflow();
-                  response.component=Mdt.component; 
-                  response.tags=Mdt.tag; 
-                  response.gradeID=Mdt.grade;
-                  response.grade=Mdt.gradeVal;
-                  response.moduleID=Mdt.module;
-                  response.module=Mdt.moduleVal;
-                  response.artcomplexId=Mdb.artcomplex;
-                  response.artcomplex=Mdb.artcomplexVal;
-                  response.artassionID=Mdb.artassion;
-                  response.artassion=Mdb.artassionVal;
-                  response.riskID=Mdb.risk;
-                  response.risk=Mdb.riskVal;
-                  response.impactID=Mdb.impact;
-                  response.impact=Mdb.impactVal;
-                  response.curriculum   =   Mdt.wip;
-                  response.creditLine   =   Mdt.creditLine;
-                  response.printAsset   =   Mdt.printAsset;
-                  response.printReady   =   Mdt.printReady;
-                  response.permissionType = Mdt.permissionType
-                  */
-                  resDt.push(objData);
-                //console.log((responses))
+                resDt.push(objData);
               });
               
               res.send({jobsInfo:jobsInfo, resDt: resDt});
             });
-            //res.send( resultedDt );
           }else{
-            //res.send({'msg':'Invalid Job Key'});
             let resDt= Array();
             let jobsInfo=rqdata.map(d=>({jobkey:d.jobkey, exist:false}));
             res.send({jobsInfo:jobsInfo, resDt: resDt});
@@ -738,12 +696,12 @@ postRoutes.route('/updatelaststage').post(function (req, res) {
     console.log( "Error in ", Err);
    });
 });
+
 postRoutes.route('/artlogdata', checkToken.checkToken).post(function (req, res) {
     console.log("req parameters :" , req.body);
     let $and = [ ];
     if(!!req.body.grade && req.body.grade!=""){
       let g=req.body.grade.split(",");
-      //console.log("\n\n Finding data as =>", JSON.stringify(req.body.grade),"\n\n");
       if(g.length ==1){
         $and.push( { "jobMetaproperties.c0ac0a86e65f4f7ebd88dbd7e77965ef" : g[0] } )
       }else{
@@ -761,50 +719,28 @@ postRoutes.route('/artlogdata', checkToken.checkToken).post(function (req, res) 
       $and.push({$or:$or})
     }
     if(!!req.body.topic && req.body.topic!=""){
-      //"jobMetaproperties.662315fccf37435081da009bd3fbe49b"
-      $and.push(
-        { "batch" : req.body.topic }
-      ); 
+      $and.push( { "batch" : req.body.topic } ); 
     }
-    //662315fccf37435081da009bd3fbe49b
     if(!!req.body.curricula && req.body.curricula!=""){
-      $and.push(
-        { "jobMetaproperties.0790cd4f2aed4ce0a315ff8034a43994" : req.body.curricula }
-      ); 
+      $and.push( { "jobMetaproperties.0790cd4f2aed4ce0a315ff8034a43994" : req.body.curricula } ); 
     }
     if(!!req.body.added && req.body.added!= ""){
       if(req.body.added==1){
-        $and.push(
-          { "duplicate" : {$exists: false} }
-        );
+        $and.push({ "duplicate" : {$exists: false} });
       }else if(req.body.added==2){
-        $and.push(
-          { "duplicate" : true }
-        );
+        $and.push({ "duplicate" : true });
       }else if(req.body.added==3){
-        $and.push(
-          { "duplicate" : false }
-        );
+        $and.push({ "duplicate" : false });
       }else if(req.body.added==4){
-        $and.push(
-          { "flaged" : true }
-        );
+        $and.push({ "flaged" : true });
       }else if(req.body.added==5){
-        $and.push(
-          { "killed" : true }
-        );
+        $and.push({ "killed" : true });
       }else if(req.body.added==6){
-        $and.push(
-          { "killed" : {$ne: true} }
-        );
+        $and.push({ "killed" : {$ne: true} });
       }
-       
     }
     if(!!req.body.workflow && req.body.workflow!=""){
-      $and.push(
-        //{"presetName": /.*Created Image*./}
-        {'presetName':{ $regex:  new RegExp(".*"+req.body.workflow+".*") }}
-      ) 
+      $and.push({'presetName':{ $regex:  new RegExp(".*"+req.body.workflow+".*") }} ) 
     }
     if(req.body.status && req.body.status!=""){
       let st=req.body.status.split(",");
@@ -835,23 +771,19 @@ postRoutes.route('/artlogdata', checkToken.checkToken).post(function (req, res) 
     let fields={presetstages:1,mathAuditor:1,flagedTeam:1,dateCreated:1, job_date_finished:1,pageNo:1,killed:1,flaged:1,batch:1,presetstages:1,isPaging:1, comment:1, mverification:1, duplicate:1, presetName:1, Preset_Stages:1, id:1, name:1, description:1, job_active_stage:1, jobMetaproperties:1, jobID:1, job_key:1, dateCreated:1, job_date_finished:1, thumb:1, generatedTags:1};
     console.log("Calling artlogdata Data " , JSON.stringify(q), JSON.stringify(fields));
     // testing in Live Build with Pradeep Sir
-    Mdb.bynder_jobs.find(q, fields ).sort({job_key:-1}).then((data)=>{
+    Mdb.bynder_jobs.find(q, fields ).sort({job_key:-1}).limit(100).then((data)=>{
     let dataResult=[];
 
     for(let  dtkey in data){
       var objData = data[dtkey].toObject();
-
-      //console.log("Object VAlue:", objData);
       if(!!data[dtkey].jobMetaproperties){
         let Meta= new Metadt(data[dtkey])
         Meta.iniMeta(WorkFlowJobsMetaData);
         Meta.initAssetMeta(GCurriculaWIP);
         Meta.PrintAssetMeta(GPrintReady)
         let Mdt= Meta.getMeta();
-        //console.log("Metadata", data[dtkey].jobMetaproperties);
         let metaObj=Object.entries(data[dtkey].jobMetaproperties);
         if(data[dtkey].Preset_Stages.length > 0 ){
-          
          let lastChangeCreated= data[dtkey].Preset_Stages[data[dtkey].Preset_Stages.length -1].start_date;
          let lastChangeComplated=(!!data[dtkey].Preset_Stages[data[dtkey].Preset_Stages.length -1].job_date_finished)?
           data[dtkey].Preset_Stages[data[dtkey].Preset_Stages.length -1].job_date_finished: new Date();
@@ -916,55 +848,35 @@ postRoutes.route('/artlogdata', checkToken.checkToken).post(function (req, res) 
     }
      job_keys=dataResult.filter( (d)=> d.job_key!="" ).map(d=>d.job_key);
      GridFilters={
-      mathAuditors      :    [...new Set(dataResult.filter( (v, i)=> !!v.mathAuditor ).map(d=>d.mathAuditor))].sort(),
+      mathAuditors     :   [...new Set(dataResult.filter( (v, i)=> !!v.mathAuditor ).map(d=>d.mathAuditor))].sort(),
       pageNos          :   [...new Set(dataResult.filter( (v, i)=> !!v.pageNo ).map(d=>d.pageNo))].sort(),
       flagedTeams      :   [...new Set(dataResult.filter( (v, i)=> !!v.flagedTeam ).map(d=>d.flagedTeam))].sort(),
       printAssets      :   [...new Set(dataResult.filter( (v, i)=> !!v.printAsset ).map(d=>d.printAsset))].sort(),
       printReadys      :   [...new Set(dataResult.filter( (v, i)=> !!v.printReady ).map(d=>d.printReady))].sort(),
       permissionTypes  :   [...new Set(dataResult.filter( (v, i)=> !!v.permissionType ).map(d=>d.permissionType))].sort(),
-       curriculum     :   [...new Set(dataResult.filter( (v, i)=> !!v.curriculum ).map(d=>d.curriculum))].sort(),
-       workflow       :   [...new Set(dataResult.filter( (v, i)=> !!v.workflow ).map(d=>d.workflow))].sort(),
-       currentRTeam   :   [...new Set(dataResult.filter( (v, i)=> !!v.currentRTeam ).map(d=>d.currentRTeam))].sort(),
-       lesson         :   [...new Set(dataResult.filter( (v, i)=> !!v.lesson ).map(d=>d.lesson))].sort(),  //.filter((v,i) => grades.indexOf(v) === i),
-       lessonlet      :   [...new Set(dataResult.filter( (v, i)=> !!v.lessonlet ).map(d=> d.lessonlet))].sort(),
-       component      :   [...new Set(dataResult.filter( (d)=> !!d.component ).map(d=>d.component))].sort(),
-       grade          :   [...new Set(dataResult.filter( (d)=> !!d.grade ).map(d=>d.grade))].sort(),
-       module         :   [...new Set(dataResult.filter( (d)=> !!d.module ).map(d=>d.module))].sort(),
-       artcomplex     :   [...new Set(dataResult.filter( (d)=> !!d.artcomplex ).map(d=>d.artcomplex))].sort(),
-       artassion      :   [...new Set( dataResult.filter( (d)=> !!d.artassion ).map(d=>d.artassion))].sort(),
-       risk           :   [...new Set(dataResult.filter( (d)=> !!d.risk ).map(d=>d.risk))].sort(),
-       impact         :   [...new Set(dataResult.filter( (d)=> !!d.impact ).map(d=>d.impact))].sort(),
-       facing         :   [...new Set(dataResult.filter( (d)=> !!d.facing ).map(d=>d.facing))].sort(),
-       series         :   [...new Set(dataResult.filter( (d)=> !!d.series ).map(d=>d.series))].sort(),
-       topic          :   [...new Set(dataResult.filter( (d)=> !!d.topic ).map(d=>d.topic))].sort(),
-       batch          :   [...new Set(dataResult.filter( (d)=> !!d.batch ).map(d=>d.batch))].sort(),
-       revision       :   [...new Set(dataResult.filter( (d)=> !!d.revisionC ).map(d=>d.revisionC ))].sort(),
-       cstages        :   [...new Set(dataResult.filter( (d)=> !!d.cstage ).map(d=>d.cstage))].sort(),
-       cstatus        :   [...new Set(dataResult.filter( (d)=> !!d.job_active_stage.status ).map(d=>d.job_active_stage.status))].sort(),
+      curriculum       :   [...new Set(dataResult.filter( (v, i)=> !!v.curriculum ).map(d=>d.curriculum))].sort(),
+      workflow         :   [...new Set(dataResult.filter( (v, i)=> !!v.workflow ).map(d=>d.workflow))].sort(),
+      currentRTeam     :   [...new Set(dataResult.filter( (v, i)=> !!v.currentRTeam ).map(d=>d.currentRTeam))].sort(),
+      lesson           :   [...new Set(dataResult.filter( (v, i)=> !!v.lesson ).map(d=>d.lesson))].sort(), 
+      lessonlet        :   [...new Set(dataResult.filter( (v, i)=> !!v.lessonlet ).map(d=> d.lessonlet))].sort(),
+      component        :   [...new Set(dataResult.filter( (d)=> !!d.component ).map(d=>d.component))].sort(),
+      grade            :   [...new Set(dataResult.filter( (d)=> !!d.grade ).map(d=>d.grade))].sort(),
+      module           :   [...new Set(dataResult.filter( (d)=> !!d.module ).map(d=>d.module))].sort(),
+      artcomplex       :   [...new Set(dataResult.filter( (d)=> !!d.artcomplex ).map(d=>d.artcomplex))].sort(),
+      artassion        :   [...new Set( dataResult.filter( (d)=> !!d.artassion ).map(d=>d.artassion))].sort(),
+      risk             :   [...new Set(dataResult.filter( (d)=> !!d.risk ).map(d=>d.risk))].sort(),
+      impact           :   [...new Set(dataResult.filter( (d)=> !!d.impact ).map(d=>d.impact))].sort(),
+      facing           :   [...new Set(dataResult.filter( (d)=> !!d.facing ).map(d=>d.facing))].sort(),
+      series           :   [...new Set(dataResult.filter( (d)=> !!d.series ).map(d=>d.series))].sort(),
+      topic            :   [...new Set(dataResult.filter( (d)=> !!d.topic ).map(d=>d.topic))].sort(),
+      batch            :   [...new Set(dataResult.filter( (d)=> !!d.batch ).map(d=>d.batch))].sort(),
+      revision         :   [...new Set(dataResult.filter( (d)=> !!d.revisionC ).map(d=>d.revisionC ))].sort(),
+      cstages          :   [...new Set(dataResult.filter( (d)=> !!d.cstage ).map(d=>d.cstage))].sort(),
+      cstatus          :   [...new Set(dataResult.filter( (d)=> !!d.job_active_stage.status ).map(d=>d.job_active_stage.status))].sort(),
      };
-    /* Mdb.bynder_jobs.find(q, fields ).sort({job_key:-1}).skip(0).limit(100).then((rowData)=>{
-      let result={ artLogData : rowData, totalPage: dataResult.length, GridFilters : GridFilters};
-      res.send( result );
-     })
-     */
-    //  let assetQ={property_workflowjobkey: {
-    //   $in:  job_keys 
-    //   }};
-     // console.log("Query of Assets: ", JSON.stringify(assetQ));
-     //Mdb.asset.find({ assetQ }).then((data)=>{
-      // console.log("total data is :", data.length);
-      // console.log(data);
-      // for(let atdt of dataResult){
-      //   if(atdt.hasOwnProperty("job_key")){
-      //     data.filter(df=> dt.)
-      //   }
-      // }  Jot51339
       console.log("result length:", dataResult.length )
       let result={ artLogData : dataResult, GridFilters : GridFilters};
       res.send( result );
-      
-     //}).catch((Err)=> { console.log("Error in Finding asset:", Err)})
-     
     }).catch((Err)=>console.log("Error in finder ERROR:", Err));
 });
 

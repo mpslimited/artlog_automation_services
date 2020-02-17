@@ -23,43 +23,45 @@ const oauth = OAuth({
     return crypto.createHmac('sha1', key).update(base_string).digest('base64');
   }
 });
-let UpdatingRequest= new Array(
- // { ID: 'ee19e14d-bdb9-407b-ab56-17292d585787' , ExeOrder: false, name:"Marketing", pageCount:0}, 
- // { ID: '12087c22-260a-4fb8-834e-d231c4c277a3' , ExeOrder: true , name: 'Geodes Readable Library', pageCount:0}, 
- // { ID: '3d39f53b-3123-4eb1-a3f1-274cd4160efe' , ExeOrder: true, name :"Wit & Wisdom", pageCount:0}, 
-  //{ ID: '9618db88-fc78-47a5-9916-e864e696ae11' , ExeOrder: true, name: 'Eureka Math 2', pageCount:0}, 
-  { ID: '4924dc05-03c5-4086-90ce-41d8bf501684' , ExeOrder: true, name: "PhD Science", pageCount:0 , complated:0 }, 
-);
 
-poRoutes.route('/synccampaignId').post(function (req, res) {
-  var hostname="http://localhost:3000";
-  for( let i=0; i<  UpdatingRequest.length ; i++){
-    if(UpdatingRequest[i].ExeOrder==true){
-      var targetURL= hostname+"/dataApi/jobsbycampaignid/"+ UpdatingRequest[i].ID;
-          excuteURL( targetURL );
-          res.send(UpdatingRequest[i]);
-         // UpdatingRequest[i].ExeOrder=false; 
-          break;
+
+
+
+poRoutes.route('/dataAutomation').post( function (req, res) {
+  Mdb.bynder_jobs.find({
+    isUpdated: true
+  }).then(data=>{
+    for( let dt of data) {
+      console.log(dt.presetstages)
+      if( dt.presetstages.length > 0 && dt.Preset_Stages.length < dt.autoStage.length ) {
+        let StageData = [];
+        for(let ddd of dt.presetstages){
+           let ddata = dt.autoStage.filter(d => d.StageName  == ddd.name );
+           if(ddata.length > 0 ){
+            StageData.push({
+              ID: ddd.ID,
+              name : ddd.name ,
+              position : ddd.position ,
+              start_date : ddata[0].start_date ,
+              job_date_finished : ddata[0].job_date_finished
+            })
+           }
+        }
+        console.log(StageData);
+        Mdb.bynder_jobs.updateOne({ id: dt.id }, { 
+          $set: { 
+            backupStage: dt.Preset_Stages,
+            Preset_Stages : StageData 
+          }
+        }).then(data=> {
+          console.log("Data Updated sucessfully ");
+        }).catch(E=>{
+          console.log("Error: ", E);
+        });
+      }
     }
-  }
-  if(UpdatingRequest.filter(d=> d.ExeOrder === false).length ==0){
-    UpdatingRequest = UpdatingRequest.map(d=> ({ ID : d.ID, ExeOrder : true, name : d.name }));
-    console.log("Round Complated");
-  }
+  })
 });
-
-function  excuteURL(URLexc){
-  console.log("\n\n excuteURL",URLexc );
-  try{
-    var options = { method: 'POST', url: URLexc, headers:{ 'Cache-Control': 'no-cache' }};
-    request(options,  function (error, response, body) {
-      if (error) //throw new Error(error);
-      console.log(error);
-    });
-  }catch(Err){
-    console.log("Error:", Err);
-  }
-}
 poRoutes.route('/jobprocessing').post( function (req, res) {
   const myProm1 = new Promise(function(resolve, reject) {
       Mdb.campaign.find({ process: true, ExeOrder: true }).limit(1).then(dt=>{
@@ -113,7 +115,6 @@ poRoutes.route('/jobprocessing').post( function (req, res) {
           }else if(response.body.indexOf("400 Bad Request") >-1 && response.body.indexOf("page is higher than amount of pages") >-1){
             console.log("API Response : ==>page is higher than amount of pages");
             //code hear for highre than amout of pages //
-
             reject();
           }else{
             let dt=[];
@@ -141,7 +142,6 @@ poRoutes.route('/jobprocessing').post( function (req, res) {
          }).catch(e=>{
           console.log("Update Err:", e.message );
          });
-
          let responceDt = {ID: data.ID , Name: data.name , processedPage: i, TotalData: data.data.length }
          // Code Hear For Merging in LocalDatabase
          let JobsResult = data.data;
@@ -225,8 +225,4 @@ poRoutes.route('/jobsbycampaignid/:campaignId').post( function (req, res) {
     }
   })
 });
-
-
-
-
 module.exports = poRoutes;

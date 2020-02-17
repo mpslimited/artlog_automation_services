@@ -370,51 +370,5 @@ postRoutes.route('/getAssets/:page').get(function (req, res) {
   });
 
 });
-postRoutes.route('/updatePresets').post(function (req, res) {
-  Mdb.bynder_jobs.find({ presetName: { $exists: false } }).then(dt => {
-    if (dt.length > 0) {
-      let persetsIds = [...new Set(dt.map(d => d.presetID))];
-      // console.log("Data ", persetsIds);
-      for (let t = 0; t < persetsIds.length; t++) {
-        if (!!persetsIds[t]) {
-          console.log("finding preset id:", persetsIds[t]);
-          var token = appConfig.getToken();
-          var request_data = appConfig.getActionInfo("getPresetByJobs", persetsIds[t]);
-          request({
-            url: request_data.url, method: request_data.method, form: request_data.data, headers: oauth.toHeader(oauth.authorize(request_data, token))
-          }, function (error, response, body) {
-            //console.log("API responded ...", JSON.stringify(request_data));
-            if (response.statusCode == 200) {
-              console.log(response.body);
-              let persetDt = JSON.parse(response.body);
 
-              let where = { presetID: persetDt.preset.ID, presetName: { $exists: false } };
-              console.log(persetDt);
-              Mdb.bynder_jobs.updateMany(where, {
-                $set: {
-                  presetName: persetDt.preset.name,
-                  presetstages: persetDt.preset.presetstages
-                }
-              }).then(rs => {
-                console.log('data updated', rs)
-              }).catch(ee => { console.log('Error in ', ee) });
-
-            }
-          });
-        }
-      }
-    }
-  }).catch(Err => console.log('Error in finding data', Err))
-})
-// postRoutes.route('/checkLogin').get(function (req, res) {
-//   res.send("Testing checkLogin");
-//   // let noSql=[];
-//   // Mdb.bynder_jobs.find(noSql).limit(200).then((dt)=>{
-//   //   res.send(dt);
-//   // }).catch((Err)=>{
-//   //   console.log("art log select error:", Err);
-//   // });
-// });
-//get testing code
-var a='testing';
 module.exports = postRoutes;

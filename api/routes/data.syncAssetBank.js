@@ -44,11 +44,10 @@ Mdb.assetMeta.find({}, { "curricula_wip.options": 1 }).then((dt) => {
 
 postRoutes.route('/updateAsset/').post(function (req, res) {
   console.log("updateAssetasset data :", req.body);
-  //let id='88021AB3-AA05-4E6C-985CC6AFBBBC2CCB';
   Mdb.bynder_jobs.find({ updateTag: 'Processing', assetID: {$exists: true} }).limit(1).then((data) => {
     if(data.length > 0){
+      res.send({'TotLength': data.length,"target":'For UpdateAsset' });
       for(let dt of data){
-        //data[0].assetID+'/'; // "88021AB3-AA05-4E6C-985CC6AFBBBC2CCB/"
         var request_data = appConfig.getActionInfo("updateAsset", data[0].assetID +"/" );
         request_data.method = 'POST';
         let tags =dt.jobMetaproperties['dde4714035904b0cb68888e0acf389b2'] ||'';
@@ -142,35 +141,12 @@ postRoutes.route('/notification').post(function (req, res) {
     });
 });
 
-postRoutes.route('/getdata/:campaignId').get(function (req, res) {
 
-  let campaignId = req.params.campaignId;
-
-  var request_data = appConfig.getActionInfo("getAssets", campaignId);
-  //request_data.data={ "limit": 5, page: 1 }
-  var token = appConfig.getToken();
-  console.log(campaignId, "::", request_data, "token=>", token);
-  try {
-    request({
-      url: request_data.url, method: request_data.method, form: request_data.data, headers: oauth.toHeader(oauth.authorize(request_data, token))
-    }, function (error, response, body) {
-      console.log("API responded ...", JSON.stringify(request_data));
-      res.send(response);
-    });
-  } catch (err) {
-    console.log(err);
-  }
-
-});
 postRoutes.route('/getAssetsProp/:id').get(function (req, res) {
   let id = req.params.id;
-  //console.log("hitting getAssetsProp", id);
-
   var request_data = appConfig.getActionInfo("getAssetsProp");
   var token = appConfig.getToken();
   request_data.data = {};
-  //console.log("request_data :1 ==>", request_data,"token=>",token);
-
   request({
     url: request_data.url, method: request_data.method, form: request_data.data, headers: oauth.toHeader(oauth.authorize(request_data, token))
   }, function (error, response, body) {
@@ -186,10 +162,8 @@ postRoutes.route('/getAssetsProp/:id').get(function (req, res) {
       }).catch((Err) => {
         console.log("Error in Saved Data", Err);
       });
-
     }
   });
-
 });
 postRoutes.route('/getjobsmeta/').post(function (req, res) {
 
@@ -199,7 +173,6 @@ postRoutes.route('/getjobsmeta/').post(function (req, res) {
   var token = appConfig.getToken();
   request_data.data = {};
   console.log("request_data :1 ==>", request_data, "token=>", token);
-
   request({
     url: request_data.url, method: request_data.method, form: request_data.data, headers: oauth.toHeader(oauth.authorize(request_data, token))
   }, function (error, response, body) {
@@ -210,14 +183,11 @@ postRoutes.route('/getjobsmeta/').post(function (req, res) {
       try {
         let MetaDatas = JSON.parse(response.body);
         for (let temp = 0; temp < MetaDatas.length; temp++) {
-
           Mdb.metaproperties.find({ ID: MetaDatas[temp].ID }).then((dt) => {
             if (dt.length > 0) {
-              //Update
               let set = { ID: MetaDatas[temp].ID };
               let where = { ID: MetaDatas[temp].ID };
               console.log("set:", set, "where:", where)
-              //Mdb.metaproperties.updateOne({ set} ,{ where })
             } else {
               //Insert 
               MetaDatas[temp].tempId= MetaDatas[temp].ID.split('-').join('');
@@ -231,13 +201,9 @@ postRoutes.route('/getjobsmeta/').post(function (req, res) {
       } catch (Err) {
         console.log("Error to getting Jobs Metapropertyes", Err);
       }
-
-      //res.send(response.body);
     }
   });
-
 });
-//
 postRoutes.route('/moveAssetBanktoWorkflow/').post(function (req, res) {
   Mdb.asset.find(
     { tagreaded: true }
@@ -384,7 +350,6 @@ postRoutes.route('/assetSynced/').post(function (req, res) {
   var token = appConfig.getToken();
   request_data.data = {};
   request_data.url = request_data.url + "?limit=0&page=1&total=1";
-
   let response= request({
     url: request_data.url, method: request_data.method, form: request_data.data, headers: oauth.toHeader(oauth.authorize(request_data, token))
   },function (error, response, body) {
@@ -413,7 +378,6 @@ postRoutes.route('/assetSynced/').post(function (req, res) {
               page++;
             }
             while( page <  Totalpage)
-            
           }else{
             res.send({data:"No more changes found ",d: new Date()});
           }
@@ -596,15 +560,12 @@ postRoutes.route('/updatePresets').post(function (req, res) {
   }
   Mdb.bynder_jobs.find( testQ ).then(dt => {
     if (dt.length > 0) {
-      console.log("Un-updated Preset jobs,", dt.length)
       let persetsIds = [...new Set(dt.map(d => d.presetID))];
       persetsIds= persetsIds.filter(d=>d!=null);
-
+      console.log("Un-updated Preset jobs,", dt.length, "Total Unique Preset: ", persetsIds.length);
       // console.log("Data ", persetsIds.length);
       for (let t = 0; t < persetsIds.length; t++) {
         if (!!persetsIds[t]) {
-          //persetsIds[0]='ff808081-67bc-14ff-0167-bdd13fd1009c';
-          console.log("finding preset id:", persetsIds[t]);
           var token = appConfig.getToken();
           var request_data = appConfig.getActionInfo("getPresetByJobs", persetsIds[t]);
           request({
@@ -649,16 +610,6 @@ postRoutes.route('/updatePresets').post(function (req, res) {
               }).catch(Err=>{
                 console.log("Error in Finding data:", Err)
               })
-              /*
-              Mdb.bynder_jobs.updateMany(where, {
-                $set: {
-                  presetName: persetDt.preset.name,
-                  presetstages: persetDt.preset.presetstages
-                }
-              }).then(rs => {
-                console.log('data updated', rs)
-              }).catch(ee => { console.log('Error in ', ee) });
-              */
             }else{
               console.log("Preset API have Some Error: ", response.statusCode);
             }
@@ -668,14 +619,7 @@ postRoutes.route('/updatePresets').post(function (req, res) {
     }
   }).catch(Err => console.log('Error in finding data', Err))
 })
-postRoutes.route('/duplicatejobs').post(function (req, res) {
-  console.log("ACTION: duplicatejobs");
-  let q={ presetID: {$exists: false}, duplicate:{$exists: true}};
-  Mdb.bynder_jobs.find(q).then(data=>{
-    let JobsKey= data.map(d=>job_key);
 
-  })
-})
 
 postRoutes.route('/fixcurrentDuration').post(function (req, res) {
   console.log("ACTION: fixcurrentDuration")
