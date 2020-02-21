@@ -8,6 +8,7 @@ const crypto  = require('crypto');
 const fetch = require('node-fetch');
 let mysql  = require('mysql');
 let slashes = require('slashes');
+let moment = require('moment');
 let config = require('./../config/Mysqlconfig');
 let Mdb = require('../models/post.model');
 let AssetTags = require("../models/AssetTags");
@@ -96,9 +97,15 @@ poRoutes.route('/jobprocessing').post( function (req, res) {
       } else {
         i = 1;
       }
-        var request_data=appConfig.getActionInfo("jobsbycampaignid", data[0].ID );
-          request_data.data= { dateCreatedFrom :  new Date("2019-02-25").toISOString(),
-          dateCreatedTo :new Date().toISOString(), limit: 1000, page: i  };
+      i=7;
+      data[0].ID ='9618db88-fc78-47a5-9916-e864e696ae11';
+      let tillDate = moment().add(1, 'days').toISOString();  
+      var request_data=appConfig.getActionInfo("jobsbycampaignid", data[0].ID );
+        //
+          request_data.data= {  
+          dateCreatedFrom :  new Date("2019-02-25").toISOString(),
+          dateCreatedTo :  tillDate,
+          limit: 1000, page: i  };
         //request_data.url= request_data.url + +"?limit=1000&page="+i
         console.log("data", request_data.url,  request_data.data);
         request({url: request_data.url, method: request_data.method, qs: request_data.data, headers: oauth.toHeader(oauth.authorize(request_data, token))
