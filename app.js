@@ -24,7 +24,7 @@ require('./api/config/passport');
 
 
 // [SH] Bring in the routes for the API (delete the default routes)
-var poRoutes = require('./api/routes/postapis.route');
+var poRoutes1 = require('./api/routes/postapis.route');
 var routesApi = require('./api/routes/index');
 var syncAssetBank = require('./api/routes/data.syncAssetBank');
 var routessmartsheetApi = require('./api/routes/smartsheet');
@@ -97,8 +97,9 @@ app.use(cors());
 // [SH] Initialise Passport before using the route middleware
 app.use(passport.initialize());
 // [SH] Use the API routes when path starts with /api
-app.use('/dataApi', poRoutes);
+
 app.use('/api', routesApi);
+app.use('/dataApi', poRoutes1);
 app.use('/api', routessmartsheetApi);
 app.use('/apiData', routesApiData);
 app.use('/sync', syncAssetBank);

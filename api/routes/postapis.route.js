@@ -1,7 +1,7 @@
 const express = require('express');
 const async = require('async');
 const await = require('await');
-const poRoutes = express.Router();
+const poRoutes1 = express.Router();
 const request = require('request');
 const OAuth   = require('oauth-1.0a');
 const crypto  = require('crypto');
@@ -30,7 +30,7 @@ const oauth = OAuth({
 
 
 
-poRoutes.route('/dataAutomation').post( function (req, res) {
+poRoutes1.route('/dataAutomation').post( function (req, res) {
   Mdb.bynder_jobs.find({
     isUpdated: true
   }).then(data=>{
@@ -65,7 +65,7 @@ poRoutes.route('/dataAutomation').post( function (req, res) {
     }
   })
 });
-poRoutes.route('/jobprocessing').post( function (req, res) {
+poRoutes1.route('/jobprocessing').post( function (req, res) {
   const myProm1 = new Promise(function(resolve, reject) {
       Mdb.campaign.find({ process: true, ExeOrder: true }).limit(1).then(dt=>{
         if(dt.length > 0) {
@@ -176,7 +176,7 @@ poRoutes.route('/jobprocessing').post( function (req, res) {
       });
   });
 });
-poRoutes.route('/jobsbycampaignid/:campaignId').post( function (req, res) {
+poRoutes1.route('/jobsbycampaignid/:campaignId').post( function (req, res) {
   let campaignId = req.params.campaignId;
   console.log("ACT: jobsbycampaignid and :", campaignId );
   let RunningDt  = UpdatingRequest.filter(d=> d.ID == campaignId );
@@ -223,4 +223,4 @@ poRoutes.route('/jobsbycampaignid/:campaignId').post( function (req, res) {
     }
   })
 });
-module.exports = poRoutes;
+module.exports = poRoutes1;

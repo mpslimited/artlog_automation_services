@@ -10,11 +10,15 @@ const Mdb  = require('../models/post.model');
 const checkToken = require('../models/middleware');
 const mongoose = require( 'mongoose' );
 const jwt = require('jsonwebtoken');
-const Memcached = require('memcached');
+const redis = require("redis");
+
+//const port_redis = process.env.PORT || 6379;
+//const redis_client = redis.createClient(port_redis);
+
 //let appConfig=require('./config');
 // Metadt= new Metadt('dddd');
 // Metadt.print("hello this is metdt class");
-var memcached = new Memcached();
+//var memcached = new Memcached();
 /* code to connect with your memecahced server */
 /*
 memcached.connect( 'localhost:11211', function( err, conn ){
@@ -657,7 +661,8 @@ postRoutes.route('/artloginit', checkToken.checkToken).post(function (req, res) 
   }).catch((Err)=>{
     console.log("Finding error from searchState: ", Err);
   });
-})
+});
+
 postRoutes.route('/updatelaststage').post(function (req, res) {
   console.log('Data testing.. in updatelaststage action');
   Mdb.bynder_jobs.find({
@@ -697,7 +702,13 @@ postRoutes.route('/updatelaststage').post(function (req, res) {
     console.log( "Error in ", Err);
    });
 });
-
+/*
+postRoutes.route('/artlogdata1').post(async (req, res)=> {
+  redis_client.get('ActiveData', (err, data) => {
+    res.send(data);
+  });
+});
+*/
 postRoutes.route('/artlogdata', checkToken.checkToken).post(function (req, res) {
     console.log("req parameters :" , req.body);
     let $and = [ ];
@@ -772,10 +783,9 @@ postRoutes.route('/artlogdata', checkToken.checkToken).post(function (req, res) 
     let fields={presetstages:1,mathAuditor:1,flagedTeam:1,dateCreated:1, job_date_finished:1,pageNo:1,killed:1,flaged:1,batch:1,presetstages:1,isPaging:1, comment:1, mverification:1, duplicate:1, presetName:1, Preset_Stages:1, id:1, name:1, description:1, job_active_stage:1, jobMetaproperties:1, jobID:1, job_key:1, dateCreated:1, job_date_finished:1, thumb:1, generatedTags:1};
     console.log("Calling artlogdata Data " , JSON.stringify(q), JSON.stringify(fields));
     // testing in Live Build with Pradeep Sir
-    //.skip(2000).limit(1000)
+    //.skip(2000)
     Mdb.bynder_jobs.find(q, fields ).sort({job_key:-1}).then((data)=>{
     let dataResult=[];
-
     for(let  dtkey in data){
       var objData = data[dtkey].toObject();
       if(!!data[dtkey].jobMetaproperties){
