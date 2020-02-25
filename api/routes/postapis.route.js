@@ -66,6 +66,7 @@ poRoutes1.route('/dataAutomation').post( function (req, res) {
   })
 });
 poRoutes1.route('/jobprocessing').post( function (req, res) {
+  console.log("jobprocessing Action");
   const myProm1 = new Promise(function(resolve, reject) {
       Mdb.campaign.find({ process: true, ExeOrder: true }).limit(1).then(dt=>{
         if(dt.length > 0) {
