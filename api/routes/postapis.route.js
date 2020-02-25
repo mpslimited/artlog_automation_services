@@ -18,6 +18,8 @@ let JobProcess = require('../models/JobProcess');
 let ApiProcess = require('../models/ApiProcess');
 let token=appConfig.getToken();
 
+
+
 const oauth = OAuth({
   consumer: { key: '71BEFFCC-2CC9-476D-93A8A79BB92BD87B', secret: 'a8de7d89165b8234405b35c83553a318' },
   signature_method: 'HMAC-SHA1', hash_function (base_string, key) {
@@ -97,11 +99,8 @@ poRoutes.route('/jobprocessing').post( function (req, res) {
       } else {
         i = 1;
       }
-      i=7;
-      data[0].ID ='9618db88-fc78-47a5-9916-e864e696ae11';
       let tillDate = moment().add(1, 'days').toISOString();  
       var request_data=appConfig.getActionInfo("jobsbycampaignid", data[0].ID );
-        //
           request_data.data= {  
           dateCreatedFrom :  new Date("2019-02-25").toISOString(),
           dateCreatedTo :  tillDate,
