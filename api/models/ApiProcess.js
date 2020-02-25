@@ -208,7 +208,9 @@ class ApiProcess {
         JobsResult.dateCreated=new Date( JobsResult.dateCreated );
     }
     if( typeof JobsResult.jobMetaproperties['ccf531b93d1c46428aa5c52bc8cc639f'] != "undefined"){
-      JobsResult.job_key=JobsResult.jobMetaproperties['ccf531b93d1c46428aa5c52bc8cc639f'];
+      if(!!JobsResult.jobMetaproperties && !!JobsResult.jobMetaproperties['ccf531b93d1c46428aa5c52bc8cc639f']){
+        JobsResult.job_key = JobsResult.jobMetaproperties['ccf531b93d1c46428aa5c52bc8cc639f'].trim();
+      }
     }
     //JobsResult[k].job_key=""; job_key should be update with meatupdate request
     JobsResult.job_date_finished="";
