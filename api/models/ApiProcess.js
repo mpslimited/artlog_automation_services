@@ -209,11 +209,18 @@ class ApiProcess {
     }
     if( typeof JobsResult.jobMetaproperties['ccf531b93d1c46428aa5c52bc8cc639f'] != "undefined"){
       if(!!JobsResult.jobMetaproperties && !!JobsResult.jobMetaproperties['ccf531b93d1c46428aa5c52bc8cc639f']){
-        JobsResult.job_key = JobsResult.jobMetaproperties['ccf531b93d1c46428aa5c52bc8cc639f'].trim();
+        //job_key Ruls ignore space and convert to uppercase, EM- to EM2-
+        let NewJobKey = JobsResult.jobMetaproperties['ccf531b93d1c46428aa5c52bc8cc639f'].trim();
+        try{
+          NewJobKey= NewJobKey.toUpperCase().replace('EM-','EM2-');
+        }catch(e){
+
+        }
+        JobsResult.job_key = NewJobKey;
       }
     }
     //JobsResult[k].job_key=""; job_key should be update with meatupdate request
-    JobsResult.job_date_finished="";
+    JobsResult.job_date_finished ="";
     JobsResult.Preset_Stages=MPS_Preset_Stages;
     JobsResult.loadPreset=false;
     JobsResult.loadMeta=false;
