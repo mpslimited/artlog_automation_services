@@ -96,7 +96,17 @@ let bynder_jobs= new Schema({
   flagedTeam: {type: String},
   killed: { type: Boolean},
   updateDt: {type: Boolean},
-  mathAuditor: { type: String}
+  mathAuditor: { type: String},
+  ///---As Art Team Columns ---//
+  batchCompletion : {type: Date},
+  /// for batch completion Date ///
+  receiveddate : { type: Date },
+  mpsDueDate : { type: String },
+  artTeamStatus : { type: String },
+  artTeamPriority : { type: String },
+  exceptionCategory : { type: String },
+  exceptoin :  { type: String },
+  
  },{
     collection: 'bynder_jobs'
 });
