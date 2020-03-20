@@ -65,6 +65,27 @@ poRoutes1.route('/dataAutomation').post( function (req, res) {
     }
   })
 });
+const redis = require("redis");
+const axios = require("axios");
+const port_redis = process.env.PORT || 6379;
+const redis_client = redis.createClient(port_redis);
+
+poRoutes1.route('/activeJobs').post( function (req, res) {
+  Mdb.bynder_jobs.find({ "job_active_stage.status": {
+    $in: ["Active","NeedsChanges"]
+  }}).then((data)=>{
+    if(data.length > 0){
+      redis_client.setex('active', 3600, JSON.stringify(data));
+    }
+  });
+});
+poRoutes1.route('/approvedJobs').post( function (req, res) {
+  Mdb.bynder_jobs.find({'job_active_stage.status':'Approved'}).then((data)=>{
+    if(data.length > 0){
+      redis_client.setex('approved', 3600, JSON.stringify(data));
+    }
+  });
+});
 poRoutes1.route('/jobprocessing').post( function (req, res) {
   console.log("jobprocessing Action");
   const myProm1 = new Promise(function(resolve, reject) {
@@ -105,7 +126,7 @@ poRoutes1.route('/jobprocessing').post( function (req, res) {
           request_data.data= {  
           dateCreatedFrom :  new Date("2019-02-25").toISOString(),
           dateCreatedTo :  tillDate,
-          limit: 1000, page: i  };
+          limit: 250, page: i  };
         //request_data.url= request_data.url + +"?limit=1000&page="+i
         console.log("data", request_data.url,  request_data.data);
         request({url: request_data.url, method: request_data.method, qs: request_data.data, headers: oauth.toHeader(oauth.authorize(request_data, token))
@@ -136,7 +157,7 @@ poRoutes1.route('/jobprocessing').post( function (req, res) {
       myProm2.then(data=>{
         console.log( "Total Data Length :", data.data.length );
         let $campSet={  process: true, processedPage: i /* totalPage: i,*/ }
-        if(data.data.length < 1000){  $campSet.totalPage = i; $campSet.process = false  };
+        if(data.data.length < 250){  $campSet.totalPage = i; $campSet.process = false  };
         Mdb.campaign.updateMany({ ID: data.ID } ,{
           $set: $campSet
          }).then(d=>{
