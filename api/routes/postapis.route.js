@@ -64,7 +64,8 @@ poRoutes1.route('/dataAutomation').post( function (req, res) {
       }
     }
   })
-});
+}); 
+
 const redis = require("redis");
 const axios = require("axios");
 const port_redis = process.env.PORT || 6379;
@@ -73,19 +74,22 @@ const redis_client = redis.createClient(port_redis);
 poRoutes1.route('/activeJobs').post( function (req, res) {
   Mdb.bynder_jobs.find({ "job_active_stage.status": {
     $in: ["Active","NeedsChanges"]
-  }}).then((data)=>{
-    if(data.length > 0){
-      redis_client.setex('active', 3600, JSON.stringify(data));
+  }}).limit(1000).then((data)=>{
+    if(data.length > 0){ //3600,
+      redis_client.set('active',  JSON.stringify(data));
+      res.send({'msg':'active job moved in redis', 'Length': data.length});
     }
   });
 });
 poRoutes1.route('/approvedJobs').post( function (req, res) {
   Mdb.bynder_jobs.find({'job_active_stage.status':'Approved'}).then((data)=>{
-    if(data.length > 0){
-      redis_client.setex('approved', 3600, JSON.stringify(data));
+    if(data.length > 0){ //3600,
+      redis_client.set('approved',  JSON.stringify(data));
+      res.send({'msg':'approved job moved in redis', 'Length': data.length});
     }
   });
-});
+}); 
+
 poRoutes1.route('/jobprocessing').post( function (req, res) {
   console.log("jobprocessing Action");
   const myProm1 = new Promise(function(resolve, reject) {
