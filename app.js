@@ -99,7 +99,7 @@ app.use(passport.initialize());
 // [SH] Use the API routes when path starts with /api
 
 app.use('/api', routesApi);
-//app.use('/dataApi', poRoutes1);
+app.use('/dataApi', poRoutes1);
 app.use('/api', routessmartsheetApi);
 app.use('/apiData', routesApiData);
 app.use('/sync', syncAssetBank);

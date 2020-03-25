@@ -1,3 +1,4 @@
+let moment = require('moment');
 //  class AssetTags{
 //     constructor(dt){
 //         this.data=dt;
@@ -411,6 +412,55 @@
     }
      print( dd){
         console.log('Name is :'+ this.name, '==>', dd);
+     }
+     getExceptoin(Obj){
+        let rs='MPS Exception';
+        return rs;
+     }
+     getExceptionCategory(Obj){
+        let rs='MPS Exception Category';
+        return rs;
+     }
+     getTeamPriority(Obj){
+        let rs='MPS TeamPriority';
+        return rs;
+     }
+     getTeamStatus(Obj){
+         let rs='MPS Team Status';
+         return rs;
+     }
+     getMpsDueDate(Obj){
+        let dueDate='';
+        let recivedDt = this.getMathAuditStartDt(Obj);
+        let position = this.getMathAuditPosition(Obj);
+        if(recivedDt!=''){
+            if ( Obj.job_active_stage.position == position && Obj.job_active_stage.status=='Active'){
+             
+                let dueDate = moment(recivedDt).add(2, 'days').toISOString(); 
+            }if ( Obj.job_active_stage.position == position && Obj.job_active_stage.status=='NeedsChanges'){
+               let dueDate = moment(recivedDt).add(1, 'days').toISOString();
+            }
+        }
+        return dueDate;
+     }
+     getMathAuditPosition(Obj){
+        let Position=0;
+        let stObj =  Obj.presetstages.filter(d => d.name == 'Math Audit Review');
+        if(stObj.length > 0){
+            Position= stObj[0].position;
+        }
+        return Position;
+     }
+     getMathAuditStartDt(obj){
+      let stObj =  obj.presetstages.filter(d => d.name == 'Math Audit Review');
+      let retDt='';
+      if(stObj.length > 0) {
+        let NObj=obj.Preset_Stages.filter( d => d.position == stObj[0].position);
+        if(NObj.length > 0){
+            retDt= NObj[0].start_date;
+        }
+      }  
+      return retDt;
      }
      getStageRTeam(name){
         //this.getWorkflow()

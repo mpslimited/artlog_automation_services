@@ -117,7 +117,7 @@ postRoutes.route('/notification').post(function (req, res) {
             <td> ${ isindex  }</td>
           </tr>` ;
         }
-        table=table+`</table>`;
+        table=table + `</table>`;
         let msg='<p>Dear User,<p><p>Automated tag generation and pushing to asset bank activity has been completed. Please see the status report below for complete details.</p>';
         msg=msg + table +`<br> Thanks,<br> Administrator`;
         mailOptions.html=msg;
@@ -496,10 +496,10 @@ postRoutes.route('/missingStages').post(function (req, res) {
 // updating Missing Jobs MetaProperty 
 
 postRoutes.route('/approvedworkfolwasset').post(function (req, res) {
-  console.log('approvedworkfolwasset action for merging approved job which is in asset bank');
+  console.log('approvedworkflowasset action for merging approved job which is in asset bank');
   let Founded=[], NotFounded=[];
   Mdb.bynder_jobs.find({ "job_active_stage.status": 'Approved', assetID: { $exists: false} ,  job_key: { $exists: true, $ne: ''}}).then(data=>{
-    console.log( "total Active Jonbs :", data.length);
+    console.log( "total Active Jobs :", data.length);
     for(let temp =0; temp < data.length ; temp ++){
       let NoSql={
         $or: [{

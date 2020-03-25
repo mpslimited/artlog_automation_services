@@ -64,6 +64,27 @@ class ApiProcess {
             if( typeof JobsResult.jobMetaproperties['ccf531b93d1c46428aa5c52bc8cc639f'] != "undefined"){
               $set.job_key=JobsResult.jobMetaproperties['ccf531b93d1c46428aa5c52bc8cc639f'];
             }
+            
+            // add Art Team Columns //
+            if(!!JobsResult.job_active_stage.id && JobsResult.job_active_stage.id =='cbafeafc-b81a-4c57-a0f9-7b525805f20b'){
+              $set.receiveddate=new Date();
+              if(JobsResult.job_active_stage.status == 'Active' ) {
+                $set.mpsDueDate = moment().add(2, 'days').toISOString();
+              } else if(JobsResult.job_active_stage.status == 'NeedsChanges') {
+                $set.mpsDueDate = moment().add(1, 'days').toISOString();
+              }
+              $set.artTeamStatus ='WIP';
+              //$set.artTeamStatus ='Delivered';
+              //$set.artTeamStatus ='Overdue';
+            }
+            /*
+            receiveddate : '',
+            mpsDueDate : '',
+            artTeamStatus : '',
+            artTeamPriority : '',
+            //exceptionCategory : { type: String }, //User Input//
+            //exceptoin :  { type: String }, //User Input//
+              */
             $set.jobMetaproperties=JobsResult.jobMetaproperties;
             $set.job_previous_stage=JobsResult.job_previous_stage;
             $set.job_active_stage=JobsResult.job_active_stage;
