@@ -74,7 +74,7 @@ const redis_client = redis.createClient(port_redis);
 poRoutes1.route('/activeJobs').post( function (req, res) {
   Mdb.bynder_jobs.find({ "job_active_stage.status": {
     $in: ["Active","NeedsChanges"]
-  }}).limit(1000).then((data)=>{
+  }}).then((data)=>{
     if(data.length > 0){ //3600,
       redis_client.set('active',  JSON.stringify(data));
       res.send({'msg':'active job moved in redis', 'Length': data.length});
