@@ -796,7 +796,7 @@ postRoutes.route('/searchdtinit').post(async (req, res)=> {
 const port_redis = process.env.PORT || 6379;
 const redis_client = redis.createClient(port_redis);
 
-postRoutes.route('/artlogdata', checkToken.checkToken).post(function (req, res) {
+postRoutes.route('/artlogdata11', checkToken.checkToken).post(function (req, res) {
   console.log("req parameters :" , req.body);
   let dataResult=[];
   redis_client.get('active', function(err, resData) {
@@ -921,7 +921,7 @@ postRoutes.route('/artlogdata', checkToken.checkToken).post(function (req, res) 
     // })
   });
 });
-postRoutes.route('/artlogdata11', checkToken.checkToken).post(function (req, res) {
+postRoutes.route('/artlogdata', checkToken.checkToken).post(function (req, res) {
     console.log("req parameters :" , req.body);
     let $and = [ ];
     if(!!req.body.grade && req.body.grade!=""){
