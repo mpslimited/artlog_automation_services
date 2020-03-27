@@ -1075,7 +1075,7 @@ postRoutes.route('/artlogdata', checkToken.checkToken).post(function (req, res) 
     // testing in Live Build with Pradeep Sir 
     //.skip(  parseInt(req.body.fromPage)).limit( parseInt(req.body.toPage) ).
     //.skip(2000)
-    Mdb.bynder_jobs.find(q, fields ).sort({job_key:-1}).limit(100).then((data)=>{
+    Mdb.bynder_jobs.find(q, fields ).sort({job_key:-1}).then((data)=>{
     let dataResult=[];
     for(let  dtkey in data){
       var objData = data[dtkey].toObject();
