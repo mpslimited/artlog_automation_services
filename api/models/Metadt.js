@@ -422,7 +422,18 @@ let moment = require('moment');
         return rs;
      }
      getTeamPriority(Obj){
-        let rs='MPS TeamPriority';
+        let rs='Low';
+        if( moment(Obj.batchCDate).diff( moment(Obj.receiveddate), 'day') > 7 ){
+            rs='Low';
+        } else if( (moment(Obj.batchCDate).diff( moment(Obj.receiveddate), 'day') <= 7) && (moment(Obj.batchCDate).diff( moment(Obj.receiveddate), 'day') > 1)  ){
+            rs='Medium';
+        } else  if ( moment(Obj.batchCDate).diff( moment(Obj.receiveddate), 'day') <= 1){
+            rs='High';
+        }
+        if(!Obj.batchCDate || Obj.batchCDate=="" || !Obj.receiveddate ){
+            rs=''; 
+        }
+        //Obj.batchCDate  Obj.receiveddate
         return rs;
      }
      getTeamStatus(Obj){

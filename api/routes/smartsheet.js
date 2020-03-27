@@ -229,6 +229,80 @@ postRoutes.route('/updateartlog').post(function (req, res) {
       res.send("Data Update Successfully");
   }
 });
+
+postRoutes.route('/updateBulkBatchCDate').post(function (req, res) {
+  console.log("ACTION : updateBulkBatchCDate REQ==>",req.body);
+  if(req.body.selectedids ){
+    let ids = JSON.parse(req.body.selectedids);
+    Mdb.bynder_jobs.find({ _id: { $in : ids}}).then(data=>{
+      for(let dt in data){
+        //data[dt].jobMetaproperties['662315fccf37435081da009bd3fbe49b']=req.body.batch;
+        Mdb.bynder_jobs.updateOne({ _id : data[dt]._id},{
+          $set : { 
+            //jobMetaproperties: data[dt].jobMetaproperties
+            batchCDate : new Date(req.body.batchCDate)
+           }
+        }).then(dt=>{
+          console.log("data Updated Successfully");
+        }).catch(Err=>{
+          console.log('Error In data');
+        });
+      }
+      res.send(data.map(d=> ({_id: d._id, batchCDate: new Date(req.body.batchCDate).toISOString()})));
+    }).catch(Err=>{
+      console.log('finding Data have some error');
+    });
+  }
+});
+
+postRoutes.route('/updateBulkExceptionCat').post(function (req, res) {
+  console.log("ACTION : updateBulkExceptionCat REQ==>",req.body);
+  if(req.body.selectedids ){
+    let ids = JSON.parse(req.body.selectedids);
+    Mdb.bynder_jobs.find({ _id: { $in : ids}}).then(data=>{
+      for(let dt in data){
+        //data[dt].jobMetaproperties['662315fccf37435081da009bd3fbe49b']=req.body.batch;
+        Mdb.bynder_jobs.updateOne({ _id : data[dt]._id},{
+          $set : { 
+            //jobMetaproperties: data[dt].jobMetaproperties
+            exceptionCategory : req.body.exceptionCategory
+           }
+        }).then(dt=>{
+          console.log("data Updated Successfully");
+        }).catch(Err=>{
+          console.log('Error In data');
+        });
+      }
+      res.send(data.map(d=> ({_id: d._id, exceptionCategory: req.body.exceptionCategory})));
+    }).catch(Err=>{
+      console.log('finding Data have some error');
+    });
+  }
+});
+postRoutes.route('/updateBulkException').post(function (req, res) {
+  console.log("ACTION : updateBulkException REQ==>",req.body);
+  if(req.body.selectedids ){
+    let ids = JSON.parse(req.body.selectedids);
+    Mdb.bynder_jobs.find({ _id: { $in : ids}}).then(data=>{
+      for(let dt in data){
+        //data[dt].jobMetaproperties['662315fccf37435081da009bd3fbe49b']=req.body.batch;
+        Mdb.bynder_jobs.updateOne({ _id : data[dt]._id},{
+          $set : { 
+            //jobMetaproperties: data[dt].jobMetaproperties exception
+            exception : req.body.exception
+           }
+        }).then(dt=>{
+          console.log("data Updated Successfully");
+        }).catch(Err=>{
+          console.log('Error In data');
+        });
+      }
+      res.send(data.map(d=> ({_id: d._id, exception: req.body.exception})));
+    }).catch(Err=>{
+      console.log('finding Data have some error');
+    });
+  }
+});
 postRoutes.route('/updateBulkBatch').post(function (req, res) {
   console.log("ACTION : updateBulkBatch REQ==>",req.body);
   if(req.body.selectedids ){
@@ -753,7 +827,7 @@ postRoutes.route('/searchdtinit').post(async (req, res)=> {
          objData.artTeamStatus     =   Meta.getTeamStatus(objData);
          objData.artTeamPriority   =   Meta.getTeamPriority(objData);
          objData.exceptionCategory =   Meta.getExceptionCategory(objData);
-         objData.exceptoin         =   Meta.getExceptoin(objData);
+         objData.exception         =   Meta.getExceptoin(objData);
          //------------------------//
          objData.currentRTeam =   Meta.getStageRTeam(objData.cstage);
          objData.totalage     =   dateDiffinDurationStage(data[dtkey].job_date_finished , dateCreatedJob );
@@ -847,7 +921,7 @@ postRoutes.route('/artlogdata11', checkToken.checkToken).post(function (req, res
        objData.artTeamStatus     =   Meta.getTeamStatus(objData);
        objData.artTeamPriority   =   Meta.getTeamPriority(objData);
        objData.exceptionCategory =   Meta.getExceptionCategory(objData);
-       objData.exceptoin         =   Meta.getExceptoin(objData);
+       objData.exception         =   Meta.getExceptoin(objData);
        //------------------------//
        objData.currentRTeam =   Meta.getStageRTeam(objData.cstage);
        objData.totalage     =   dateDiffinDurationStage(data[dtkey].job_date_finished , dateCreatedJob );
@@ -992,11 +1066,16 @@ postRoutes.route('/artlogdata', checkToken.checkToken).post(function (req, res) 
       $and.push( {"campaignID":{"$in": ['4924dc05-03c5-4086-90ce-41d8bf501684','9618db88-fc78-47a5-9916-e864e696ae11'] } });
        q= { $and};
     } 
-    let fields={presetstages:1,mathAuditor:1,flagedTeam:1,dateCreated:1, job_date_finished:1,pageNo:1,killed:1,flaged:1,batch:1,presetstages:1,isPaging:1, comment:1, mverification:1, duplicate:1, presetName:1, Preset_Stages:1, id:1, name:1, description:1, job_active_stage:1, jobMetaproperties:1, jobID:1, job_key:1, dateCreated:1, job_date_finished:1, thumb:1, generatedTags:1};
+    /*
+   
+  */
+    //q={  id:"1ad18583-18cf-4cc7-bbcf-64f5621ea06f" };
+    let fields={ batchCDate:1,receiveddate:1,mpsDueDate:1,artTeamStatus : 1, artTeamPriority : 1, exceptionCategory : 1, exception:1, presetstages:1,mathAuditor:1,flagedTeam:1,dateCreated:1, job_date_finished:1,pageNo:1,killed:1,flaged:1,batch:1,presetstages:1,isPaging:1, comment:1, mverification:1, duplicate:1, presetName:1, Preset_Stages:1, id:1, name:1, description:1, job_active_stage:1, jobMetaproperties:1, jobID:1, job_key:1, dateCreated:1, job_date_finished:1, thumb:1, generatedTags:1};
     console.log("Calling artlogdata Data " , JSON.stringify(q), JSON.stringify(fields));
-    // testing in Live Build with Pradeep Sir
+    // testing in Live Build with Pradeep Sir 
+    //.skip(  parseInt(req.body.fromPage)).limit( parseInt(req.body.toPage) ).
     //.skip(2000)
-    Mdb.bynder_jobs.find(q, fields ).sort({job_key:-1}).skip(  parseInt(req.body.fromPage)).limit( parseInt(req.body.toPage) ).then((data)=>{
+    Mdb.bynder_jobs.find(q, fields ).sort({job_key:-1}).limit(100).then((data)=>{
     let dataResult=[];
     for(let  dtkey in data){
       var objData = data[dtkey].toObject();
@@ -1036,13 +1115,15 @@ postRoutes.route('/artlogdata', checkToken.checkToken).post(function (req, res) 
             objData.cstage = objdt[0].name;
           }
         }
+        objData.artTeamPriority   =   Meta.getTeamPriority(objData);
          // Art Team Columns // 
-         objData.receiveddate      =   Meta.getMathAuditStartDt(objData);
+         /*objData.receiveddate      =   Meta.getMathAuditStartDt(objData);
          objData.mpsDueDate        =   Meta.getMpsDueDate(objData);
          objData.artTeamStatus     =   Meta.getTeamStatus(objData);
          objData.artTeamPriority   =   Meta.getTeamPriority(objData);
          objData.exceptionCategory =   Meta.getExceptionCategory(objData);
          objData.exceptoin         =   Meta.getExceptoin(objData);
+         */
          //------------------------//
          objData.currentRTeam =   Meta.getStageRTeam(objData.cstage);
          objData.totalage     =   dateDiffinDurationStage(data[dtkey].job_date_finished , dateCreatedJob );

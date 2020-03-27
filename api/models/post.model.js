@@ -98,14 +98,14 @@ let bynder_jobs= new Schema({
   updateDt: {type: Boolean},
   mathAuditor: { type: String},
   ///---As Art Team Columns ---//
-  batchCompletion : {type: Date},
+  batchCDate : {type: Date},
   /// for batch completion Date ///
   receiveddate : { type: Date },
   mpsDueDate : { type: Date },
   artTeamStatus : { type: String },
   artTeamPriority : { type: String },
   exceptionCategory : { type: String },
-  exceptoin :  { type: String },
+  exception :  { type: String },
   
  },{
     collection: 'bynder_jobs'
