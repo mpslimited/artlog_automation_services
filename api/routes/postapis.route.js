@@ -130,7 +130,7 @@ poRoutes1.route('/jobprocessing').post( function (req, res) {
           request_data.data= {  
           dateCreatedFrom :  new Date("2019-02-25").toISOString(),
           dateCreatedTo :  tillDate,
-          limit: 250, page: i  };
+          limit: 500, page: i  };
         //request_data.url= request_data.url + +"?limit=1000&page="+i
         console.log("data", request_data.url,  request_data.data);
         request({url: request_data.url, method: request_data.method, qs: request_data.data, headers: oauth.toHeader(oauth.authorize(request_data, token))
@@ -161,7 +161,7 @@ poRoutes1.route('/jobprocessing').post( function (req, res) {
       myProm2.then(data=>{
         console.log( "Total Data Length :", data.data.length );
         let $campSet={  process: true, processedPage: i /* totalPage: i,*/ }
-        if(data.data.length < 250){  $campSet.totalPage = i; $campSet.process = false  };
+        if(data.data.length < 500){  $campSet.totalPage = i; $campSet.process = false  };
         Mdb.campaign.updateMany({ ID: data.ID } ,{
           $set: $campSet
          }).then(d=>{

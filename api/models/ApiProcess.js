@@ -1,4 +1,5 @@
 const request = require('request');
+let moment = require('moment');
 
 class ApiProcess {
   constructor(db){
@@ -66,16 +67,30 @@ class ApiProcess {
             }
             
             // add Art Team Columns //
-            if(!!JobsResult.job_active_stage.id && JobsResult.job_active_stage.id =='cbafeafc-b81a-4c57-a0f9-7b525805f20b'){
-              $set.receiveddate=new Date();
-              if(JobsResult.job_active_stage.status == 'Active' ) {
-                $set.mpsDueDate = moment().add(2, 'days').toISOString();
-              } else if(JobsResult.job_active_stage.status == 'NeedsChanges') {
-                $set.mpsDueDate = moment().add(1, 'days').toISOString();
+            if(serDocs.presetstages.length > 0) {
+              let dtf= serDocs.presetstages.filter(d=> d.position == JobsResult.job_active_stage.position)
+              let dtfPo = serDocs.presetstages.filter(d=> d.name == 'Designer Create Asset');
+              let position=0;
+              if(dtfPo.length > 0){
+                position = dtfPo[0].position;
               }
-              $set.artTeamStatus ='WIP';
-              //$set.artTeamStatus ='Delivered';
-              //$set.artTeamStatus ='Overdue';
+              if(dtf.length > 0 ){
+                let stageName = dtf[0].name || dtf[0].StageNames;
+                if(stageName!="" && stageName.trim() == 'Designer Create Asset' ){
+                  $set.receiveddate=new Date();
+                  if(JobsResult.job_active_stage.status == 'Active' ) {
+                    $set.mpsDueDate = moment().add(2, 'days').toISOString();
+                  } else if(JobsResult.job_active_stage.status == 'NeedsChanges') {
+                    $set.mpsDueDate = moment().add(1, 'days').toISOString();
+                  }
+                  $set.artTeamStatus ='WIP';
+                  //$set.artTeamStatus ='Delivered';
+                  //$set.artTeamStatus ='Overdue';
+                }
+                if(position >0 && position < dtf[0].position ){
+                  $set.artTeamStatus ='Delivered';
+                }
+              }
             }
             /*
             receiveddate : '',
