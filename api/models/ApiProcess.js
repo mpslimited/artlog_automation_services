@@ -31,12 +31,15 @@ class ApiProcess {
         PresetData=serDocs.joincollection[0].presetstages;
       }
       var NewPreset_Stages=new Array();
+      if(serDocs.id=='1af02679-9749-4a74-a993-7561096b2b0f'){
+        console.log(serDocs.id);
+      }
         if(JobsResult.hasOwnProperty('job_active_stage') && serDocs.job_active_stage ){
-          var currentStage=JobsResult.job_active_stage;
-          var oldStage=serDocs.job_active_stage;
+          var currentStage  = JobsResult.job_active_stage;
+          var oldStage  = serDocs.job_active_stage;
           //console.log( "Stage Positon moment :", currentStage.position != oldStage.position);
           if(currentStage.position != oldStage.position ){
-            var OldPreset_Stages=serDocs.Preset_Stages;
+            var OldPreset_Stages = serDocs.Preset_Stages;
               for(let num=0; num< OldPreset_Stages.length; num++){
                 if(num==(OldPreset_Stages.length-1)){
                   //console.log("PresetData data value", PresetData);
@@ -67,8 +70,9 @@ class ApiProcess {
             }
             
             // add Art Team Columns //
+            // $set=getDataSetter(serDocs, $set);
             if(serDocs.presetstages.length > 0) {
-              let dtf= serDocs.presetstages.filter(d=> d.position == JobsResult.job_active_stage.position)
+              let dtf = serDocs.presetstages.filter(d=> d.position == JobsResult.job_active_stage.position)
               let dtfPo = serDocs.presetstages.filter(d=> d.name == 'Designer Create Asset');
               let position=0;
               if(dtfPo.length > 0){
@@ -77,11 +81,11 @@ class ApiProcess {
               if(dtf.length > 0 ){
                 let stageName = dtf[0].name || dtf[0].StageNames;
                 if(stageName!="" && stageName.trim() == 'Designer Create Asset' ){
-                  $set.receiveddate=new Date();
+                  $set.receiveddate = new Date();
                   if(JobsResult.job_active_stage.status == 'Active' ) {
-                    $set.mpsDueDate = moment().add(2, 'days').toISOString();
+                    $set.mpsDueDate = new Date(moment().add(2, 'days').toISOString());
                   } else if(JobsResult.job_active_stage.status == 'NeedsChanges') {
-                    $set.mpsDueDate = moment().add(1, 'days').toISOString();
+                    $set.mpsDueDate = new Date(moment().add(1, 'days').toISOString());
                   }
                   $set.artTeamStatus ='WIP';
                   //$set.artTeamStatus ='Delivered';
@@ -107,9 +111,9 @@ class ApiProcess {
             $set.Preset_Stages=NewPreset_Stages;
             
             this.Mdb.bynder_jobs.updateOne({ id : JobsResult.id , duplicate: {$exists: false} }, { $set : $set })
-              .then((res) => { 
-                console.log( JobsResult.id,"==>", res); })
-              .catch((Err) => { console.log("unable to updated bynder_jobs ID:", JobsResult.id, Err); });
+            .then((res) => { 
+              console.log( JobsResult.id,"==>", res); })
+            .catch((Err) => { console.log("unable to updated bynder_jobs ID:", JobsResult.id, Err); });
             // for duplicate data Update skip some Meta data
             if(docs.length > 1){
               for(let ddtt in docs){

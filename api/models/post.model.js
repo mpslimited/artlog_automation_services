@@ -101,7 +101,7 @@ let bynder_jobs= new Schema({
   batchCompletion : {type: Date},
   /// for batch completion Date ///
   receiveddate : { type: Date },
-  mpsDueDate : { type: String },
+  mpsDueDate : { type: Date },
   artTeamStatus : { type: String },
   artTeamPriority : { type: String },
   exceptionCategory : { type: String },
