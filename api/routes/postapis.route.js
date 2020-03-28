@@ -90,6 +90,41 @@ poRoutes1.route('/approvedJobs').post( function (req, res) {
   });
 }); 
 
+poRoutes1.route('/existingArtTeamData').post( function (req, res) {
+  Mdb.bynder_jobs.find().then((data)=>{
+     for(let dt of data){
+       if(!!dt.presetstages && dt.presetstages.length > 0 && !!dt.Preset_Stages && dt.Preset_Stages.length > 0){
+        let dd = dt.presetstages.filter(d => d.name =='Designer Create Asset');
+        if(dd.length > 0 ){
+         let poData= dt.Preset_Stages.filter(d => d.position == dd[0].position );
+         if(poData.length > 0 && !!poData[poData.length-1].start_date ) {
+           let $set = {}
+           $set.receiveddate = poData[poData.length-1].start_date;
+           if(poData.length > 1){
+            $set.mpsDueDate = new Date(moment(poData[poData.length-1].start_date).add(2, 'days').toISOString());
+           }else {
+            $set.mpsDueDate = new Date(moment(poData[poData.length-1].start_date).add(2, 'days').toISOString());
+           }
+           
+           if(!!poData[poData.length-1].job_date_finished){
+            $set.artTeamStatus ='Delivered';
+           }else {
+            $set.artTeamStatus ='WIP';
+           }
+           Mdb.bynder_jobs.updateOne({ _id: dt._id },{
+             $set: $set
+           }).then((dt)=>{
+            console.log(dt);
+           }).catch((err)=>{ 
+             console.log('Data Error:', err);
+           });  
+         }
+        }
+       }
+     }
+  });
+}); 
+
 poRoutes1.route('/jobprocessing').post( function (req, res) {
   console.log("jobprocessing Action");
   const myProm1 = new Promise(function(resolve, reject) {
