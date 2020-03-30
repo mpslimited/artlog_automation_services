@@ -437,7 +437,7 @@ let moment = require('moment');
         return rs;
      }
      getTeamStatus(Obj){
-       if(moment(Obj.mpsDueDate).diff( moment(), 'day') >= 0 && Obj.artTeamStatus=='WIP'){
+       if(moment(Obj.mpsDueDate).diff( moment(), 'day') <= 0 && Obj.artTeamStatus=='WIP'){
         Obj.artTeamStatus = 'Overdue'; 
        }
        return Obj.artTeamStatus;
