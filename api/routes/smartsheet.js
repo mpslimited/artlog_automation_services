@@ -1073,6 +1073,7 @@ postRoutes.route('/artlogdata', checkToken.checkToken).post(function (req, res) 
     //.skip(  parseInt(req.body.fromPage)).limit( parseInt(req.body.toPage) ).
     //.skip(2000)
     Mdb.bynder_jobs.find(q, fields ).sort({job_key:-1}).then((data)=>{
+      console.log("data responded in DB TIME:", data.length);
     let dataResult=[];
     for(let  dtkey in data){
       var objData = data[dtkey].toObject();
@@ -1157,6 +1158,7 @@ postRoutes.route('/artlogdata', checkToken.checkToken).post(function (req, res) 
       //console.log("Object Final VAlues: ==>", objData);
       dataResult.push(objData);
     }
+    console.log("objData data responded in DB TIME:", objData.length);
      job_keys=dataResult.filter( (d)=> d.job_key!="" ).map(d=>d.job_key);
      GridFilters={
       mathAuditors     :   [...new Set(dataResult.filter( (v, i)=> !!v.mathAuditor ).map(d=>d.mathAuditor))].sort(),
@@ -1185,13 +1187,14 @@ postRoutes.route('/artlogdata', checkToken.checkToken).post(function (req, res) 
       cstages          :   [...new Set(dataResult.filter( (d)=> !!d.cstage ).map(d=>d.cstage))].sort(),
       cstatus          :   [...new Set(dataResult.filter( (d)=> !!d.job_active_stage.status ).map(d=>d.job_active_stage.status))].sort(),
      };
-      console.log("result length:", dataResult.length )
+      console.log("result length:", dataResult.length );
       
-
-      Mdb.bynder_jobs.find(q, fields ).count().then(dt=>{
-        let result={ artLogData : dataResult, GridFilters : GridFilters, totalCount: dt};
+      console.log("objData data MAPED responded in DB TIME:", objData.length);
+      //Mdb.bynder_jobs.find(q, fields ).count().then(dt=>{
+        let result={ artLogData : dataResult, GridFilters : GridFilters, totalCount: objData.length};
         res.send( result );
-      })
+        console.log("============>result length:", dataResult.length )
+      //})
       
     }).catch((Err)=>console.log("Error in finder ERROR:", Err));
 });
