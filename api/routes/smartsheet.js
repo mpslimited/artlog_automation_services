@@ -1189,13 +1189,13 @@ postRoutes.route('/artlogdata', checkToken.checkToken).post(function (req, res) 
       cstages          :   [...new Set(dataResult.filter( (d)=> !!d.cstage ).map(d=>d.cstage))].sort(),
       cstatus          :   [...new Set(dataResult.filter( (d)=> !!d.job_active_stage.status ).map(d=>d.job_active_stage.status))].sort(),
      };
-      console.log("result length:", dataResult.length , new Date().toISOString);
+      console.log("result length:", dataResult.length , new Date().toISOString());
       
-      console.log("objData data MAPED responded in DB TIME:", objData.length , new Date().toISOString);
+      console.log("objData data MAPED responded in DB TIME:", objData.length , new Date().toISOString());
       //Mdb.bynder_jobs.find(q, fields ).count().then(dt=>{
         let result={ artLogData : dataResult, GridFilters : GridFilters, totalCount: objData.length};
         res.send( result );
-        console.log("============>result length:", dataResult.length , new Date().toISOString);
+        console.log("============>result length:", dataResult.length , new Date().toISOString());
       //})
       
     }).catch((Err)=>console.log("Error in finder ERROR:", Err));
