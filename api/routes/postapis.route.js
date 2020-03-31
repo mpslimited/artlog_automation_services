@@ -18,17 +18,12 @@ let JobProcess = require('../models/JobProcess');
 let ApiProcess = require('../models/ApiProcess');
 let token=appConfig.getToken();
 
-
-
 const oauth = OAuth({
   consumer: { key: '71BEFFCC-2CC9-476D-93A8A79BB92BD87B', secret: 'a8de7d89165b8234405b35c83553a318' },
   signature_method: 'HMAC-SHA1', hash_function (base_string, key) {
     return crypto.createHmac('sha1', key).update(base_string).digest('base64');
   }
 });
-
-
-
 
 poRoutes1.route('/dataAutomation').post( function (req, res) {
   Mdb.bynder_jobs.find({
