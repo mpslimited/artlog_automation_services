@@ -1066,7 +1066,7 @@ postRoutes.route('/artlogdata', checkToken.checkToken).post(function (req, res) 
       $and.push( {"campaignID":{"$in": ['4924dc05-03c5-4086-90ce-41d8bf501684','9618db88-fc78-47a5-9916-e864e696ae11'] } });
        q= { $and};
     }
-    //q={  id:"1ad18583-18cf-4cc7-bbcf-64f5621ea06f" };
+   // q={  job_key:"EM2-5207" };
     let fields={ batchCDate:1,receiveddate:1,mpsDueDate:1,artTeamStatus : 1, artTeamPriority : 1, exceptionCategory : 1, exception:1, presetstages:1,mathAuditor:1,flagedTeam:1,dateCreated:1, job_date_finished:1,pageNo:1,killed:1,flaged:1,batch:1,presetstages:1,isPaging:1, comment:1, mverification:1, duplicate:1, presetName:1, Preset_Stages:1, id:1, name:1, description:1, job_active_stage:1, jobMetaproperties:1, jobID:1, job_key:1, dateCreated:1, job_date_finished:1, thumb:1, generatedTags:1};
     console.log("Calling artlogdata Data " , JSON.stringify(q), JSON.stringify(fields));
     // testing in Live Build with Pradeep Sir 
@@ -1075,13 +1075,15 @@ postRoutes.route('/artlogdata', checkToken.checkToken).post(function (req, res) 
     Mdb.bynder_jobs.find(q, fields ).sort({job_key:-1}).then((data)=>{
       console.log("data responded in DB TIME:", data.length);
     let dataResult=[];
-    for(let  dtkey in data){
-      var objData = data[dtkey].toObject();
-      if(!!data[dtkey].jobMetaproperties){
-        let Meta= new Metadt(data[dtkey])
+        let Meta= new Metadt()
         Meta.iniMeta(WorkFlowJobsMetaData);
         Meta.initAssetMeta(GCurriculaWIP);
         Meta.PrintAssetMeta(GPrintReady)
+        
+    for(let  dtkey in data){
+      var objData = data[dtkey].toObject();
+      if(!!data[dtkey].jobMetaproperties){
+        Meta.getInitDataSet(data[dtkey]);
         let Mdt= Meta.getMeta();
         let metaObj=Object.entries(data[dtkey].jobMetaproperties);
         if(data[dtkey].Preset_Stages.length > 0 ){

@@ -8,12 +8,7 @@ let moment = require('moment');
 //     }
 //  }
  class Metadt {
-    constructor(dt){
-        this.data = dt;
-        if(dt.hasOwnProperty('jobMetaproperties')){
-            this.metaObj=Object.entries(dt.jobMetaproperties);
-        }
-        
+    constructor(){
         this.lessonkey     =   "b447dc7d70b0420a8ac9ec9aeff78296";   //static
         this.lessonletkey  =   "7b30e1d296d343bdaaffcb6be164a713";   // static
         this.componentkey  =   "87d538e6d3a442468b20426285aef253";   // static
@@ -38,7 +33,12 @@ let moment = require('moment');
         this.printAssetKey =    '47a0e9db948541b2820a32425bd6dd60';   //Dynamic
         this.printReadyKey =    '37a38eb9dcfd4bd19c976b3e38cc7821';   //Dynamic
      }
-     
+     getInitDataSet(dt){
+        this.data = dt;
+        if(dt.hasOwnProperty('jobMetaproperties')){
+            this.metaObj=Object.entries(dt.jobMetaproperties);
+        }
+     }
      getAMetaOptionsBykey(key){
       let retdt=[];
       let Gradopt=this.Meta.filter(d=>d.tempId==key); 
