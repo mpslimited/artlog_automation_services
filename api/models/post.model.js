@@ -106,6 +106,8 @@ let bynder_jobs= new Schema({
   artTeamPriority : { type: String },
   exceptionCategory : { type: String },
   exception :  { type: String },
+  //
+  flaggedComment: { type : String }
   
  },{
     collection: 'bynder_jobs'

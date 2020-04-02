@@ -394,7 +394,11 @@ postRoutes.route('/flagedRows').post(function (req, res) {
   if(req.body.flagedID ){ 
     let flagedID= JSON.parse(req.body.flagedID);
     Mdb.bynder_jobs.updateMany({ _id: { $in : flagedID}},{
-      $set: { flaged: true, flagedTeam: req.body.flagedTeam }
+      $set: { 
+        flaged: true, 
+        flagedTeam: req.body.flagedTeam ,
+        flaggedComment : req.body.flaggedComment
+      }
     }).then(dt=>{
       res.send({'msg':'Selected rows has been flagged successfully', code:2000});
     }).catch(Er=>{
@@ -1035,6 +1039,8 @@ postRoutes.route('/artlogdata', checkToken.checkToken).post(function (req, res) 
         $and.push({ "killed" : true });
       }else if(req.body.added==6){
         $and.push({ "killed" : {$ne: true} });
+      }else if(req.body.added==7){
+        $and.push({ "job_active_stage.position" : 2 });
       }
     }
     if(!!req.body.workflow && req.body.workflow!=""){
@@ -1044,8 +1050,6 @@ postRoutes.route('/artlogdata', checkToken.checkToken).post(function (req, res) 
       let st=req.body.status.split(",");
       if(st.indexOf('Active') > -1){
         st.push('NeedsChanges')
-      } else if(st.indexOf('On Hold')){
-        console.log('Pending condations');
       }
       if(st.length ==0){
         $and.push( {"job_active_stage.status":{"$in": st[0] } });
@@ -1072,7 +1076,7 @@ postRoutes.route('/artlogdata', checkToken.checkToken).post(function (req, res) 
     // testing in Live Build with Pradeep Sir 
     //.skip(  parseInt(req.body.fromPage)).limit( parseInt(req.body.toPage) ).
     //.skip(2000)
-    Mdb.bynder_jobs.find(q, fields ).sort({job_key:-1}).then((data)=>{
+    Mdb.bynder_jobs.find(q ).sort({job_key:-1}).then((data)=>{
       console.log("data responded in DB TIME:", data.length, new Date().toISOString());
     let dataResult=[];
         let Meta= new Metadt()
