@@ -11,7 +11,7 @@ const checkToken = require('../models/middleware');
 const mongoose = require( 'mongoose' );
 const jwt = require('jsonwebtoken');
 const redis = require("redis");
-
+let moment = require('moment');
 //const port_redis = process.env.PORT || 6379;
 //const redis_client = redis.createClient(port_redis);
 
@@ -1120,6 +1120,9 @@ postRoutes.route('/artlogdata', checkToken.checkToken).post(function (req, res) 
             objData.cstage = objdt[0].name;
           }
         }
+        objData.batchCDate        =  (objData.batchCDate!="" && typeof objData.batchCDate != "undefined")? moment(objData.batchCDate).format('DD/MM/YYYY'):'';
+        objData.receiveddate      =  (objData.receiveddate!="" && typeof objData.receiveddate != "undefined")? moment(objData.receiveddate).format('DD/MM/YYYY'):'';
+        objData.mpsDueDate        =  (objData.mpsDueDate!="" && typeof objData.mpsDueDate != "undefined")? moment(objData.mpsDueDate).format('DD/MM/YYYY'):'';
         objData.artTeamPriority   =   Meta.getTeamPriority(objData);
         objData.artTeamStatus     =   Meta.getTeamStatus(objData);
          // Art Team Columns // 
