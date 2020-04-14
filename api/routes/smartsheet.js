@@ -1213,6 +1213,136 @@ postRoutes.route('/artlogdata', checkToken.checkToken).post(function (req, res) 
     }).catch((Err)=>console.log("Error in finder ERROR:", Err));
 });
 
+postRoutes.route('/artlogteamdata', checkToken.checkToken).post(function (req, res) {
+  console.log("req parameters :" , req.body);
+  let sData =JSON.parse(req.body.filters);
+  let q ={};
+  if(sData.rTypeData =="1"){
+    sData.rDate
+    sData.rTypeData
+    let start = moment(sData.rDate).format('YYYY-MM-DD') +'T00:00:00.000Z';
+    let end = moment(sData.rDate).add(1, 'days').format('YYYY-MM-DD') +'T00:00:00.000Z';
+    
+    q={
+      receiveddate: {
+        $gte: new Date(start),
+        $lt: new Date(end)
+      },
+
+    }
+  } else if(sData.rTypeData =="2"){
+    sData.rDate
+    sData.rTypeData
+    let start = moment(sData.rDate).format('YYYY-MM-DD') +'T00:00:00.000Z';
+    let end = moment(sData.rDate).add(1, 'days').format('YYYY-MM-DD') +'T00:00:00.000Z';
+    
+    q={
+      receiveddate: {
+        $gte: new Date(start),
+        $lt: new Date(end)
+      },
+      artTeamStatus: 'Delivered'
+    }
+  }
+ console.log("Query DT:", q);
+  Mdb.bynder_jobs.find(q).then(data=>{
+    console.log("Data For Filters: ", data.length);
+    let dataResult=[];
+        let Meta= new Metadt()
+        Meta.iniMeta(WorkFlowJobsMetaData);
+        Meta.initAssetMeta(GCurriculaWIP);
+        Meta.PrintAssetMeta(GPrintReady)
+    for(let  dtkey in data){
+      var objData = data[dtkey].toObject();
+      if(!!data[dtkey].jobMetaproperties){
+        Meta.getInitDataSet(data[dtkey]);
+        let Mdt= Meta.getMeta();
+        let metaObj=Object.entries(data[dtkey].jobMetaproperties);
+
+        if(data[dtkey].Preset_Stages.length > 0 ){
+         let lastChangeCreated= data[dtkey].Preset_Stages[data[dtkey].Preset_Stages.length -1].start_date;
+         let lastChangeComplated=(!!data[dtkey].Preset_Stages[data[dtkey].Preset_Stages.length -1].job_date_finished)?
+          data[dtkey].Preset_Stages[data[dtkey].Preset_Stages.length -1].job_date_finished: new Date();
+          objData.lastage=dateDiffinDurationStage(lastChangeComplated, lastChangeCreated);
+        }
+        var dateCreatedJob =  data[dtkey].dateCreated ||Mdt.dateCreatedM ;
+        if(data[dtkey].job_date_finished===null && data[dtkey].job_active_stage.status!="Approved"){
+          data[dtkey].job_date_finished=new Date().toISOString();
+        }else if(data[dtkey].job_date_finished===null){
+          data[dtkey].job_date_finished=new Date().toISOString();
+        }
+        objData.cstage=""; objData.workflow=Meta.getWorkflow();
+        objData.mathAuditRC = 0;
+        if(objData.Preset_Stages.length > 0){
+          // IT Should be another that we can not captuchred 
+          objData.mathAuditRC= objData.Preset_Stages.filter( d => d.StageNames =='Math Audit Review' ).length;
+          let ob=objData.Preset_Stages[ objData.Preset_Stages.length-1 ];
+          if(ob.hasOwnProperty('name')){
+            objData.cstage=ob.name;
+          }else if(ob.hasOwnProperty('StageNames')){
+            objData.cstage=ob.StageNames;
+          }
+          if(objData.cstage=="" && !!ob.position && objData.presetstages.length > 0){
+            let objdt=objData.presetstages.filter(d=> d.position == ob.position);
+            if(objdt.length > 0)
+            objData.cstage = objdt[0].name;
+          }
+        }
+        //demo
+        objData.batchCDate        =  (objData.batchCDate!="" && typeof objData.batchCDate != "undefined")? moment(objData.batchCDate).format('DD/MM/YYYY'):'';
+        objData.receiveddate      =  (objData.receiveddate!="" && typeof objData.receiveddate != "undefined")? moment(objData.receiveddate).format('DD/MM/YYYY'):'';
+        objData.mpsDueDate        =  (objData.mpsDueDate!="" && typeof objData.mpsDueDate != "undefined")? moment(objData.mpsDueDate).format('DD/MM/YYYY'):'';
+        objData.artTeamPriority   =   Meta.getTeamPriority(objData);
+        objData.artTeamStatus     =   Meta.getTeamStatus(objData);
+         // Art Team Columns // 
+         /*objData.receiveddate      =   Meta.getMathAuditStartDt(objData);
+         objData.mpsDueDate        =   Meta.getMpsDueDate(objData);
+         objData.artTeamStatus     =   Meta.getTeamStatus(objData);
+         objData.artTeamPriority   =   Meta.getTeamPriority(objData);
+         objData.exceptionCategory =   Meta.getExceptionCategory(objData);
+         objData.exceptoin         =   Meta.getExceptoin(objData);
+         */
+         //------------------------//
+         objData.currentRTeam =   Meta.getStageRTeam(objData.cstage);
+         objData.totalage     =   dateDiffinDurationStage(data[dtkey].job_date_finished , dateCreatedJob );
+         objData.lesson       =   Mdt.lesson;
+         objData.lessonlet    =   Mdt.lessonlet;
+         objData.component    =   Mdt.component; 
+         objData.tags         =   Mdt.tag; 
+         objData.gradeID      =   Mdt.grade;
+         objData.grade        =   Mdt.gradeVal;
+         objData.moduleID     =   Mdt.module;
+         objData.module       =   Mdt.moduleVal;
+         objData.topic        =   Mdt.topic;
+         objData.facing       =   Mdt.facingVal;
+         objData.facingID     =   Mdt.facing;
+         objData.series       =   Mdt.series;
+         //test
+         objData.revisionID   =   Mdt.revision;
+         objData.revisionC    =   Mdt.revisionVal;
+         objData.artcomplexID =   Mdt.artComplex;
+         objData.artcomplex   =   Mdt.artComplexVal;
+         objData.artassionID  =   Mdt.artAssion;
+         objData.artassion    =   Mdt.artAssionVal;
+         objData.riskID       =   Mdt.risk;
+         objData.risk         =   Mdt.riskVal;
+         objData.impactId     =   Mdt.impact;
+         objData.impact       =   Mdt.impactVal;
+         objData.curriculum   =   Mdt.wip;
+         objData.creditLine   =   Mdt.creditLine;
+         objData.printAsset   =   Mdt.printAsset;
+         objData.printReady   =   Mdt.printReady;
+         objData.permissionType = Mdt.permissionType
+      }
+      //console.log("Object Final VAlues: ==>", objData);
+      dataResult.push(objData);
+    }
+    res.send(dataResult);
+    
+  }).catch(error=>{
+    console.log(error);
+  })
+});
 function dateDiff( string1, string2){
   try{
     if(typeof string1 =="object"){

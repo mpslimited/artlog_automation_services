@@ -101,13 +101,14 @@ let bynder_jobs= new Schema({
   batchCDate : {type: Date},
   /// for batch completion Date ///
   receiveddate : { type: Date },
+  artComplateDate: { type: Date},
   mpsDueDate : { type: Date },
   artTeamStatus : { type: String },
   artTeamPriority : { type: String },
   exceptionCategory : { type: String },
   exception :  { type: String },
   //
-  flaggedComment: { type : String }
+  flaggedComment: { type : String   }
   
  },{
     collection: 'bynder_jobs'

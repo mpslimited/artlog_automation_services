@@ -93,6 +93,7 @@ class ApiProcess {
                 }
                 if(position >0 && position < dtf[0].position ){
                   $set.artTeamStatus ='Delivered';
+                  $set.artComplateDate = new Date();
                 }
               }
             }
