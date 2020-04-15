@@ -1202,9 +1202,9 @@ postRoutes.route('/artlogdata', checkToken.checkToken).post(function (req, res) 
     };
       console.log("result length:", dataResult.length , new Date().toISOString());
       
-      console.log("objData data MAPED responded in DB TIME:", objData.length , new Date().toISOString());
+      console.log("objData data MAPED responded in DB TIME:", dataResult.length , new Date().toISOString());
       //Mdb.bynder_jobs.find(q, fields ).count().then(dt=>{
-        let result={ artLogData : dataResult, GridFilters : GridFilters, totalCount: objData.length};
+        let result={ artLogData : dataResult, GridFilters : GridFilters, totalCount: dataResult.length};
         console.log("result responce:", new Date().toISOString());
         res.send( result );
         console.log("============>result length:", dataResult.length , new Date().toISOString());
