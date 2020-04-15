@@ -85,6 +85,27 @@ poRoutes1.route('/approvedJobs').post( function (req, res) {
   });
 }); 
 
+poRoutes1.route('/existingArtTeamData1').post( function (req, res) {
+  Mdb.bynder_jobs.find({ artTeamStatus: 'Delivered', receiveddate: {$exists: true }}).then((data)=>{
+    for( let dt of data ){
+      console.log("data==>", dt);
+      let stages= dt.Preset_Stages.filter(d=> d.StageNames =="Designer Create Asset" || d.name == "Designer Create Asset");
+      if(stages.length > 0){
+       let index= dt.Preset_Stages.indexOf(stages[0]);
+       let artComplateDt=dt.Preset_Stages[index+1].start_date || dt.Preset_Stages[index+1].job_date_finished ;
+       Mdb.bynder_jobs.updateMany({ id: dt.id},{
+         $set:{
+          artComplateDate: artComplateDt
+         }
+       }).then(data=>{
+         console.log("Data:", data);
+       })
+      }
+    }
+  }).catch(e=>{
+    console.log("eEEEEE:", e);
+  });
+});
 poRoutes1.route('/existingArtTeamData').post( function (req, res) {
   Mdb.bynder_jobs.find().then((data)=>{
      for(let dt of data){

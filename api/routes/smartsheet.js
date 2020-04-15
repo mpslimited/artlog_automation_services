@@ -1220,21 +1220,21 @@ postRoutes.route('/artlogteamdata', checkToken.checkToken).post(function (req, r
   if(sData.rTypeData =="1"){
     sData.rDate
     sData.rTypeData
-    let start = moment(sData.rDate).format('YYYY-MM-DD') +'T00:00:00.000Z';
-    let end = moment(sData.rDate).add(1, 'days').format('YYYY-MM-DD') +'T00:00:00.000Z';
-    
+    let start = moment(sData.rDate).format('YYYY-MM-DD') +'T00:00:00';
+    //let end = moment(sData.rDate).add(1, 'days').format('YYYY-MM-DD') +'T00:00:00.000Z';
+    let end = moment(sData.rDate).format('YYYY-MM-DD') +'T23:59:59';
     q={
       receiveddate: {
         $gte: new Date(start),
         $lt: new Date(end)
       },
-
+      //artTeamStatus: 'WIP'
     }
   } else if(sData.rTypeData =="2"){
     sData.rDate
     sData.rTypeData
-    let start = moment(sData.rDate).format('YYYY-MM-DD') +'T00:00:00.000Z';
-    let end = moment(sData.rDate).add(1, 'days').format('YYYY-MM-DD') +'T00:00:00.000Z';
+    let start = moment(sData.rDate).format('YYYY-MM-DD') +'T00:00:00';
+    let end = moment(sData.rDate).format('YYYY-MM-DD') +'T23:59:59';
     
     q={
       receiveddate: {
