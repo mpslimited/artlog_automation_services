@@ -92,14 +92,20 @@ poRoutes1.route('/existingArtTeamData1').post( function (req, res) {
       let stages= dt.Preset_Stages.filter(d=> d.StageNames =="Designer Create Asset" || d.name == "Designer Create Asset");
       if(stages.length > 0){
        let index= dt.Preset_Stages.indexOf(stages[0]);
-       let artComplateDt=dt.Preset_Stages[index+1].start_date || dt.Preset_Stages[index+1].job_date_finished ;
-       Mdb.bynder_jobs.updateMany({ id: dt.id},{
-         $set:{
-          artComplateDate: artComplateDt
-         }
-       }).then(data=>{
-         console.log("Data:", data);
-       })
+       if(!! dt.Preset_Stages[index+1]){
+        console.log(dt.Preset_Stages[index] , dt.Preset_Stages[index+1]);
+        let artComplateDt=dt.Preset_Stages[index+1].start_date || dt.Preset_Stages[index+1].job_date_finished ;
+        Mdb.bynder_jobs.updateMany({ id: dt.id},{
+          $set:{
+            artComplateDate: artComplateDt
+          }
+        }).then(data=>{
+          console.log("Data:", dt.ID);
+        })
+       }
+       if(dt._id == data[data.length-1]._id){
+         res.send(dt);
+       }
       }
     }
   }).catch(e=>{

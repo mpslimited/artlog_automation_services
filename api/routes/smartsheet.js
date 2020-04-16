@@ -1217,7 +1217,7 @@ postRoutes.route('/artlogteamdata', checkToken.checkToken).post(function (req, r
   console.log("req parameters :" , req.body);
   let sData =JSON.parse(req.body.filters);
   let q ={};
-  if(sData.rTypeData =="1"){
+  //if(sData.rTypeData =="1"){
     sData.rDate
     sData.rTypeData
     let start = moment(sData.rDate).format('YYYY-MM-DD') +'T00:00:00';
@@ -1230,8 +1230,8 @@ postRoutes.route('/artlogteamdata', checkToken.checkToken).post(function (req, r
       },
       //artTeamStatus: 'WIP'
     }
-  } else if(sData.rTypeData =="2"){
-    sData.rDate
+  //} else if(sData.rTypeData =="2"){
+    /*sData.rDate
     sData.rTypeData
     let start = moment(sData.rDate).format('YYYY-MM-DD') +'T00:00:00';
     let end = moment(sData.rDate).format('YYYY-MM-DD') +'T23:59:59';
@@ -1242,17 +1242,40 @@ postRoutes.route('/artlogteamdata', checkToken.checkToken).post(function (req, r
         $lt: new Date(end)
       },
       artTeamStatus: 'Delivered'
-    }
-  }
- console.log("Query DT:", q);
-  Mdb.bynder_jobs.find(q).then(data=>{
-    console.log("Data For Filters: ", data.length);
-    let dataResult=[];
-        let Meta= new Metadt()
-        Meta.iniMeta(WorkFlowJobsMetaData);
-        Meta.initAssetMeta(GCurriculaWIP);
-        Meta.PrintAssetMeta(GPrintReady)
-    for(let  dtkey in data){
+    }*/
+  //}
+  const myProm1 = new Promise(function(resolve, reject) {
+    Mdb.bynder_jobs.find(q).then(data=>{
+      resolve(data);
+    });
+  });
+  myProm1.then(data=>{
+    const myProm2 = new Promise(function(resolve, reject) {
+      let q2={
+        artComplateDate: {
+          $gte: new Date(start),
+          $lt: new Date(end)
+        },
+        artTeamStatus: 'Delivered'
+      }
+      Mdb.bynder_jobs.find(q2).then(data2=>{
+        resolve(data2);
+      });
+    });
+    myProm2.then(data2=>{
+      for(d of data2){
+        d.artRorC="Outflow";
+      }
+      for(d of data){
+        d.artRorC="Inflow";
+      }
+      data = data.concat(data2);
+      let dataResult=[];
+      let Meta= new Metadt()
+      Meta.iniMeta(WorkFlowJobsMetaData);
+      Meta.initAssetMeta(GCurriculaWIP);
+      Meta.PrintAssetMeta(GPrintReady);
+      for(let  dtkey in data){  
       var objData = data[dtkey].toObject();
       if(!!data[dtkey].jobMetaproperties){
         Meta.getInitDataSet(data[dtkey]);
@@ -1288,24 +1311,15 @@ postRoutes.route('/artlogteamdata', checkToken.checkToken).post(function (req, r
             objData.cstage = objdt[0].name;
           }
         }
-        //demo
-        objData.batchCDate        =  (objData.batchCDate!="" && typeof objData.batchCDate != "undefined")? moment(objData.batchCDate).format('DD/MM/YYYY'):'';
-        objData.receiveddate      =  (objData.receiveddate!="" && typeof objData.receiveddate != "undefined")? moment(objData.receiveddate).format('DD/MM/YYYY'):'';
-        objData.mpsDueDate        =  (objData.mpsDueDate!="" && typeof objData.mpsDueDate != "undefined")? moment(objData.mpsDueDate).format('DD/MM/YYYY'):'';
+        objData.artRorC= data[dtkey].artRorC
+       // objData.batchCDate        =  (objData.batchCDate!="" && typeof objData.batchCDate != "undefined")? moment(objData.batchCDate).format('DD/MM/YYYY'):'';
+       // objData.receiveddate      =  (objData.receiveddate!="" && typeof objData.receiveddate != "undefined")? moment(objData.receiveddate).format('DD/MM/YYYY'):'';
+        //objData.mpsDueDate        =  (objData.mpsDueDate!="" && typeof objData.mpsDueDate != "undefined")? moment(objData.mpsDueDate).format('DD/MM/YYYY'):'';
         objData.artTeamPriority   =   Meta.getTeamPriority(objData);
         objData.artTeamStatus     =   Meta.getTeamStatus(objData);
-         // Art Team Columns // 
-         /*objData.receiveddate      =   Meta.getMathAuditStartDt(objData);
-         objData.mpsDueDate        =   Meta.getMpsDueDate(objData);
-         objData.artTeamStatus     =   Meta.getTeamStatus(objData);
-         objData.artTeamPriority   =   Meta.getTeamPriority(objData);
-         objData.exceptionCategory =   Meta.getExceptionCategory(objData);
-         objData.exceptoin         =   Meta.getExceptoin(objData);
-         */
-         //------------------------//
-         objData.currentRTeam =   Meta.getStageRTeam(objData.cstage);
-         objData.totalage     =   dateDiffinDurationStage(data[dtkey].job_date_finished , dateCreatedJob );
-         objData.lesson       =   Mdt.lesson;
+        objData.currentRTeam =   Meta.getStageRTeam(objData.cstage);
+        objData.totalage     =   dateDiffinDurationStage(data[dtkey].job_date_finished , dateCreatedJob );
+        objData.lesson       =   Mdt.lesson;
          objData.lessonlet    =   Mdt.lessonlet;
          objData.component    =   Mdt.component; 
          objData.tags         =   Mdt.tag; 
@@ -1338,10 +1352,10 @@ postRoutes.route('/artlogteamdata', checkToken.checkToken).post(function (req, r
       dataResult.push(objData);
     }
     res.send(dataResult);
-    
-  }).catch(error=>{
-    console.log(error);
+    })
   })
+ console.log("Query DT:", q);
+ 
 });
 function dateDiff( string1, string2){
   try{
