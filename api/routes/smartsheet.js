@@ -1354,8 +1354,13 @@ postRoutes.route('/artlogteamdata', checkToken.checkToken).post(function (req, r
     res.send(dataResult);
     })
   })
- console.log("Query DT:", q);
- 
+});
+
+postRoutes.route('/dsmsummary', checkToken.checkToken).post(function (req, res) {
+  Mdb.bynder_jobs.find({artTeamStatus: 'WIP'}).then(data=>{
+    console.log(data.length);
+    res.send(data);
+  })
 });
 function dateDiff( string1, string2){
   try{

@@ -82,18 +82,32 @@ class ApiProcess {
                 let stageName = dtf[0].name || dtf[0].StageNames;
                 if(stageName!="" && stageName.trim() == 'Designer Create Asset' ){
                   $set.receiveddate = new Date();
-                  if(JobsResult.job_active_stage.status == 'Active' ) {
-                    $set.mpsDueDate = new Date(moment().add(2, 'days').toISOString());
-                  } else if(JobsResult.job_active_stage.status == 'NeedsChanges') {
-                    $set.mpsDueDate = new Date(moment().add(1, 'days').toISOString());
+                  let momentdt= moment();
+                  if( parseInt(momentdt.format('h'))  > 12 && moment().format('a')=='pm' ){ // getter then ==
+                    momentdt= moment().add(1, 'days');
+                  } 
+                  let addedDay = 2;
+                  if(JobsResult.job_active_stage.status == 'NeedsChanges'){
+                    addedDay = 1;
+                  }
+                  //add 2 days
+                  if(momentdt.day() == 0){
+                    $set.mpsDueDate = new Date(momentdt.add((addedDay + 1), 'days').toISOString());
+                  } else if(momentdt.day()==6 ){
+                    $set.mpsDueDate = new Date(momentdt.add((addedDay + 2), 'days').toISOString());
+                  } else {
+                    $set.mpsDueDate = new Date(momentdt.add( addedDay , 'days').toISOString());
                   }
                   $set.artTeamStatus ='WIP';
-                  //$set.artTeamStatus ='Delivered';
-                  //$set.artTeamStatus ='Overdue';
                 }
                 if(position >0 && position < dtf[0].position ){
                   $set.artTeamStatus ='Delivered';
                   $set.artComplateDate = new Date();
+                  let excepCat='On Track';
+                  if(moment() > moment(serDocs.mpsDueDate)){
+                    excepCat='Not On Track';
+                  }
+                  $set.exceptionCategory = excepCat;
                 }
               }
             }
