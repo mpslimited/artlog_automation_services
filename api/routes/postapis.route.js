@@ -135,12 +135,16 @@ poRoutes1.route('/mpsdueDate').post( function (req, res) {
       let addedDay = 1;
       if(ddt.job_active_stage.status == 'NeedsChanges'){
         addedDay = 0;
-        if(momentdt.day()==0 && parseInt(momentdt.format('H'))  > 18 ){
+        if(momentdt.day()==0 ){
           addedDay = 1;
         } else if(momentdt.day()==6  ){
           addedDay = 2;
-        }else if(momentdt.day()==5 && parseInt(momentdt.format('H'))  > 18){
-          addedDay = 3;
+        } else if(momentdt.day()==5 && parseInt(momentdt.format('H'))  > 18){
+          if(moment(ddt.receiveddate).day() == momentdt.day()){
+            addedDay = 2;
+          }else {
+            addedDay = 0;
+          }
         } 
       } else {
         if(momentdt.day()==0  ){
@@ -217,7 +221,7 @@ poRoutes1.route('/existingArtTeamData').post( function (req, res) {
   });
 }); 
 
-poRoutes1.route('/jobprocessingSTOP').post( function (req, res) {
+poRoutes1.route('/jobprocessing').post( function (req, res) {
   console.log("jobprocessing Action");
   const myProm1 = new Promise(function(resolve, reject) {
       Mdb.campaign.find({ process: true, ExeOrder: true }).limit(1).then(dt=>{
