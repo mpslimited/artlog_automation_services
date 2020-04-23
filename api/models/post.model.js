@@ -100,6 +100,7 @@ let bynder_jobs= new Schema({
   ///---As Art Team Columns ---//
   batchCDate : {type: Date},
   /// for batch completion Date ///
+  recivedCStage:{ type: String},
   receiveddate : { type: Date },
   artComplateDate: { type: Date},
   mpsDueDate : { type: Date },

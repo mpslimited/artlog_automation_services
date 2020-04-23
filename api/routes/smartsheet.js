@@ -1214,7 +1214,7 @@ postRoutes.route('/artlogdata', checkToken.checkToken).post(function (req, res) 
 });
 
 postRoutes.route('/artlogteamdata', checkToken.checkToken).post(function (req, res) {
-  console.log("req parameters :" , req.body);
+  console.log("artlogteamdata req parameters :" , req.body);
   let sData =JSON.parse(req.body.filters);
   let q ={};
   //if(sData.rTypeData =="1"){
@@ -1230,22 +1230,10 @@ postRoutes.route('/artlogteamdata', checkToken.checkToken).post(function (req, r
       },
       //artTeamStatus: 'WIP'
     }
-  //} else if(sData.rTypeData =="2"){
-    /*sData.rDate
-    sData.rTypeData
-    let start = moment(sData.rDate).format('YYYY-MM-DD') +'T00:00:00';
-    let end = moment(sData.rDate).format('YYYY-MM-DD') +'T23:59:59';
-    
-    q={
-      receiveddate: {
-        $gte: new Date(start),
-        $lt: new Date(end)
-      },
-      artTeamStatus: 'Delivered'
-    }*/
-  //}
+ 
   const myProm1 = new Promise(function(resolve, reject) {
     Mdb.bynder_jobs.find(q).then(data=>{
+
       resolve(data);
     });
   });
@@ -1312,9 +1300,11 @@ postRoutes.route('/artlogteamdata', checkToken.checkToken).post(function (req, r
           }
         }
         objData.artRorC= data[dtkey].artRorC
-       // objData.batchCDate        =  (objData.batchCDate!="" && typeof objData.batchCDate != "undefined")? moment(objData.batchCDate).format('DD/MM/YYYY'):'';
-       // objData.receiveddate      =  (objData.receiveddate!="" && typeof objData.receiveddate != "undefined")? moment(objData.receiveddate).format('DD/MM/YYYY'):'';
-        //objData.mpsDueDate        =  (objData.mpsDueDate!="" && typeof objData.mpsDueDate != "undefined")? moment(objData.mpsDueDate).format('DD/MM/YYYY'):'';
+        objData.batchCDate        =  (objData.batchCDate!="" && typeof objData.batchCDate != "undefined")? moment(objData.batchCDate).format('YYYY-MM-DD HH:MM a'):'';
+        objData.receiveddate      =  (objData.receiveddate!="" && typeof objData.receiveddate != "undefined")? moment(objData.receiveddate).format('YYYY-MM-DD HH:MM a'):'';
+        objData.mpsDueDate        =  (objData.mpsDueDate!="" && typeof objData.mpsDueDate != "undefined")? moment(objData.mpsDueDate).format('YYYY-MM-DD HH:MM a'):'';
+        objData.artComplateDate   =  (objData.artComplateDate!="" && typeof objData.artComplateDate != "undefined")? moment(objData.artComplateDate).format('YYYY-MM-DD HH:MM a'):'';
+        
         objData.artTeamPriority   =   Meta.getTeamPriority(objData);
         objData.artTeamStatus     =   Meta.getTeamStatus(objData);
         objData.currentRTeam =   Meta.getStageRTeam(objData.cstage);
@@ -1358,8 +1348,31 @@ postRoutes.route('/artlogteamdata', checkToken.checkToken).post(function (req, r
 
 postRoutes.route('/dsmsummary', checkToken.checkToken).post(function (req, res) {
   Mdb.bynder_jobs.find({artTeamStatus: 'WIP'}).then(data=>{
+    let Meta= new Metadt()
+    Meta.iniMeta(WorkFlowJobsMetaData);
+    Meta.initAssetMeta(GCurriculaWIP);
+    Meta.PrintAssetMeta(GPrintReady);
     console.log(data.length);
-    res.send(data);
+    let dataResult = [];
+    for(dtkey in data){
+      var objData = data[dtkey].toObject();
+      if(!!data[dtkey].jobMetaproperties){
+        Meta.getInitDataSet(data[dtkey]);
+        let Mdt= Meta.getMeta();
+        let metaObj=Object.entries(data[dtkey].jobMetaproperties);
+        objData.gradeID      =   Mdt.grade;
+        objData.grade        =   Mdt.gradeVal;
+        objData.moduleID     =   Mdt.module;
+        objData.module       =   Mdt.moduleVal;
+        objData.batchCDate        =  (objData.batchCDate!="" && typeof objData.batchCDate != "undefined")? moment(objData.batchCDate).format('YYYY-MM-DD'):'';
+        objData.receiveddate      =  (objData.receiveddate!="" && typeof objData.receiveddate != "undefined")? moment(objData.receiveddate).format('YYYY-MM-DD'):'';
+        objData.mpsDueDate        =  (objData.mpsDueDate!="" && typeof objData.mpsDueDate != "undefined")? moment(objData.mpsDueDate).format('YYYY-MM-DD'):'';
+        objData.artTeamPriority   =   Meta.getTeamPriority(objData);
+        objData.artTeamStatus     =   Meta.getTeamStatus(objData);
+      }
+      dataResult.push(objData);
+    }
+    res.send(dataResult);
   })
 });
 function dateDiff( string1, string2){
