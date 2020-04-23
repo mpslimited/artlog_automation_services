@@ -112,6 +112,76 @@ poRoutes1.route('/existingArtTeamData1').post( function (req, res) {
     console.log("eEEEEE:", e);
   });
 });
+poRoutes1.route('/mpsdueDate').post( function (req, res) {
+  let start = moment('2020-04-16').format('YYYY-MM-DD') +'T00:00:00';
+  let end = moment('2020-04-16').format('YYYY-MM-DD') +'T23:59:59';
+   let q={
+      receiveddate: {
+        $gte: new Date(start),
+        $lt: new Date(end)
+      }};
+  Mdb.bynder_jobs.find(
+    //q
+    //{ artComplateDate:{$exists: true}, receiveddate:{$exists: false}}
+   // { job_key: 'EM2-5721' }
+   //{ receiveddate : new Date('2020-04-16')}
+   {receiveddate:{$exists: true}}
+    ).then((data)=>{
+    for(let ddt of data){
+      let momentdt= moment(ddt.receiveddate);
+      if( parseInt(momentdt.format('H'))  > 18  ) {
+        momentdt= momentdt.add(1, 'days');
+      } 
+      let addedDay = 1;
+      if(ddt.job_active_stage.status == 'NeedsChanges'){
+        addedDay = 0;
+        if(momentdt.day()==0 && parseInt(momentdt.format('H'))  > 18 ){
+          addedDay = 1;
+        } else if(momentdt.day()==6  ){
+          addedDay = 2;
+        }else if(momentdt.day()==5 && parseInt(momentdt.format('H'))  > 18){
+          addedDay = 3;
+        } 
+      } else {
+        if(momentdt.day()==0  ){
+          addedDay = 2;
+        } else if(momentdt.day()==6  ){
+          addedDay = 3;
+        } else if(momentdt.day()==5 && parseInt(momentdt.format('H'))  > 18){
+          if(moment(ddt.receiveddate).day() == momentdt.day()){
+            addedDay = 4;
+          }else {
+            addedDay = 3;
+          }
+        } else if(momentdt.day()==5 && parseInt(momentdt.format('H'))  <= 18){
+          addedDay = 3;
+        } 
+      }
+      let $set={};
+      $set.mpsDueDate = new Date(momentdt.add( addedDay , 'days').toISOString());
+      /*if(momentdt.day() == 0 && parseInt(momentdt.format('H'))  < 18 ){
+        $set.mpsDueDate = new Date(momentdt.add((addedDay + 1 ), 'days').toISOString());
+      } else if(momentdt.day()==5 && parseInt(momentdt.format('H'))  > 18){
+        $set.mpsDueDate = new Date(momentdt.add((addedDay + 2), 'days').toISOString());
+      } else if(momentdt.day()==5 && parseInt(momentdt.format('H'))  <= 18){
+        $set.mpsDueDate = new Date(momentdt.add((addedDay + 2), 'days').toISOString());
+      } else if(momentdt.day()==6 ){
+        $set.mpsDueDate = new Date(momentdt.add((addedDay + 2), 'days').toISOString());
+      } else {
+        $set.mpsDueDate = new Date(momentdt.add( addedDay , 'days').toISOString());
+      }
+      */
+      console.log("mpsDueDate:", $set.mpsDueDate);
+      Mdb.bynder_jobs.updateOne({id: ddt.id},{
+        $set: $set
+      }).then(d=>{
+        console.log(d);
+      }).catch(error=>{
+        console.log("ERROR:", error);
+      });
+    }
+  });
+})
 poRoutes1.route('/existingArtTeamData').post( function (req, res) {
   Mdb.bynder_jobs.find().then((data)=>{
      for(let dt of data){
@@ -147,7 +217,7 @@ poRoutes1.route('/existingArtTeamData').post( function (req, res) {
   });
 }); 
 
-poRoutes1.route('/jobprocessing').post( function (req, res) {
+poRoutes1.route('/jobprocessingSTOP').post( function (req, res) {
   console.log("jobprocessing Action");
   const myProm1 = new Promise(function(resolve, reject) {
       Mdb.campaign.find({ process: true, ExeOrder: true }).limit(1).then(dt=>{
