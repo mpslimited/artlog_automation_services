@@ -1218,11 +1218,14 @@ postRoutes.route('/artlogteamdata', checkToken.checkToken).post(function (req, r
   let sData =JSON.parse(req.body.filters);
   let q ={};
   //if(sData.rTypeData =="1"){
-    sData.rDate
-    sData.rTypeData
-    let start = moment(sData.rDate).format('YYYY-MM-DD') +'T00:00:00';
+    let dateReq = moment().format('YYYY-MM-DD');
+    if(!!sData.rDate.year && !!sData.rDate.month && !!sData.rDate.day) {
+      dateReq = new Date(sData.rDate.year+'-'+sData.rDate.month+'-'+sData.rDate.day);
+    }
+    
+    let start = moment(dateReq).format('YYYY-MM-DD') +'T00:00:00';
     //let end = moment(sData.rDate).add(1, 'days').format('YYYY-MM-DD') +'T00:00:00.000Z';
-    let end = moment(sData.rDate).format('YYYY-MM-DD') +'T23:59:59';
+    let end = moment(dateReq).format('YYYY-MM-DD') +'T23:59:59';
     q={
       receiveddate: {
         $gte: new Date(start),
@@ -1233,7 +1236,6 @@ postRoutes.route('/artlogteamdata', checkToken.checkToken).post(function (req, r
  
   const myProm1 = new Promise(function(resolve, reject) {
     Mdb.bynder_jobs.find(q).then(data=>{
-
       resolve(data);
     });
   });
@@ -1283,6 +1285,7 @@ postRoutes.route('/artlogteamdata', checkToken.checkToken).post(function (req, r
           data[dtkey].job_date_finished=new Date().toISOString();
         }
         objData.cstage=""; objData.workflow=Meta.getWorkflow();
+        objData.job_active_stageStatus= objData.job_active_stage.status;
         objData.mathAuditRC = 0;
         if(objData.Preset_Stages.length > 0){
           // IT Should be another that we can not captuchred 
