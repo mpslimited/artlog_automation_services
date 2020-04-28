@@ -164,7 +164,7 @@ poRoutes1.route('/mpsdueDate').post( function (req, res) {
       let $set={};
       $set.mpsDueDate = new Date(momentdt.add( addedDay , 'days').toISOString());
       console.log("Jobkey:", ddt.job_key, "receiveddate", ddt.receiveddate ,"mpsDueDate:", $set.mpsDueDate);
-      Mdb.bynder_jobs.updateOne({id: ddt.id},{
+      Mdb.bynder_jobs.updateOne({_id: ddt._id},{
         $set: $set
       }).then(d=>{
         console.log(d);
