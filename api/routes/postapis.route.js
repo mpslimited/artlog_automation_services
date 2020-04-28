@@ -123,7 +123,7 @@ poRoutes1.route('/mpsdueDate').post( function (req, res) {
   Mdb.bynder_jobs.find(
     //q
     //{ artComplateDate:{$exists: true}, receiveddate:{$exists: false}}
-   // { job_key: 'EM2-4194' }
+   // { job_key: 'EM2-10142' , receiveddate:{$exists: true} }
    //{ receiveddate : new Date('2020-04-16')}
    {receiveddate:{$exists: true}}
     ).then((data)=>{
@@ -163,7 +163,7 @@ poRoutes1.route('/mpsdueDate').post( function (req, res) {
       }
       let $set={};
       $set.mpsDueDate = new Date(momentdt.add( addedDay , 'days').toISOString());
-      console.log("mpsDueDate:", $set.mpsDueDate);
+      console.log(" Data ==> receiveddate", ddt.receiveddate ,"mpsDueDate:", $set.mpsDueDate);
       Mdb.bynder_jobs.updateOne({id: ddt.id},{
         $set: $set
       }).then(d=>{
