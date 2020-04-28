@@ -123,9 +123,9 @@ poRoutes1.route('/mpsdueDate').post( function (req, res) {
   Mdb.bynder_jobs.find(
     //q
     //{ artComplateDate:{$exists: true}, receiveddate:{$exists: false}}
-    { job_key: 'EM2-4194' }
+   // { job_key: 'EM2-4194' }
    //{ receiveddate : new Date('2020-04-16')}
-   //{receiveddate:{$exists: true}}
+   {receiveddate:{$exists: true}}
     ).then((data)=>{
     for(let ddt of data){
       let momentdt= moment(ddt.receiveddate);
@@ -172,6 +172,7 @@ poRoutes1.route('/mpsdueDate').post( function (req, res) {
         console.log("ERROR:", error);
       });
     }
+    res.send({'msg':'Data modified'});
   });
 })
 poRoutes1.route('/existingArtTeamData').post( function (req, res) {
