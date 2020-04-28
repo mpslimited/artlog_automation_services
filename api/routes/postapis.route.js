@@ -123,13 +123,13 @@ poRoutes1.route('/mpsdueDate').post( function (req, res) {
   Mdb.bynder_jobs.find(
     //q
     //{ artComplateDate:{$exists: true}, receiveddate:{$exists: false}}
-   // { job_key: 'EM2-5721' }
+    { job_key: 'EM2-4194' }
    //{ receiveddate : new Date('2020-04-16')}
-   {receiveddate:{$exists: true}}
+   //{receiveddate:{$exists: true}}
     ).then((data)=>{
     for(let ddt of data){
       let momentdt= moment(ddt.receiveddate);
-      if( parseInt(momentdt.format('H'))  > 18  ) {
+      if( parseInt(momentdt.format('H'))  > 12  ) {
         momentdt= momentdt.add(1, 'days');
       } 
       let addedDay = 1;
@@ -139,7 +139,7 @@ poRoutes1.route('/mpsdueDate').post( function (req, res) {
           addedDay = 1;
         } else if(momentdt.day()==6  ){
           addedDay = 2;
-        } else if(momentdt.day()==5 && parseInt(momentdt.format('H'))  > 18){
+        } else if(momentdt.day()==5 && parseInt(momentdt.format('H'))  > 12){
           if(moment(ddt.receiveddate).day() == momentdt.day()){
             addedDay = 2;
           }else {
@@ -151,30 +151,18 @@ poRoutes1.route('/mpsdueDate').post( function (req, res) {
           addedDay = 2;
         } else if(momentdt.day()==6  ){
           addedDay = 3;
-        } else if(momentdt.day()==5 && parseInt(momentdt.format('H'))  > 18){
+        } else if(momentdt.day()==5 && parseInt(momentdt.format('H'))  > 12){
           if(moment(ddt.receiveddate).day() == momentdt.day()){
             addedDay = 4;
           }else {
             addedDay = 3;
           }
-        } else if(momentdt.day()==5 && parseInt(momentdt.format('H'))  <= 18){
+        } else if(momentdt.day()==5 && parseInt(momentdt.format('H'))  <= 12){
           addedDay = 3;
         } 
       }
       let $set={};
       $set.mpsDueDate = new Date(momentdt.add( addedDay , 'days').toISOString());
-      /*if(momentdt.day() == 0 && parseInt(momentdt.format('H'))  < 18 ){
-        $set.mpsDueDate = new Date(momentdt.add((addedDay + 1 ), 'days').toISOString());
-      } else if(momentdt.day()==5 && parseInt(momentdt.format('H'))  > 18){
-        $set.mpsDueDate = new Date(momentdt.add((addedDay + 2), 'days').toISOString());
-      } else if(momentdt.day()==5 && parseInt(momentdt.format('H'))  <= 18){
-        $set.mpsDueDate = new Date(momentdt.add((addedDay + 2), 'days').toISOString());
-      } else if(momentdt.day()==6 ){
-        $set.mpsDueDate = new Date(momentdt.add((addedDay + 2), 'days').toISOString());
-      } else {
-        $set.mpsDueDate = new Date(momentdt.add( addedDay , 'days').toISOString());
-      }
-      */
       console.log("mpsDueDate:", $set.mpsDueDate);
       Mdb.bynder_jobs.updateOne({id: ddt.id},{
         $set: $set
