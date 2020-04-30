@@ -1061,13 +1061,15 @@ postRoutes.route('/artlogdata', checkToken.checkToken).post(function (req, res) 
         {"job_active_stage.status":{"$ne":"Cancelled"}}
       ) 
     }
-    let q={"job_active_stage.status": { $in: [ 'Active', 'NeedsChanges']} ,"campaignID":{"$in": ['4924dc05-03c5-4086-90ce-41d8bf501684','9618db88-fc78-47a5-9916-e864e696ae11'] } };
+    let q={"job_active_stage.status": { $in: [ 'Active', 'NeedsChanges']} ,"campaignID":{"$in": ['4924dc05-03c5-4086-90ce-41d8bf501684',
+     '9618db88-fc78-47a5-9916-e864e696ae11'] } };
       
     if(!!req.body.jobkey && req.body.jobkey!=""){
       q={"job_key": req.body.jobkey }
     }else if($and.length >0){
-      // condition for ignore other Jobs 
-      $and.push( {"campaignID":{"$in": ['4924dc05-03c5-4086-90ce-41d8bf501684','9618db88-fc78-47a5-9916-e864e696ae11'] } });
+      // condition for ignore other Jobs  '4924dc05-03c5-4086-90ce-41d8bf501684',
+     // '9618db88-fc78-47a5-9916-e864e696ae11',
+      $and.push( {"campaignID":{"$in": ['3d39f53b-3123-4eb1-a3f1-274cd4160efe'] } });
        q= { $and};
     }
    // q={  job_key:"EM2-5207" };
@@ -1079,7 +1081,7 @@ postRoutes.route('/artlogdata', checkToken.checkToken).post(function (req, res) 
     Mdb.bynder_jobs.find(q ).sort({job_key:-1}).then((data)=>{
       console.log("data responded in DB TIME:", data.length, new Date().toISOString());
     let dataResult=[];
-        let Meta= new Metadt()
+         let Meta= new Metadt()
         Meta.iniMeta(WorkFlowJobsMetaData);
         Meta.initAssetMeta(GCurriculaWIP);
         Meta.PrintAssetMeta(GPrintReady)
@@ -1121,11 +1123,12 @@ postRoutes.route('/artlogdata', checkToken.checkToken).post(function (req, res) 
           }
         }
         //demo
+        objData.artTeamPriority   =   Meta.getTeamPriority(objData);
+        objData.artTeamStatus     =   Meta.getTeamStatus(objData);
         objData.batchCDate        =  (objData.batchCDate!="" && typeof objData.batchCDate != "undefined")? moment(objData.batchCDate).format('DD/MM/YYYY'):'';
         objData.receiveddate      =  (objData.receiveddate!="" && typeof objData.receiveddate != "undefined")? moment(objData.receiveddate).format('DD/MM/YYYY'):'';
         objData.mpsDueDate        =  (objData.mpsDueDate!="" && typeof objData.mpsDueDate != "undefined")? moment(objData.mpsDueDate).format('DD/MM/YYYY'):'';
-        objData.artTeamPriority   =   Meta.getTeamPriority(objData);
-        objData.artTeamStatus     =   Meta.getTeamStatus(objData);
+        
          // Art Team Columns // 
          /*objData.receiveddate      =   Meta.getMathAuditStartDt(objData);
          objData.mpsDueDate        =   Meta.getMpsDueDate(objData);
