@@ -392,15 +392,23 @@ postRoutes.route('/assignAuditors').post(function (req, res) {
 postRoutes.route('/flagedRows').post(function (req, res) {
   console.log("ACTION : flagedRows REQ==>",req.body);
   if(req.body.flagedID ){ 
+    let auth = JSON.parse(req.body.auth);
     let flagedID= JSON.parse(req.body.flagedID);
     Mdb.bynder_jobs.updateMany({ _id: { $in : flagedID}},{
       $set: { 
         flaged: true, 
         flagedTeam: req.body.flagedTeam ,
-        flaggedComment : req.body.flaggedComment
+        flaggedComment : req.body.flaggedComment,
+        flaggedUser : auth.name,
+        flaggedDate : new Date()
       }
     }).then(dt=>{
-      res.send({'msg':'Selected rows has been flagged successfully', code:2000});
+      let resdt= { _id: flagedID, flaged: true, 
+      flagedTeam: req.body.flagedTeam ,
+      flaggedComment : req.body.flaggedComment,
+      flaggedUser : auth.name,
+      flaggedDate : moment().format('MM-DD-YYYY') };
+      res.send({'msg':'Selected rows has been flagged successfully',dt:resdt, code:2000});
     }).catch(Er=>{
       console.log("Error in flagging data : ", Er);
     });
@@ -1122,6 +1130,7 @@ postRoutes.route('/artlogdata', checkToken.checkToken).post(function (req, res) 
             objData.cstage = objdt[0].name;
           }
         }
+        objData.comment = (objData.flaged)? objData.flaggedComment +'|'+ objData.flaggedUser +'|'+ moment(objData.flaggedDate).format('MM-DD-YYYY') :'';
         //demo
         objData.artTeamPriority   =   Meta.getTeamPriority(objData);
         objData.artTeamStatus     =   Meta.getTeamStatus(objData);
@@ -1351,7 +1360,97 @@ postRoutes.route('/artlogteamdata', checkToken.checkToken).post(function (req, r
     })
   })
 });
+postRoutes.route('/showrefreshjobs', checkToken.checkToken).post(function (req, res) {
+  var start = new Date();
+  start.setHours(0,0,0,0);
+  var end = new Date();
+  end.setHours(23,59,59,999);
+  let Meta= new Metadt()
+  Meta.iniMeta(WorkFlowJobsMetaData);
+  Meta.initAssetMeta(GCurriculaWIP);
+  Meta.PrintAssetMeta(GPrintReady);
+  Mdb.bynder_jobs_refresh.find({addedDate :  {$gte: start, $lt: end}}).then((data) => {
+    let resData = [];
+    for(let dtkey in data ){
+      var objData = data[dtkey].toObject();
+      if( !!data[dtkey].OldjobMetaproperties ||!!data[dtkey].jobMetaproperties){
+        data[dtkey].jobMetaproperties = data[dtkey].OldjobMetaproperties;
+        Meta.getInitDataSet(data[dtkey]);
+        let Mdt= Meta.getMeta();
+        let metaObj=Object.entries(data[dtkey].jobMetaproperties);
+        objData.lesson       =   Mdt.lesson;
+         objData.lessonlet    =   Mdt.lessonlet;
+         objData.component    =   Mdt.component; 
+         objData.tags         =   Mdt.tag; 
+         objData.gradeID      =   Mdt.grade;
+         objData.grade        =   Mdt.gradeVal;
+         objData.moduleID     =   Mdt.module;
+         objData.module       =   Mdt.moduleVal;
+         objData.topic        =   Mdt.topic;
+         objData.facing       =   Mdt.facingVal;
+         objData.facingID     =   Mdt.facing;
+         objData.series       =   Mdt.series;
+         //test
+         objData.job_key      =   Mdt.getjobkey.trim();
+         objData.revisionID   =   Mdt.revision;
+         objData.revisionC    =   Mdt.revisionVal;
+         objData.artcomplexID =   Mdt.artComplex;
+         objData.artcomplex   =   Mdt.artComplexVal;
+         objData.artassionID  =   Mdt.artAssion;
+         objData.artassion    =   Mdt.artAssionVal;
+         objData.riskID       =   Mdt.risk;
+         objData.risk         =   Mdt.riskVal;
+         objData.impactId     =   Mdt.impact;
+         objData.impact       =   Mdt.impactVal;
+         objData.curriculum   =   Mdt.wip;
+         objData.creditLine   =   Mdt.creditLine;
+         objData.printAsset   =   Mdt.printAsset;
+         objData.printReady   =   Mdt.printReady;
+         objData.permissionType = Mdt.permissionType
 
+        resData.push(objData);
+      }
+    }
+    //////////
+    res.send(resData);
+  }).catch((Err)=>{
+    console.log(Err);
+  })
+});
+postRoutes.route('/refreshjobs', checkToken.checkToken).post(function (req, res) {
+  console.log("Action:refreshjobs", req.body.filters);
+  let jobsKeys= req.body.filters.split(',');
+  //Spaces seprator handling;
+  //if(typeof a != "object" && jobsKeys.trim()!=''){ jobsKeys.split(' '); }
+  let jobsKeysId = [];
+  for(let k in jobsKeys){
+    if(jobsKeys[k].trim()!=""){
+      jobsKeysId.push(jobsKeys[k].trim());
+    }
+  }
+  Mdb.bynder_jobs.find({job_key: {$in : jobsKeysId}}).then(data=>{
+    for(let dt of data){
+
+      let refreshData = {
+        id        : dt.id,
+        assetID   : dt.assetID,
+        jobID     : dt.jobID,
+        job_key   : dt.job_key,
+        OldjobMetaproperties : dt.jobMetaproperties,
+        isRefresh: false,
+        addedDate : new Date()
+      }
+      console.log("refreshData:", refreshData);
+      var bynder_jobs_refresh =  Mdb.bynder_jobs_refresh(refreshData);
+      bynder_jobs_refresh.save().then((rs) => {
+        console.log('data has been saved: result', rs);
+        //resolve(JobsResult);
+      });
+      console.log("data:",dt);
+    }
+    res.send({ msg: data.length +' jobs has been added for metadata refresh.'});
+  });
+})
 postRoutes.route('/dsmsummary', checkToken.checkToken).post(function (req, res) {
   Mdb.bynder_jobs.find({artTeamStatus: 'WIP'}).then(data=>{
     let Meta= new Metadt()

@@ -42,6 +42,18 @@ let overdue_jobs= new Schema({
  },{
     collection: 'overdue_jobs'
 });
+let bynder_jobs_refresh = new Schema({
+  assetID   : {type : String},
+  id: { type: String},
+  job_key: { type: String},
+  jobID:{type:String},
+  OldjobMetaproperties:{ type: Object},
+  NewjobMetaproperties:{ type: Object},
+  isRefresh: { type: Boolean},
+  addedDate: { type : Date },
+},{
+   collection: 'bynder_jobs_refresh'
+});
 let bynder_jobs= new Schema({
   assetID   : {type : String},
   id: { type: String},
@@ -92,8 +104,7 @@ let bynder_jobs= new Schema({
   isMailed    : {type: String },
   thumb: { type: String },
   batch: { type: String},
-  flaged: { type: Boolean},
-  flagedTeam: {type: String},
+  
   killed: { type: Boolean},
   updateDt: {type: Boolean},
   mathAuditor: { type: String},
@@ -108,8 +119,12 @@ let bynder_jobs= new Schema({
   artTeamPriority : { type: String },
   exceptionCategory : { type: String },
   exception :  { type: String },
-  //
-  flaggedComment: { type : String   }
+  //for flagged comments
+  flaged: { type: Boolean},
+  flagedTeam: {type: String},
+  flaggedComment: { type : String   },
+  flaggedUser : { type : String   },
+  flaggedDate: { type : Date   },
   
  },{
     collection: 'bynder_jobs'
@@ -350,6 +365,7 @@ let asset=new Schema({
       apiErrors: mongoose.model('apiErrors', apiErrors),
       job_presets: mongoose.model('job_presets', job_presets),
       bynder_jobs: mongoose.model('bynder_jobs', bynder_jobs),
+      bynder_jobs_refresh: mongoose.model('bynder_jobs_refresh', bynder_jobs_refresh),
       bynder_jobs_old: mongoose.model('bynder_jobs_old', bynder_jobs_old),
       presetdataupdate: mongoose.model('presetdataupdate', presetdataupdate),
       searchState: mongoose.model('searchState', searchState),
