@@ -11,6 +11,7 @@ var appConfig = {
     secret: '563e1def9f296439af4906b0a60bd7b4'
   },
   apiAction:  [
+      { action: 'jobsbyID', URL:`https://greatminds.getbynder.com/api/workflow/jobs/`, extraConfog: true, other:``},
       { action: 'jobsbycampaignid', URL:`https://greatminds.getbynder.com/api/workflow/campaigns/`, extraConfog: true, other:`/jobs`},
       { action: 'getPresetByJobs', URL:'https://greatminds.getbynder.com/api/workflow/presets/job/', extraConfog: true, other:''},
       { action: 'users', URL:'https://greatminds.getbynder.com/api/workflow/users/', extraConfog: false, other:''},

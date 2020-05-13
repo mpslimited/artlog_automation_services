@@ -82,25 +82,43 @@ class ApiProcess {
                 let stageName = dtf[0].name || dtf[0].StageNames;
                 if(stageName!="" && stageName.trim() == 'Designer Create Asset' ){
                   $set.receiveddate = new Date();
-                  let momentdt= moment();
-                  if( parseInt(momentdt.format('h'))  > 12 && moment().format('a')=='pm' ){ // getter then ==
-                    momentdt= moment().add(1, 'days');
-                  } 
-                  let addedDay = 2;
-                  if(JobsResult.job_active_stage.status == 'NeedsChanges'){
-                    addedDay = 1;
-                  }
-                  //add 2 days
-                  if(momentdt.day() == 0){
-                    $set.mpsDueDate = new Date(momentdt.add((addedDay + 1), 'days').toISOString());
-                  } else if(momentdt.day()==6 ){
-                    $set.mpsDueDate = new Date(momentdt.add((addedDay + 2), 'days').toISOString());
+                  // code for MPS Due Date
+                  let momentdt= moment(); let addedDay = 1;
+                  if( parseInt(momentdt.format('H'))  > 12  ) {  momentdt= momentdt.add(1, 'days'); } 
+                  if(ddt.job_active_stage.status == 'NeedsChanges'){
+                    addedDay = 0;
+                    if(momentdt.day()==0 ){
+                      addedDay = 1;
+                    } else if(momentdt.day()==6  ){
+                      addedDay = 2;
+                    } else if(momentdt.day()==5 && parseInt(momentdt.format('H'))  > 12){
+                      if(moment().day() == momentdt.day()){
+                        addedDay = 2;
+                      }else {
+                        addedDay = 0;
+                      }
+                    } 
                   } else {
-                    $set.mpsDueDate = new Date(momentdt.add( addedDay , 'days').toISOString());
+                    if(momentdt.day()==0  ){
+                      addedDay = 2;
+                    } else if(momentdt.day()==6  ){
+                      addedDay = 3;
+                    } else if(momentdt.day()==5 && parseInt(momentdt.format('H'))  > 12){
+                      if(moment().day() == momentdt.day()){
+                        addedDay = 4;
+                      }else {
+                        addedDay = 3;
+                      }
+                    } else if(momentdt.day()==5 && parseInt(momentdt.format('H'))  <= 12){
+                      addedDay = 3;
+                    } 
                   }
+                  $set.mpsDueDate = new Date(momentdt.add( addedDay , 'days').toISOString());
+                  // end
+                  $set.recivedCStage = JobsResult.job_active_stage.status;
                   $set.artTeamStatus ='WIP';
                 }
-                if(position >0 && position < dtf[0].position ){
+                if(position >0 && position < dtf[0].position && !!serDocs.recivedCStage){
                   $set.artTeamStatus ='Delivered';
                   $set.artComplateDate = new Date();
                   let excepCat='On Track';
