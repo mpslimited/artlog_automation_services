@@ -124,7 +124,7 @@ let moment = require('moment');
      }
      getJobkey(){
         if(this.data.jobMetaproperties.hasOwnProperty(this.jobkeykey)){
-            return this.data.jobMetaproperties[this.jobkeykey];
+            return this.data.job_key ||this.data.jobMetaproperties[this.jobkeykey];
         }else{
             return '';
         }
