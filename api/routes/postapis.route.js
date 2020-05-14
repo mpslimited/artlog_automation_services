@@ -208,39 +208,41 @@ poRoutes1.route('/existingArtTeamData').post( function (req, res) {
 poRoutes1.route('/refreshJobs').post( function (req, res) {
   Mdb.bynder_jobs_refresh.find({ isRefresh: false}).limit(1).then((data)=>{
     console.log(data.length);
-    for(let dt of data){
-      var request_data=appConfig.getActionInfo("jobsbyID", dt.id );
-      console.log("data", request_data.url,  request_data.data);
-      request({url: request_data.url, method: request_data.method, qs: request_data.data, headers: oauth.toHeader(oauth.authorize(request_data, token)) }, function(error, response, body) {
-        console.log("data:", response);
-        if(!!response.body){
-          let jsonDt = JSON.parse(response.body); 
-          let job_key = (jsonDt.jobMetaproperties.hasOwnProperty('ccf531b93d1c46428aa5c52bc8cc639f'))? jsonDt.jobMetaproperties['ccf531b93d1c46428aa5c52bc8cc639f'].trim():''; 
-          //console.log(jsonDt.id,  jsonDt.NewjobMetaproperties, job_key );
-          Mdb.bynder_jobs_refresh.updateOne({ id: jsonDt.id, isRefresh: false },{
-            $set:{
-              NewjobMetaproperties : jsonDt.jobMetaproperties,
-              isRefresh: true,
-              job_key: job_key
-            }
-          }).then((rs)=>{
-            console.log('Data testing 123:', rs, jsonDt.id);
-            Mdb.bynder_jobs.updateOne({ id: jsonDt.id },{
+    if(data.length > 0 ) {
+      for(let dt of data){
+        var request_data=appConfig.getActionInfo("jobsbyID", dt.id );
+        console.log("data", request_data.url,  request_data.data);
+        request({url: request_data.url, method: request_data.method, qs: request_data.data, headers: oauth.toHeader(oauth.authorize(request_data, token)) }, function(error, response, body) {
+          console.log("data:", response);
+          if(!!response.body){
+            let jsonDt = JSON.parse(response.body); 
+            let job_key = (jsonDt.jobMetaproperties.hasOwnProperty('ccf531b93d1c46428aa5c52bc8cc639f'))? jsonDt.jobMetaproperties['ccf531b93d1c46428aa5c52bc8cc639f'].trim():''; 
+            //console.log(jsonDt.id,  jsonDt.NewjobMetaproperties, job_key );
+            Mdb.bynder_jobs_refresh.updateOne({ id: jsonDt.id, isRefresh: false },{
               $set:{
-                jobMetaproperties : jsonDt.jobMetaproperties,
+                NewjobMetaproperties : jsonDt.jobMetaproperties,
+                isRefresh: true,
                 job_key: job_key
               }
-            }).then((ddt)=>{
-              console.log(ddt);
-              res.send(data);
+            }).then((rs)=>{
+              console.log('Data testing 123:', rs, jsonDt.id);
+              Mdb.bynder_jobs.updateOne({ id: jsonDt.id },{
+                $set:{
+                  jobMetaproperties : jsonDt.jobMetaproperties,
+                  job_key: job_key
+                }
+              }).then((ddt)=>{
+                console.log(ddt);
+                res.send(data);
+              });
             });
-          });
-          
-        }
-      });
+            
+          }
+        });
+      }
+    } else {
+      res.send({'msg':'Data not found for refresh the metadata'});
     }
-   //
-    // code here for refresh the jobs //
   }).catch((error)=>{
     console.log("Error data: ", error);
   })
