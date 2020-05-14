@@ -1374,7 +1374,11 @@ postRoutes.route('/showrefreshjobs', checkToken.checkToken).post(function (req, 
     for(let dtkey in data ){
       var objData = data[dtkey].toObject();
       if( !!data[dtkey].OldjobMetaproperties ||!!data[dtkey].jobMetaproperties){
-        data[dtkey].jobMetaproperties = data[dtkey].OldjobMetaproperties;
+        if (!!data[dtkey].NewjobMetaproperties) {
+          data[dtkey].jobMetaproperties = data[dtkey].NewjobMetaproperties;
+        } else {
+          data[dtkey].jobMetaproperties = data[dtkey].OldjobMetaproperties;
+        }
         Meta.getInitDataSet(data[dtkey]);
         let Mdt= Meta.getMeta();
         let metaObj=Object.entries(data[dtkey].jobMetaproperties);
