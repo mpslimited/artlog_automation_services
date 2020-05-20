@@ -85,7 +85,7 @@ class ApiProcess {
                   // code for MPS Due Date
                   let momentdt= moment(); let addedDay = 1;
                   if( parseInt(momentdt.format('H'))  > 12  ) {  momentdt= momentdt.add(1, 'days'); } 
-                  if(ddt.job_active_stage.status == 'NeedsChanges'){
+                  if(ddf.job_active_stage.status == 'NeedsChanges'){
                     addedDay = 0;
                     if(momentdt.day()==0 ){
                       addedDay = 1;
