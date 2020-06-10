@@ -66,7 +66,7 @@ class ApiProcess {
               $set.job_date_finished=new Date();
             }
             if( typeof JobsResult.jobMetaproperties['ccf531b93d1c46428aa5c52bc8cc639f'] != "undefined"){
-              $set.job_key=JobsResult.jobMetaproperties['ccf531b93d1c46428aa5c52bc8cc639f'];
+              $set.job_key=JobsResult.jobMetaproperties['ccf531b93d1c46428aa5c52bc8cc639f'].trim();
             }
             
             // add Art Team Columns //
@@ -183,7 +183,7 @@ class ApiProcess {
             set.job_next_stage=JobsResult.job_next_stage;
             set.Preset_Stages=NewPreset_Stages;
             if( typeof JobsResult.jobMetaproperties['ccf531b93d1c46428aa5c52bc8cc639f'] != "undefined"){
-              set.job_key=JobsResult.jobMetaproperties['ccf531b93d1c46428aa5c52bc8cc639f'];
+              set.job_key=JobsResult.jobMetaproperties['ccf531b93d1c46428aa5c52bc8cc639f'].trim();
             }
             let dupData={
               jobMetaproperties   : JobsResult.jobMetaproperties,

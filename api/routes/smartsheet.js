@@ -1373,16 +1373,16 @@ postRoutes.route('/showrefreshjobs', checkToken.checkToken).post(function (req, 
     let resData = [];
     for(let dtkey in data ){
       var objData = data[dtkey].toObject();
-      if( !!data[dtkey].OldjobMetaproperties ||!!data[dtkey].jobMetaproperties){
-        if (!!data[dtkey].NewjobMetaproperties) {
+      if( !!data[dtkey].OldjobMetaproperties ||!!data[dtkey].jobMetaproperties) {
+        data[dtkey].jobMetaproperties = data[dtkey].OldjobMetaproperties;
+        if (!!data[dtkey].NewjobMetaproperties && !!data[dtkey].NewjobMetaproperties ) {
           data[dtkey].jobMetaproperties = data[dtkey].NewjobMetaproperties;
-        } else {
-          data[dtkey].jobMetaproperties = data[dtkey].OldjobMetaproperties;
-        }
+        } 
         Meta.getInitDataSet(data[dtkey]);
         let Mdt= Meta.getMeta();
         let metaObj=Object.entries(data[dtkey].jobMetaproperties);
-        objData.lesson       =   Mdt.lesson;
+         objData.Newjobkey    =   (!!objData.NewjobMetaproperties && objData.NewjobMetaproperties['ccf531b93d1c46428aa5c52bc8cc639f']) ? objData.NewjobMetaproperties['ccf531b93d1c46428aa5c52bc8cc639f'] :'';
+         objData.lesson       =   Mdt.lesson;
          objData.lessonlet    =   Mdt.lessonlet;
          objData.component    =   Mdt.component; 
          objData.tags         =   Mdt.tag; 
@@ -1395,7 +1395,7 @@ postRoutes.route('/showrefreshjobs', checkToken.checkToken).post(function (req, 
          objData.facingID     =   Mdt.facing;
          objData.series       =   Mdt.series;
          //test
-         objData.job_key      =   Mdt.getjobkey.trim();
+         objData.job_key      =   Meta.getOldJobkey();
          objData.revisionID   =   Mdt.revision;
          objData.revisionC    =   Mdt.revisionVal;
          objData.artcomplexID =   Mdt.artComplex;
@@ -1428,9 +1428,9 @@ postRoutes.route('/refreshjobs', checkToken.checkToken).post(function (req, res)
   //if(typeof a != "object" && jobsKeys.trim()!=''){ jobsKeys.split(' '); }
   let jobsKeysId = [];
   for(let k in jobsKeys){
-    if(jobsKeys[k].trim()!=""){
-      jobsKeysId.push(jobsKeys[k].trim());
-    }
+    //if(jobsKeys[k].trim()!=""){
+      jobsKeysId.push(jobsKeys[k]);
+    //}
   }
   Mdb.bynder_jobs.find({job_key: {$in : jobsKeysId}}).then(data=>{
     for(let dt of data){
