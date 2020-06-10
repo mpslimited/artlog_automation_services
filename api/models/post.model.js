@@ -125,7 +125,7 @@ let bynder_jobs= new Schema({
   flaggedComment: { type : String   },
   flaggedUser : { type : String   },
   flaggedDate: { type : Date   },
-  
+  updatethm: { type : Boolean   },
  },{
     collection: 'bynder_jobs'
 });

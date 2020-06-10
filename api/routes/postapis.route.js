@@ -66,6 +66,7 @@ const axios = require("axios");
 const port_redis = process.env.PORT || 6379;
 const redis_client = redis.createClient(port_redis);
 
+
 poRoutes1.route('/activeJobs').post( function (req, res) {
   Mdb.bynder_jobs.find({ "job_active_stage.status": {
     $in: ["Active","NeedsChanges"]
@@ -112,6 +113,16 @@ poRoutes1.route('/existingArtTeamData1').post( function (req, res) {
     console.log("eEEEEE:", e);
   });
 });
+poRoutes1.route('/uodateMetadt').post( function (req, res) {
+  console.log("uodateMetadt in metapropertiesbyid");
+  let id='cd8809565088496da4955eb3327fea04';
+  var request_data=appConfig.getActionInfo("metapropertiesbyid", id );
+    console.log("data", request_data.url,  request_data.data);
+    request({url: request_data.url, method: request_data.method, qs: request_data.data, headers: oauth.toHeader(oauth.authorize(request_data, token)) }, function(error, response, body) {
+    
+    });
+});
+
 poRoutes1.route('/mpsdueDate').post( function (req, res) {
   let start = moment('2020-04-16').format('YYYY-MM-DD') +'T00:00:00';
   let end = moment('2020-04-16').format('YYYY-MM-DD') +'T23:59:59';
@@ -213,7 +224,7 @@ poRoutes1.route('/refreshJobs').post( function (req, res) {
         var request_data=appConfig.getActionInfo("jobsbyID", dt.id );
         console.log("data", request_data.url,  request_data.data);
         request({url: request_data.url, method: request_data.method, qs: request_data.data, headers: oauth.toHeader(oauth.authorize(request_data, token)) }, function(error, response, body) {
-          console.log("data:", response);
+         // console.log("data:", response);
           if(!!response.body){
             let jsonDt = JSON.parse(response.body); 
             let job_key = (jsonDt.jobMetaproperties.hasOwnProperty('ccf531b93d1c46428aa5c52bc8cc639f'))? jsonDt.jobMetaproperties['ccf531b93d1c46428aa5c52bc8cc639f'].trim():''; 
@@ -225,14 +236,14 @@ poRoutes1.route('/refreshJobs').post( function (req, res) {
                 job_key: job_key
               }
             }).then((rs)=>{
-              console.log('Data testing 123:', rs, jsonDt.id);
+              //console.log('Data testing 123:', rs, jsonDt.id);
               Mdb.bynder_jobs.updateOne({ id: jsonDt.id },{
                 $set:{
                   jobMetaproperties : jsonDt.jobMetaproperties,
                   job_key: job_key
                 }
               }).then((ddt)=>{
-                console.log(ddt);
+               // console.log(ddt);
                 res.send(data);
               });
             });
@@ -263,6 +274,7 @@ poRoutes1.route('/jobprocessing').post( function (req, res) {
             processedPage:0
            }
           }).then(d=>{ 
+            console.log("change dt req......");
           }).catch(e=>{
             console.log(e.message);
           });
@@ -348,7 +360,11 @@ poRoutes1.route('/jobprocessing').post( function (req, res) {
                 });
               })
               myProm3.then((docs)=>{
-                if(docs.length> 0){   // Update Cases 
+                if(docs.filter(d=> d.id =='2626c8ac-167e-422b-b766-60a7a0990aef').length > 0){
+                  console.log("Data syncing found", JobsResult[k]);
+                }
+                if(docs.length > 0){   // Update Cases 
+                  
                   APIProcess.updateHandler(docs, JobsResult[k]);
                 } else { 
                   APIProcess.saveHandler(JobsResult[k]);
@@ -359,6 +375,54 @@ poRoutes1.route('/jobprocessing').post( function (req, res) {
          res.send(responceDt);
       });
   });
+});
+poRoutes1.route('/thumbsdata').post( function (req, res) {
+  console.log("jobprocessing Action");  console.log("Data summary");
+  Mdb.bynder_jobs.find({ "job_active_stage.status": "Approved", thumb: "", updatethm:{ $exists: false}, assetID: { $exists: true,  $ne: "" }
+  },{ job_key: true, 'job_active_stage.status': true, thumb:1,  assetID:1 }).limit(1).then(data=>{
+    var token = appConfig.getToken(); 
+    var request_data=appConfig.getActionInfo( 'getAssets', data[0].assetID );
+    //request_data.data= { limit: '1000', page: i  };
+    request_data.url = request_data.url + '?id=' + data[0].assetID;
+    console.log('URL:', request_data.url);
+    var token=appConfig.getToken(); 
+    request({url: request_data.url, method: request_data.method, qs: request_data.data, headers: oauth.toHeader(oauth.authorize(request_data, token)) }, function(error, response, body) {
+      if(error){
+        console.log(error, response.body);
+      } else {
+        try {
+          let dt = JSON.parse(response.body);
+          if(dt.message){
+            console.log(dt, data[0].assetID);
+            Mdb.bynder_jobs.updateMany({ assetID: data[0].assetID},{
+              $set : {
+               // thumb: dt.thumbnails.thul || dt.thumbnails.webimage,
+                updatethm: false
+              }
+            }).then(dt=>{
+              res.send( {'thm': dt.thumbnails , dt: dt});
+            })
+          } else {
+            Mdb.bynder_jobs.updateMany({ assetID: dt.id},{
+              $set : {
+                thumb: dt.thumbnails.thul || dt.thumbnails.webimage,
+                updatethm: true
+              }
+            }).then(dt=>{
+              res.send( {'thm': dt.thumbnails , dt: dt});
+            })
+          }
+          //res.send(dt.thumbnails);
+          
+        } catch (Error){
+          console.log(Error);
+        }
+      }
+       // res.send(response.body);
+    });
+   // res.send({ 'msg':'data testing'});
+  }) ; 
+  
 });
 poRoutes1.route('/jobsbycampaignid/:campaignId').post( function (req, res) {
   let campaignId = req.params.campaignId;
@@ -407,4 +471,6 @@ poRoutes1.route('/jobsbycampaignid/:campaignId').post( function (req, res) {
     }
   })
 });
+
+
 module.exports = poRoutes1;
