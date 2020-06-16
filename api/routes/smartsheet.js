@@ -1069,15 +1069,16 @@ postRoutes.route('/artlogdata', checkToken.checkToken).post(function (req, res) 
         {"job_active_stage.status":{"$ne":"Cancelled"}}
       ) 
     }
-    let q={"job_active_stage.status": { $in: [ 'Active', 'NeedsChanges']} ,"campaignID":{"$in": ['4924dc05-03c5-4086-90ce-41d8bf501684',
-     '9618db88-fc78-47a5-9916-e864e696ae11'] } };
+    let q={"job_active_stage.status": { $in: [ 'Active', 'NeedsChanges']} ,
+    "campaignID":{"$in": ['4924dc05-03c5-4086-90ce-41d8bf501684',
+     '9618db88-fc78-47a5-9916-e864e696ae11','5bf2ed40-6b98-45b2-b926-5eb4445ed38d'] } };
       
     if(!!req.body.jobkey && req.body.jobkey!=""){
       q={"job_key": req.body.jobkey }
     }else if($and.length >0){
       // condition for ignore other Jobs  '4924dc05-03c5-4086-90ce-41d8bf501684',
      // '9618db88-fc78-47a5-9916-e864e696ae11',
-      $and.push( {"campaignID":{"$in": ['4924dc05-03c5-4086-90ce-41d8bf501684','9618db88-fc78-47a5-9916-e864e696ae11'] } });
+      $and.push( {"campaignID":{"$in": ['4924dc05-03c5-4086-90ce-41d8bf501684','9618db88-fc78-47a5-9916-e864e696ae11', '5bf2ed40-6b98-45b2-b926-5eb4445ed38d'] } });
        q= { $and};
     }
    // q={  job_key:"EM2-5207" };
@@ -1484,6 +1485,8 @@ postRoutes.route('/dsmsummary', checkToken.checkToken).post(function (req, res) 
     res.send(dataResult);
   })
 });
+
+
 function dateDiff( string1, string2){
   try{
     if(typeof string1 =="object"){

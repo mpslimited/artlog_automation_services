@@ -35,7 +35,8 @@ var stats = new StatsD()
 stats.socket.on('error', function (error) {
   console.error(error.stack)
 })
- 
+ // catch 404 and forward to error handler
+
 app.use(responseTime(function (req, res, time) {
   var stat = (req.method + req.url).toLowerCase()
     .replace(/[:\.]/g, '')

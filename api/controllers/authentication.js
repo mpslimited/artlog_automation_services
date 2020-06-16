@@ -40,7 +40,6 @@ module.exports.login = function(req, res) {
         'name': user.name,
         "userGroupName":user.userGroupName,
         'roleName': user.roleName,
-
       });
     } else {
       res.status(401).json(info);

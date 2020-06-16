@@ -122,6 +122,20 @@ let moment = require('moment');
      setJobkey(value){
         this.data.jobMetaproperties[this.jobkeykey]=value;
      }
+     getNewJobkey(){
+        if(!!this.data.NewjobMetaproperties && this.data.NewjobMetaproperties.hasOwnProperty(this.jobkeykey)){
+            return this.data.NewjobMetaproperties[this.jobkeykey];
+        }else{
+            return '';
+        }  
+     }
+     getOldJobkey(){
+        if(this.data.jobMetaproperties.hasOwnProperty(this.jobkeykey)){
+            return this.data.jobMetaproperties[this.jobkeykey];
+        }else{
+            return '';
+        }
+     }
      getJobkey(){
         if(this.data.jobMetaproperties.hasOwnProperty(this.jobkeykey)){
             return this.data.job_key ||this.data.jobMetaproperties[this.jobkeykey];
@@ -480,23 +494,30 @@ let moment = require('moment');
         var Teamname="";
         if( name!=null &&  name!=""){
           if(name.toLowerCase().indexOf("research asset and original source")!=-1 ||
+          name.toLowerCase().indexOf("Permission 1: Research Asset and Original Source")!=-1 ||
           name.toLowerCase().indexOf("select job type")!=-1 ||
+          name.toLowerCase().indexOf("Permission 2: Copyright Status")!=-1 ||
           name.toLowerCase().indexOf("copyright status")!=-1 ||
           name.toLowerCase().indexOf("contract negotiation and asset procurement")!=-1 ||
+          name.toLowerCase().indexOf("Permission 3: Contract Negotiation and Asset Procurement")!=-1 ||
           name.toLowerCase().indexOf("review image permissions")!=-1 ||
+          name.toLowerCase().indexOf("Permission 4: A&P Record Keeping")!=-1 ||
           name.toLowerCase().indexOf("asset approval")!=-1 ||
           name.toLowerCase().indexOf("waiting room preflight (for permission workflow)")!=-1 ||
-          name.toLowerCase().indexOf("a&p record keeping")!=-1 ){
+          name.toLowerCase().indexOf("Permission 5: Waiting Room Preflight")!=-1 ||
+          name.toLowerCase().indexOf("a&p record keeping")!=-1 ) {
             Teamname="Permissions Team";
           }
           else if(name.toLowerCase().indexOf("art production lead assigns designer")!=-1 ||
+          name.toLowerCase().indexOf("Art 1: Assign Designer")!=-1 ||
            name.toLowerCase().indexOf("create asset")!=-1 ||
            name.toLowerCase().indexOf("designer create asset")!=-1 ||
            name.toLowerCase().indexOf("review image design and quality")!=-1 ||
            name.toLowerCase().indexOf("art production lead review")!=-1 ||
+           name.toLowerCase().indexOf("Art 3: Tech Review")!=-1 ||
            name.toLowerCase().indexOf("team lead/designer creates asset")!=-1 ||
            name.toLowerCase().indexOf("team lead assigns designer")!=-1 ||
-           name.toLowerCase().indexOf("waiting room preflight")!=-1 ){
+           name.toLowerCase().indexOf("waiting room preflight")!=-1  ){
              Teamname="Art Team";
           }
           else if(name.toLowerCase().indexOf("search the dam for existing assets")!=-1 ||
@@ -512,7 +533,9 @@ let moment = require('moment');
           }else if(name.toLowerCase().indexOf("content team feedback and approval")!=-1 ||
           name.toLowerCase().indexOf("feedback and approval")!=-1 ||
           name.toLowerCase().indexOf("math audit review")!=-1 ||
+          name.toLowerCase().indexOf("Content Feedback 1")!=-1 ||
           name.toLowerCase().indexOf("math managing editor feedback and approval")!=-1 ||
+          name.toLowerCase().indexOf("Content Feedback 2")!=-1 ||
           name.toLowerCase().indexOf("complete request form")!=-1 ||
           name.toLowerCase().indexOf("content team feedback and approval")!=-1 ||
           name.toLowerCase().indexOf("feedback and approval")!=-1 ||
