@@ -264,7 +264,7 @@ poRoutes1.route('/jobprocessing2').post( function (req, res) {
   const myProm1 = new Promise(function(resolve, reject) {
       Mdb.campaign.find({ process: true, ExeOrder: true }).limit(1).then(dt=>{
         if(dt.length > 0) {
-          console.log("data processing:", dt);
+          //console.log("data processing:", dt);
           resolve(dt);
         } else {
           // here responce
@@ -293,6 +293,12 @@ poRoutes1.route('/jobprocessing2').post( function (req, res) {
         //res.send(data);
         var token=appConfig.getToken();
         const myProm2 = new Promise(function(resolve, reject) {
+          if(!!data[0].processedPage && data[0].processedPage > 0){
+            i= data[0].processedPage +1;
+          } else {
+            i = 1;
+          }
+          /////
           let tillDate = moment().add(1, 'days').toISOString();  
           var request_data=appConfig.getActionInfo("jobsbycampaignid", data[0].ID );
               request_data.data= {  
