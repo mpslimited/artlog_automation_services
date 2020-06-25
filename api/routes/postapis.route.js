@@ -259,6 +259,124 @@ poRoutes1.route('/refreshJobs').post( function (req, res) {
   })
 });
 
+poRoutes1.route('/jobprocessing2').post( function (req, res) {
+  console.log("jobprocessing Action");
+  const myProm1 = new Promise(function(resolve, reject) {
+      Mdb.campaign.find({ process: true, ExeOrder: true }).limit(1).then(dt=>{
+        if(dt.length > 0) {
+          console.log("data processing:", dt);
+          resolve(dt);
+        } else {
+          // here responce
+          //bb6f3943-5a47-49f0-ab82-c6278d1dad29
+          let where ={ ExeOrder: true }
+          Mdb.campaign.updateMany(where ,{
+           $set:{
+            process: true,
+            processedPage:0
+           }
+          }).then(d=>{ 
+            console.log("change dt req......");
+          }).catch(e=>{
+            console.log(e.message);
+          });
+        }
+      }).catch((e) => {
+         reject( new Error('REJECTError:', Err));
+      });
+	});
+	// Promish 1 For Data Selection 
+	let i= 0;
+	myProm1.then((data)=>{
+        //res.send(data);
+        console.log("Data Processed ", data[0].ID ,"Name:", data[0].name );
+        //res.send(data);
+        var token=appConfig.getToken();
+        const myProm2 = new Promise(function(resolve, reject) {
+          let tillDate = moment().add(1, 'days').toISOString();  
+          var request_data=appConfig.getActionInfo("jobsbycampaignid", data[0].ID );
+              request_data.data= {  
+              dateModifiedFrom: new Date(data[0].lastExeTime).toISOString(),
+              dateModifiedTo : tillDate,
+              limit: 500, page: 1  
+          };
+          request_data.url=request_data.url+"/";
+          request({url: request_data.url, method: request_data.method, qs: request_data.data, headers: oauth.toHeader(oauth.authorize(request_data, token))
+          }, function(error, response, body) {
+          if(error){
+            reject(new Error( error));
+          }else if(response.body.indexOf("Unauthorized Access") >-1){
+            console.log("API Response : ==>Unauthorized Access");
+          }else if(response.body.indexOf("504 Gateway Time-out") >-1){
+            console.log("API Response : ==>504 Gateway Time-out");
+            reject(new Error( '504 Gateway Time-out'));
+          }else if(response.body.indexOf("400 Bad Request") >-1 && response.body.indexOf("page is higher than amount of pages") >-1){
+            console.log("API Response : ==>page is higher than amount of pages");
+            //code hear for highre than amout of pages //
+            reject(new Error( 'page is higher than amount of pages'));
+          }else{
+            let dt=[];
+            try{
+              dt= JSON.parse(response.body);
+              console.log("Data getting at Bynder End Total:", dt.length );
+              console.log({ ID: data[0].ID,  name: data[0].name ,dataLength: dt.length, data : dt, });
+              resolve( { ID: data[0].ID,  name: data[0].name , data : dt, });
+            }catch(e){
+                reject( new Error('API Response Have Invalid Error: ', e.message));
+            }
+        }
+      })
+    });
+	 // Promish 2 for Bynder API 
+	  myProm2.then(data=>{
+		  console.log( "Total Data Length :", data.data.length );
+      //res.send(data);
+      let $campSet={  process: true, processedPage: i /* totalPage: i,*/ }
+        if(data.data.length < 500){  
+          $campSet.totalPage = i; 
+          $campSet.totalPage = i; 
+          $campSet.process = false  
+        };
+        Mdb.campaign.updateMany({ ID: data.ID } ,{
+          $set: $campSet
+         }).then(d=>{
+           console.log(d);
+         }).catch(e=>{
+          console.log("Update Err:", e.message );
+         });
+         let responceDt = {ID: data.ID , Name: data.name , processedPage: i, TotalData: data.data.length }
+         // Code Hear For Merging in LocalDatabase
+         let JobsResult = data.data;
+         console.log("responded on JobsResult", JobsResult.length);
+         var presetsforUpdating=[...new Set(JobsResult.map(x =>  x.presetID))];
+         var jobsForUpdate=new Array();
+         var saveSuccess=new Array();
+         var movedCount=0; 
+         let updatedID = new Array(), savedID = new Array();
+         let APIProcess = new ApiProcess(Mdb); // No need to avpid data before 25 feb
+         JobsResult= JobsResult.filter(dd=> new Date(dd.dateCreated) > new Date("2019-02-25"));
+         for(let k=0; k <JobsResult.length; k++){
+           if( APIProcess.checkAvoideJobs( JobsResult[k] ) ){
+              var Query=[{"$lookup":{"localField":"presetID","from":"job_presets","foreignField":"ID","as":"joincollection"}}];
+              Query.push({$match: { id: JobsResult[k].id }});
+              const myProm3 = new Promise(function(resolve, reject) {
+                Mdb.bynder_jobs.aggregate( Query ).then((docs)=>{
+                  resolve(docs)
+                });
+              })
+              myProm3.then((docs)=>{
+                if(docs.length > 0){   // Update Cases 
+                  APIProcess.updateHandler(docs, JobsResult[k]);
+                } else { 
+                  APIProcess.saveHandler(JobsResult[k]);
+                }
+              });
+            }
+         }
+         res.send(responceDt);
+	  });
+  });
+});
 poRoutes1.route('/jobprocessing').post( function (req, res) {
   console.log("jobprocessing Action");
   const myProm1 = new Promise(function(resolve, reject) {
@@ -270,7 +388,7 @@ poRoutes1.route('/jobprocessing').post( function (req, res) {
           let where ={ ExeOrder: true }
           Mdb.campaign.updateMany(where ,{
            $set:{
-            process: true,
+            process: false,
             processedPage:0
            }
           }).then(d=>{ 
@@ -308,6 +426,7 @@ poRoutes1.route('/jobprocessing').post( function (req, res) {
           //console.log(error, response.body);
           if(error){
              reject(new Error( error));
+             //
            }else if(response.body.indexOf("504 Gateway Time-out") >-1){
             console.log("API Response : ==>504 Gateway Time-out");
              reject(new Error( '504 Gateway Time-out'));
@@ -322,7 +441,7 @@ poRoutes1.route('/jobprocessing').post( function (req, res) {
               console.log("Data getting at Bynder End Total:", dt.length );
               resolve( { ID: data[0].ID,  name: data[0].name , data : dt, });
             }catch(e){
-                reject( new Error('API Responce Have Invalid Error: ', e.message));
+                reject( new Error('API Response Have Invalid Error: ', e.message));
             }
          }
         })
@@ -374,6 +493,90 @@ poRoutes1.route('/jobprocessing').post( function (req, res) {
          }
          res.send(responceDt);
       });
+  });
+});
+function changeStageName(StageNames){
+  try{
+    if( StageNames.trim().toLowerCase() =='research asset and original source') {
+      return 'Permission 1: Research Asset and Original Source';
+    } else if( StageNames.trim().toLowerCase() =='select job type') {
+      return 'Permission 2: Copyright Status';
+    } else if( StageNames.trim().toLowerCase() =='copyright status') {
+      return 'Permission 2: Copyright Status';
+    } else if( StageNames.trim().toLowerCase() =='contract negotiation and asset procurement') {
+      return 'Permission 3: Contract Negotiation and Asset Procurement';
+    } else if( StageNames.trim().toLowerCase() =='asset approval') {
+      return 'Permission 4: A&P Record Keeping';
+    } else if( StageNames.trim().toLowerCase() =='a&p record keeping') {
+      return 'Permission 4: A&P Record Keeping';
+    } else if( StageNames.trim().toLowerCase() =='art production lead assigns designer') {
+      return 'Art 1: Assign Designer';
+    } else if( StageNames.trim().toLowerCase() =='designer create asset') {
+      return 'Art 2: Designer Create Asset';
+    } else if( StageNames.trim().toLowerCase() =='art production lead review') {
+      return 'Art 3: Tech Review';
+    } else if( StageNames.trim().toLowerCase() =='math audit review') {
+      return 'Content Feedback 1';
+    } else if( StageNames.trim().toLowerCase() =='math managing editor feedback and approval') {
+      return 'Content Feedback 2';
+    } else if( StageNames.trim().toLowerCase() =='waiting room preflight') {
+      return 'Permission 5: Waiting Room Preflight';
+    } else if( StageNames.trim().toLowerCase() =='complete image research and provide options to writer') {
+      return 'Stock 1: Complete Image Research and Provide Options to Writer';
+    } else if( StageNames.trim().toLowerCase() =='upload final image') {
+      return 'Stock 2: Upload Final Image';
+    } else {
+      return StageNames.trim();
+    }
+  } catch(e){
+    return StageNames.trim();
+  }
+  
+}
+poRoutes1.route('/stagelabelchange').post( function (req, res) {
+  console.log("stagelabelchange Action has been called:");
+  Mdb.bynder_jobs.find({ Preset_Stagesq:{$exists: false},
+    "job_active_stage.status": {
+        $ne: "Cancelled"
+    }
+  }).limit(500).then((data)=>{
+    for( let dt of data){
+      let Oldpresetstages = JSON.parse(JSON.stringify(dt.presetstages));
+      let OldPreset_Stages = JSON.parse(JSON.stringify(dt.Preset_Stages));
+      if( dt.presetstages &&  dt.Preset_Stages ){
+        console.log( data.length);
+        let New_Preset_Stages = [];
+        for( let ddt of dt.Preset_Stages){
+          if(ddt.name){
+            ddt.name = changeStageName(ddt.name);
+          } else if(ddt.StageNames) {
+            ddt.StageNames = changeStageName(ddt.StageNames);
+          }
+          New_Preset_Stages.push( ddt );
+        }
+        //console.log(" New Data : ", New_Preset_Stages);
+        // data for Preset_Stages
+        for (let ddtt of dt.presetstages ) {
+          if(ddtt.name) {
+            ddtt.name = changeStageName(ddtt.name);
+          }
+        }
+       // break;
+      // console.log("data testing:", dt );
+       Mdb.bynder_jobs.updateOne({ _id: dt._id },{
+         $set:{
+          presetstages: dt.presetstages ,
+          presetstagesq: Oldpresetstages,
+          Preset_Stages: New_Preset_Stages,
+          Preset_Stagesq:  OldPreset_Stages ,
+         }
+       }).then((rs)=>{
+         console.log('responce found:', rs);
+       });
+       
+      }
+    }
+    res.send({ 'Total Data' : data.length });
   });
 });
 poRoutes1.route('/thumbsdata').post( function (req, res) {

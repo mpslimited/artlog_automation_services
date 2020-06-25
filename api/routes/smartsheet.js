@@ -1088,7 +1088,7 @@ postRoutes.route('/artlogdata', checkToken.checkToken).post(function (req, res) 
     //.skip(  parseInt(req.body.fromPage)).limit( parseInt(req.body.toPage) ).
     //.skip(2000)
     Mdb.bynder_jobs.find(q ).sort({job_key:-1}).then((data)=>{
-      console.log("data responded in DB TIME:", data.length, new Date().toISOString());
+      console.log("data responded in DB TIMEs :", data.length, new Date().toISOString());
     let dataResult=[];
          let Meta= new Metadt()
         Meta.iniMeta(WorkFlowJobsMetaData);

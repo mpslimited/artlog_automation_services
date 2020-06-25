@@ -42,6 +42,17 @@ let overdue_jobs= new Schema({
  },{
     collection: 'overdue_jobs'
 });
+
+let api_error_notification= new Schema({
+	isPushed : { type: Boolean},
+	msg : { type: String},
+  sub : { type: String},
+  apiUrL: { type: String},
+  apiResponce: {type: String },
+  
+ },{
+    collection: 'api_error_notification'
+});
 let bynder_jobs_refresh = new Schema({
   assetID   : {type : String},
   id: { type: String},
@@ -54,6 +65,7 @@ let bynder_jobs_refresh = new Schema({
 },{
    collection: 'bynder_jobs_refresh'
 });
+
 let bynder_jobs= new Schema({
   assetID   : {type : String},
   id: { type: String},
@@ -126,6 +138,8 @@ let bynder_jobs= new Schema({
   flaggedUser : { type : String   },
   flaggedDate: { type : Date   },
   updatethm: { type : Boolean   },
+  Preset_Stagesq : { type: Array},
+  presetstagesq : { type: Array},
  },{
     collection: 'bynder_jobs'
 });
@@ -281,8 +295,8 @@ let campaign=new Schema({
   process: {type: Boolean},
   ExeOrder: {type: Boolean},
   totalPage: {type: Number},
-  processedPage: {type:Number}
-  
+  processedPage: {type:Number},
+  lastExeTime: {type: Date}
 },{ collection: 'campaign'});
 let tempAssetCount = new Schema({
   count: { type: String} ,
@@ -375,5 +389,6 @@ let asset=new Schema({
       ExportSheetData: mongoose.model('ExportSheetData', ExportSheetData),
       delete_temp_data: mongoose.model('delete_temp_data', delete_temp_data),
       overdue_jobs:mongoose.model('overdue_jobs', overdue_jobs),
+      api_error_notification: mongoose.model('api_error_notification', api_error_notification),
     };
   module.exports = Mdb;
