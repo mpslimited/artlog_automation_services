@@ -304,7 +304,7 @@ poRoutes1.route('/jobprocessing2').post( function (req, res) {
               request_data.data= {  
               dateModifiedFrom: new Date(data[0].lastExeTime).toISOString(),
               dateModifiedTo : tillDate,
-              limit: 500, page: 1  
+              limit: 500, page: i  
           };
           request_data.url=request_data.url+"/";
           request({url: request_data.url, method: request_data.method, qs: request_data.data, headers: oauth.toHeader(oauth.authorize(request_data, token))
@@ -325,7 +325,7 @@ poRoutes1.route('/jobprocessing2').post( function (req, res) {
             try{
               dt= JSON.parse(response.body);
               console.log("Data getting at Bynder End Total:", dt.length );
-              console.log({ ID: data[0].ID,  name: data[0].name ,dataLength: dt.length, data : dt, });
+              //console.log({ ID: data[0].ID,  name: data[0].name ,dataLength: dt.length, data : dt, });
               resolve( { ID: data[0].ID,  name: data[0].name , data : dt, });
             }catch(e){
                 reject( new Error('API Response Have Invalid Error: ', e.message));
@@ -339,7 +339,7 @@ poRoutes1.route('/jobprocessing2').post( function (req, res) {
       //res.send(data);
       let $campSet={  process: true, processedPage: i /* totalPage: i,*/ }
         if(data.data.length < 500){  
-          $campSet.totalPage = i; 
+          $campSet.lastExeTime = moment().startOf('day').toISOString(); 
           $campSet.totalPage = i; 
           $campSet.process = false  
         };
@@ -398,6 +398,7 @@ poRoutes1.route('/jobprocessing').post( function (req, res) {
             processedPage:0
            }
           }).then(d=>{ 
+            res.send({'msg':'Job will be processed next calling'});
             console.log("change dt req......");
           }).catch(e=>{
             console.log(e.message);
