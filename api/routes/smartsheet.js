@@ -157,11 +157,11 @@ postRoutes.route('/getUserInfo').post(function (req, res) {
    }else{
      console.log(" else data ");
      var options = { method: 'POST',
-        url: 'https://greatminds.mpstechnologies.com/GreatMinds/admin/getLoggedInUserDeatils',
+        url: 'https://greatmindsdemo.mpstechnologies.com/GreatMinds/admin/getLoggedInUserDeatils',
         headers: 
         { 'cache-control': 'no-cache', Connection: 'keep-alive', 'Content-Length': '0',
           Cookie: 'JSESSIONID='+req.cookies.jssonId,  'Accept-Encoding': 'gzip, deflate',
-          Host: 'greatminds.mpstechnologies.com',
+          Host: 'greatmindsdemo.mpstechnologies.com',
           'Postman-Token': '253922e1-1531-47b2-b9d7-5ec943db1a91,24e7633e-1344-4d5d-a7d2-1a73fd497799',
           'Cache-Control': 'no-cache', Accept: '*/*', 'User-Agent': 'PostmanRuntime/7.17.1' } 
       };
@@ -1187,7 +1187,7 @@ postRoutes.route('/artlogdata', checkToken.checkToken).post(function (req, res) 
     console.log("objData data responded in DB TIME:",  new Date().toISOString());
      job_keys=dataResult.filter( (d)=> d.job_key!="" ).map(d=>d.job_key);
      GridFilters={
-      
+      /*
       mathAuditors     :   [...new Set(dataResult.filter( (v, i)=> !!v.mathAuditor ).map(d=>d.mathAuditor))].sort(),
       pageNos          :   [...new Set(dataResult.filter( (v, i)=> !!v.pageNo ).map(d=>d.pageNo))].sort(),
       flagedTeams      :   [...new Set(dataResult.filter( (v, i)=> !!v.flagedTeam ).map(d=>d.flagedTeam))].sort(),
@@ -1213,7 +1213,7 @@ postRoutes.route('/artlogdata', checkToken.checkToken).post(function (req, res) 
       revision         :   [...new Set(dataResult.filter( (d)=> !!d.revisionC ).map(d=>d.revisionC ))].sort(),
       cstages          :   [...new Set(dataResult.filter( (d)=> !!d.cstage ).map(d=>d.cstage))].sort(),
       cstatus          :   [...new Set(dataResult.filter( (d)=> !!d.job_active_stage.status ).map(d=>d.job_active_stage.status))].sort(),
-     
+     */
     };
       console.log("result length:", dataResult.length , new Date().toISOString());
       
