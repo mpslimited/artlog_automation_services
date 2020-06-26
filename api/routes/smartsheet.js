@@ -1185,7 +1185,7 @@ postRoutes.route('/artlogdata', checkToken.checkToken).post(function (req, res) 
     console.log("objData data responded in DB TIME:",  new Date().toISOString());
      job_keys=dataResult.filter( (d)=> d.job_key!="" ).map(d=>d.job_key);
      GridFilters={
-      
+      /*
       mathAuditors     :   [...new Set(dataResult.filter( (v, i)=> !!v.mathAuditor ).map(d=>d.mathAuditor))].sort(),
       pageNos          :   [...new Set(dataResult.filter( (v, i)=> !!v.pageNo ).map(d=>d.pageNo))].sort(),
       flagedTeams      :   [...new Set(dataResult.filter( (v, i)=> !!v.flagedTeam ).map(d=>d.flagedTeam))].sort(),
@@ -1211,7 +1211,7 @@ postRoutes.route('/artlogdata', checkToken.checkToken).post(function (req, res) 
       revision         :   [...new Set(dataResult.filter( (d)=> !!d.revisionC ).map(d=>d.revisionC ))].sort(),
       cstages          :   [...new Set(dataResult.filter( (d)=> !!d.cstage ).map(d=>d.cstage))].sort(),
       cstatus          :   [...new Set(dataResult.filter( (d)=> !!d.job_active_stage.status ).map(d=>d.job_active_stage.status))].sort(),
-    
+     */
     };
       console.log("result length:", dataResult.length , new Date().toISOString());
       
