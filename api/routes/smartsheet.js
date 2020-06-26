@@ -1008,7 +1008,7 @@ postRoutes.route('/artlogdata11', checkToken.checkToken).post(function (req, res
   });
 });
 postRoutes.route('/artlogdata', checkToken.checkToken).post(function (req, res) {
-    console.log("req parameters :" , req.body);
+    console.log("req parameters :" , req.body, new Date().toISOString());
     let $and = [ ];
     if(!!req.body.grade && req.body.grade!=""){
       let g=req.body.grade.split(",");
