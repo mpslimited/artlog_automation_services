@@ -1091,11 +1091,11 @@ postRoutes.route('/artlogdata', checkToken.checkToken).post(function (req, res) 
       console.log("data responded in DB TIMEs :", data.length, new Date().toISOString(), new Date());
 
     let dataResult=[];
-         let Meta= new Metadt()
+        /* let Meta= new Metadt()
         Meta.iniMeta(WorkFlowJobsMetaData);
         Meta.initAssetMeta(GCurriculaWIP);
         Meta.PrintAssetMeta(GPrintReady)
-        
+        */
     for(let  dtkey in data){
       var objData = data[dtkey].toObject();
       /*
@@ -1186,7 +1186,7 @@ postRoutes.route('/artlogdata', checkToken.checkToken).post(function (req, res) 
       dataResult.push(objData);
     }
     console.log("objData data responded in DB TIME:",  new Date().toISOString());
-     job_keys=dataResult.filter( (d)=> d.job_key!="" ).map(d=>d.job_key);
+     //job_keys=dataResult.filter( (d)=> d.job_key!="" ).map(d=>d.job_key);
      GridFilters={
       /*
       mathAuditors     :   [...new Set(dataResult.filter( (v, i)=> !!v.mathAuditor ).map(d=>d.mathAuditor))].sort(),
