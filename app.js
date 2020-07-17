@@ -45,10 +45,8 @@ app.use(responseTime(function (req, res, time) {
 }));
 
 const publicRoot = 'dist';
-//
 var accessLogStream = fs.createWriteStream(path.join(__dirname, 'logs/access.log'), 
-{ flags: 'a' })
-      , error = fs.createWriteStream(path.join(__dirname, 'logs/error.log'), { flags: 'a' });
+{ flags: 'a' }) , error = fs.createWriteStream(path.join(__dirname, 'logs/error.log'), { flags: 'a' });
 
 
 var logStdout = process.stdout;
@@ -58,7 +56,6 @@ console.log = function () {
   logStdout.write(util.format.apply(null, arguments) + '\n');
 }
 console.error = console.log;
-
 app.use(morgan('combined', { stream: accessLogStream }))
 
 
@@ -68,8 +65,6 @@ app.use('/static', express.static(path.join(__dirname,"/public/dist/static/")));
 //   console.log("requesting data for ==>",req.query);
 //   res.send('Wiki home page');
 // });
-
-
 
 app.get("/*", (request, res, next) => {
   let refUrl=request.headers.referer || request.url;

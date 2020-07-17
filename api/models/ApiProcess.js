@@ -73,14 +73,14 @@ class ApiProcess {
             // $set=getDataSetter(serDocs, $set);
             if(serDocs.presetstages.length > 0) {
               let dtf = serDocs.presetstages.filter(d=> d.position == JobsResult.job_active_stage.position)
-              let dtfPo = serDocs.presetstages.filter(d=> d.name == 'Designer Create Asset');
+              let dtfPo = serDocs.presetstages.filter(d=> d.name == 'Art 2: Designer Create Asset');
               let position=0;
               if(dtfPo.length > 0){
                 position = dtfPo[0].position;
               }
               if(dtf.length > 0 ){
                 let stageName = dtf[0].name || dtf[0].StageNames;
-                if(stageName!="" && stageName.trim() == 'Designer Create Asset' ){
+                if(stageName!="" && stageName.trim() == 'Art 2: Designer Create Asset' ){
                   $set.receiveddate = new Date();
                   // code for MPS Due Date
                   let momentdt= moment(); let addedDay = 1;

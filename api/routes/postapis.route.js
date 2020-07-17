@@ -78,32 +78,58 @@ poRoutes1.route('/activeJobs').post( function (req, res) {
   });
 });
 poRoutes1.route('/approvedJobs').post( function (req, res) {
-  Mdb.bynder_jobs.find({'job_active_stage.status':'Approved'}).then((data)=>{
+  Mdb.bynder_jobs.find(
+    { "job_active_stage.status": "Approved", 'job_date_finished': null } 
+    //{ id: 'aed3fe5f-f0b4-4d98-b1a9-85ae091444dd'}
+  ).then((data)=>{
     if(data.length > 0){ //3600,
-      redis_client.set('approved',  JSON.stringify(data));
-      res.send({'msg':'approved job moved in redis', 'Length': data.length});
+      //redis_client.set('approved',  JSON.stringify(data));
+      //res.send({'msg':'approved job moved in redis', 'Length': data.length});
+      for( let dt of data ) {
+        if(dt.Preset_Stages.length > 0 ) {
+         //console.log("data:",dt.id, "===>",dt.Preset_Stages[ dt.Preset_Stages.length-1 ] ,"======>>",  dt.Preset_Stages);
+         Mdb.bynder_jobs.updateMany({ id: dt.id},{
+            $set: {
+              job_date_finished : dt.Preset_Stages[ dt.Preset_Stages.length-1 ].job_date_finished || dt.Preset_Stages[ dt.Preset_Stages.length-1 ].start_date
+            }
+          }).then(ddata=>{
+            console.log("Data:", ddata);
+          });
+        }
+        if(dt.id == data[data.length -1 ].id){
+          res.send({ 'DataProcessed': data.length });
+        }
+      }
+    } else {
+      res.send({mag:'data Not found..!'});
     }
   });
 }); 
 
 poRoutes1.route('/existingArtTeamData1').post( function (req, res) {
-  Mdb.bynder_jobs.find({ artTeamStatus: 'Delivered', receiveddate: {$exists: true }}).then((data)=>{
+  console.log("finding jobs for update");
+  Mdb.bynder_jobs.find({  "Preset_Stages.StageNames":'Art 2: Designer Create Asset', receiveddate: {$exists: false }}).then((data)=>{
     for( let dt of data ){
       console.log("data==>", dt);
-      let stages= dt.Preset_Stages.filter(d=> d.StageNames =="Designer Create Asset" || d.name == "Designer Create Asset");
+      let stages= dt.Preset_Stages.filter(d=> d.StageNames =="Art 2: Designer Create Asset" || d.StageNames =="Designer Create Asset" || d.name == "Art 2: Designer Create Asset" || d.name == "Designer Create Asset");
       if(stages.length > 0){
-       let index= dt.Preset_Stages.indexOf(stages[0]);
-       if(!! dt.Preset_Stages[index+1]){
-        console.log(dt.Preset_Stages[index] , dt.Preset_Stages[index+1]);
-        let artComplateDt=dt.Preset_Stages[index+1].start_date || dt.Preset_Stages[index+1].job_date_finished ;
+      // let index= dt.Preset_Stages.indexOf(stages[0]);
+      // if(!! dt.Preset_Stages[index+1]){
+       // console.log(dt.Preset_Stages[index] , dt.Preset_Stages[index+1]);
+       // let artComplateDt=dt.Preset_Stages[index+1].start_date || dt.Preset_Stages[index+1].job_date_finished ;
+        
         Mdb.bynder_jobs.updateMany({ id: dt.id},{
           $set:{
-            artComplateDate: artComplateDt
+          //  artComplateDate: artComplateDt
+          receiveddate: stages[0].start_date,
+         // mpsDueDate : '',
+         // artTeamStatus: ''
+         // batchCDate
           }
         }).then(data=>{
           console.log("Data:", dt.ID);
-        })
-       }
+        });
+      // }
        if(dt._id == data[data.length-1]._id){
          res.send(dt);
        }
@@ -136,7 +162,7 @@ poRoutes1.route('/mpsdueDate').post( function (req, res) {
     //{ artComplateDate:{$exists: true}, receiveddate:{$exists: false}}
    // { job_key: 'EM2-10142' , receiveddate:{$exists: true} }
    //{ receiveddate : new Date('2020-04-16')}
-   {receiveddate:{$exists: true}}
+   {receiveddate:{$exists: true} , mpsDueDate:{$exists: false} }
     ).then((data)=>{
     for(let ddt of data){
       let momentdt= moment(ddt.receiveddate);
@@ -190,7 +216,8 @@ poRoutes1.route('/existingArtTeamData').post( function (req, res) {
   Mdb.bynder_jobs.find().then((data)=>{
      for(let dt of data){
        if(!!dt.presetstages && dt.presetstages.length > 0 && !!dt.Preset_Stages && dt.Preset_Stages.length > 0){
-        let dd = dt.presetstages.filter(d => d.name =='Designer Create Asset');
+      return 'Content Feedback 1';
+        let dd = dt.presetstages.filter(d => d.name =='Designer Create Asset' || d.name =='Art 2: Designer Create Asset');
         if(dd.length > 0 ){
          let poData= dt.Preset_Stages.filter(d => d.position == dd[0].position );
          if(poData.length > 0 && !!poData[poData.length-1].start_date ) {
@@ -298,7 +325,6 @@ poRoutes1.route('/jobprocessing2').post( function (req, res) {
           } else {
             i = 1;
           }
-          /////
           let tillDate = moment().add(1, 'days').toISOString();  
           var request_data=appConfig.getActionInfo("jobsbycampaignid", data[0].ID );
               request_data.data= {  
@@ -306,7 +332,8 @@ poRoutes1.route('/jobprocessing2').post( function (req, res) {
               dateModifiedTo : tillDate,
               limit: 500, page: i  
           };
-          request_data.url=request_data.url+"/";
+          console.log("request_data ===>", request_data.url, request_data.data );
+          //request_data.url=request_data.url+"/";
           request({url: request_data.url, method: request_data.method, qs: request_data.data, headers: oauth.toHeader(oauth.authorize(request_data, token))
           }, function(error, response, body) {
           if(error){
@@ -588,8 +615,11 @@ poRoutes1.route('/stagelabelchange').post( function (req, res) {
 });
 poRoutes1.route('/thumbsdata').post( function (req, res) {
   console.log("jobprocessing Action");  console.log("Data summary");
-  Mdb.bynder_jobs.find({ "job_active_stage.status": "Approved", thumb: "", updatethm:{ $exists: false}, assetID: { $exists: true,  $ne: "" }
-  },{ job_key: true, 'job_active_stage.status': true, thumb:1,  assetID:1 }).limit(1).then(data=>{
+  Mdb.bynder_jobs.find(
+    {"job_active_stage.status":'Approved', thumb:'',  updatethm:{ $exists: false}}
+   // { "job_active_stage.status": "Approved", thumb: "", updatethm:{ $exists: false}, assetID: { $exists: true,  $ne: "" }},
+   // { job_key: true, 'job_active_stage.status': true, thumb:1,  assetID:1 }
+  ).limit(1).then(data=>{
     var token = appConfig.getToken(); 
     var request_data=appConfig.getActionInfo( 'getAssets', data[0].assetID );
     //request_data.data= { limit: '1000', page: i  };
