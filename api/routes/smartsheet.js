@@ -157,11 +157,11 @@ postRoutes.route('/getUserInfo').post(function (req, res) {
    }else{
      console.log(" else data ");
      var options = { method: 'POST',
-        url: 'https://greatmindsdemo.mpstechnologies.com/GreatMinds/admin/getLoggedInUserDeatils',
+        url: 'https://greatminds.mpstechnologies.com/GreatMinds/admin/getLoggedInUserDeatils',
         headers: 
         { 'cache-control': 'no-cache', Connection: 'keep-alive', 'Content-Length': '0',
           Cookie: 'JSESSIONID='+req.cookies.jssonId,  'Accept-Encoding': 'gzip, deflate',
-          Host: 'greatmindsdemo.mpstechnologies.com',
+          Host: 'greatminds.mpstechnologies.com',
           'Postman-Token': '253922e1-1531-47b2-b9d7-5ec943db1a91,24e7633e-1344-4d5d-a7d2-1a73fd497799',
           'Cache-Control': 'no-cache', Accept: '*/*', 'User-Agent': 'PostmanRuntime/7.17.1' } 
       };
@@ -1087,24 +1087,21 @@ postRoutes.route('/artlogdata', checkToken.checkToken).post(function (req, res) 
     // testing in Live Build with Pradeep Sir 
     //.skip(  parseInt(req.body.fromPage)).limit( parseInt(req.body.toPage) ).
     //.skip(2000)
-    Mdb.bynder_jobs.find(q ).sort({job_key:-1}).then((data)=>{
-      console.log("data responded in DB TIMEs :", data.length, new Date().toISOString(), new Date());
-
+    Mdb.bynder_jobs.find(q ).sort({job_key:-1}).limit(500).then((data)=>{
+      console.log("data responded in DB TIMEs :", data.length, new Date().toISOString());
     let dataResult=[];
-        /* let Meta= new Metadt()
+         let Meta= new Metadt()
         Meta.iniMeta(WorkFlowJobsMetaData);
         Meta.initAssetMeta(GCurriculaWIP);
         Meta.PrintAssetMeta(GPrintReady)
-        */
+        
     for(let  dtkey in data){
       var objData = data[dtkey].toObject();
-      /*
       if(!!data[dtkey].jobMetaproperties){
         
         Meta.getInitDataSet(data[dtkey]);
         let Mdt= Meta.getMeta();
         let metaObj=Object.entries(data[dtkey].jobMetaproperties);
-        
         if(data[dtkey].Preset_Stages.length > 0 ){
          let lastChangeCreated= data[dtkey].Preset_Stages[data[dtkey].Preset_Stages.length -1].start_date;
          let lastChangeComplated=(!!data[dtkey].Preset_Stages[data[dtkey].Preset_Stages.length -1].job_date_finished)?
@@ -1151,7 +1148,7 @@ postRoutes.route('/artlogdata', checkToken.checkToken).post(function (req, res) 
          objData.exceptoin         =   Meta.getExceptoin(objData);
          */
          //------------------------//
-         /*objData.currentRTeam =   Meta.getStageRTeam(objData.cstage);
+         objData.currentRTeam =   Meta.getStageRTeam(objData.cstage);
          objData.totalage     =   dateDiffinDurationStage(data[dtkey].job_date_finished , dateCreatedJob );
          objData.lesson       =   Mdt.lesson;
          objData.lessonlet    =   Mdt.lessonlet;
@@ -1180,15 +1177,15 @@ postRoutes.route('/artlogdata', checkToken.checkToken).post(function (req, res) 
          objData.creditLine   =   Mdt.creditLine;
          objData.printAsset   =   Mdt.printAsset;
          objData.printReady   =   Mdt.printReady;
-         objData.permissionType = Mdt.permissionType*/
-      //}
+         objData.permissionType = Mdt.permissionType
+      }
       //console.log("Object Final VAlues: ==>", objData);
       dataResult.push(objData);
     }
     console.log("objData data responded in DB TIME:",  new Date().toISOString());
-     //job_keys=dataResult.filter( (d)=> d.job_key!="" ).map(d=>d.job_key);
+     job_keys=dataResult.filter( (d)=> d.job_key!="" ).map(d=>d.job_key);
      GridFilters={
-      /*
+      
       mathAuditors     :   [...new Set(dataResult.filter( (v, i)=> !!v.mathAuditor ).map(d=>d.mathAuditor))].sort(),
       pageNos          :   [...new Set(dataResult.filter( (v, i)=> !!v.pageNo ).map(d=>d.pageNo))].sort(),
       flagedTeams      :   [...new Set(dataResult.filter( (v, i)=> !!v.flagedTeam ).map(d=>d.flagedTeam))].sort(),
@@ -1214,7 +1211,7 @@ postRoutes.route('/artlogdata', checkToken.checkToken).post(function (req, res) 
       revision         :   [...new Set(dataResult.filter( (d)=> !!d.revisionC ).map(d=>d.revisionC ))].sort(),
       cstages          :   [...new Set(dataResult.filter( (d)=> !!d.cstage ).map(d=>d.cstage))].sort(),
       cstatus          :   [...new Set(dataResult.filter( (d)=> !!d.job_active_stage.status ).map(d=>d.job_active_stage.status))].sort(),
-     */
+    
     };
       console.log("result length:", dataResult.length , new Date().toISOString());
       
