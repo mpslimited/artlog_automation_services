@@ -61,7 +61,6 @@ postRoutes.route('/updateAsset/').post(function (req, res) {
         let formData= { tags: allTags.join(',') };
         request_data.data={ } //tags : dt.generatedTags };
         let authheader= oauth.toHeader( oauth.authorize(request_data, appConfig.getToken()) );
-
         let updtInfo= new Promise(resolve => {
             request({ method: "POST", url: request_data.url,  headers: authheader , formData: formData}, 
               function (error, response, body) {
@@ -84,7 +83,9 @@ postRoutes.route('/updateAsset/').post(function (req, res) {
         console.log(updtInfo, "data => ", data);
       }
     }
-  }).catch(Err => { console.log("Error:", Err); });
+  }).catch(Err => { 
+    console.log("Error:", Err);
+   });
   //res.send(request_data);
 });
 postRoutes.route('/notification').post(function (req, res) {
@@ -396,7 +397,7 @@ postRoutes.route('/assetSynced/').post(function (req, res) {
 postRoutes.route('/getAssets/:page').post(function (req, res) {
   console.log("Requesting ");
   let page = req.params.page;
-  page=1;
+  //page=1;
   var request_data = appConfig.getActionInfo("getAssets");
   var token = appConfig.getToken();
   request_data.data = {}; //={ "limit": 5, page: 1 }
@@ -555,6 +556,10 @@ postRoutes.route('/approvedworkfolwasset').post(function (req, res) {
 
 
 postRoutes.route('/updatePresets').post(function (req, res) {
+  console.log("updatePresets Action");
+  let ApiInfo = {};
+  ApiInfo.apiTaskName = 'Bynder Jobs syncing';
+  ApiInfo.process={ startTime: new Date() } ;
   let testQ={
     $or: [{  presetName: { $exists: false } }, { presetName: "" }]
   }
@@ -564,13 +569,12 @@ postRoutes.route('/updatePresets').post(function (req, res) {
       persetsIds= persetsIds.filter(d=>d!=null);
       console.log("Un-updated Preset jobs,", dt.length, "Total Unique Preset: ", persetsIds.length);
       // console.log("Data ", persetsIds.length);
+      ApiInfo.dataProcessed = { ID: dt[0].presetID , name : "Un-updated Preset job:" + dt.length + "Total Unique Preset: "+ persetsIds.length }
       for (let t = 0; t < persetsIds.length; t++) {
         if (!!persetsIds[t]) {
           var token = appConfig.getToken();
           var request_data = appConfig.getActionInfo("getPresetByJobs", persetsIds[t]);
-          request({
-            url: request_data.url, method: request_data.method, form: request_data.data, headers: oauth.toHeader(oauth.authorize(request_data, token))
-          }, function (error, response, body) {
+          request({  url: request_data.url, method: request_data.method, form: request_data.data, headers: oauth.toHeader(oauth.authorize(request_data, token)) }, function (error, response, body) {
             if(error){
               console.log("Error IN Api", error);
             }
