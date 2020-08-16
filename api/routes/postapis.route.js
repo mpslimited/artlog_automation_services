@@ -288,12 +288,24 @@ poRoutes1.route('/refreshJobs').post( function (req, res) {
 
 poRoutes1.route('/jobprocessing2').post( function (req, res) {
   console.log("jobprocessing Action");
+  let ApiInfo = {};
+  ApiInfo.apiTaskName = 'Bynder Jobs syncing';
+  ApiInfo.process={ startTime: new Date() } ;
   const myProm1 = new Promise(function(resolve, reject) {
       Mdb.campaign.find({ process: true, ExeOrder: true }).limit(1).then(dt=>{
         if(dt.length > 0) {
-          //console.log("data processing:", dt);
+          ApiInfo.dataProcessed = { ID: dt[0].ID, name: dt[0].name };
           resolve(dt);
+
         } else {
+          ApiInfo.isRounded = true;
+          ApiInfo.process.endTime= new Date() ;
+          res.send({'msg':'Api Round complated data will be processed next round'});
+          ApiInfo.responce= 'Api Round complated data will be processed next round';
+          let ApiPerformance = new Mdb.ApiPerformance(ApiInfo);
+          ApiPerformance.save().then(d=>{
+            console.log(d);
+          });
           // here responce
           //bb6f3943-5a47-49f0-ab82-c6278d1dad29
           let where ={ ExeOrder: true }
@@ -332,37 +344,53 @@ poRoutes1.route('/jobprocessing2').post( function (req, res) {
               dateModifiedTo : tillDate,
               limit: 500, page: i  
           };
+          ApiInfo.APISendInfo ={ url: request_data.url, data:request_data.data};
           console.log("request_data ===>", request_data.url, request_data.data );
+          ApiInfo.APIprocess ={ startTime:  new Date()}  ;
+          
           //request_data.url=request_data.url+"/";
           request({url: request_data.url, method: request_data.method, qs: request_data.data, headers: oauth.toHeader(oauth.authorize(request_data, token))
           }, function(error, response, body) {
           if(error){
+            ApiInfo.responce= error.toString();
+            ApiInfo.APIprocess.endTime= new Date() ;
             reject(new Error( error));
           }else if(response.body.indexOf("Unauthorized Access") >-1){
+            ApiInfo.responce= "API Response : ==>Unauthorized Access";
+            ApiInfo.APIprocess.endTime= new Date() ;
             console.log("API Response : ==>Unauthorized Access");
           }else if(response.body.indexOf("504 Gateway Time-out") >-1){
+            ApiInfo.responce= "API Response : ==>504 Gateway Time-out";
+            ApiInfo.APIprocess.endTime= new Date() ;
             console.log("API Response : ==>504 Gateway Time-out");
             reject(new Error( '504 Gateway Time-out'));
           }else if(response.body.indexOf("400 Bad Request") >-1 && response.body.indexOf("page is higher than amount of pages") >-1){
             console.log("API Response : ==>page is higher than amount of pages");
+            ApiInfo.responce= "API Response : ==>page is higher than amount of pages";
+            ApiInfo.APIprocess.endTime= new Date() ;
             //code hear for highre than amout of pages //
             reject(new Error( 'page is higher than amount of pages'));
           }else{
             let dt=[];
             try{
+              
               dt= JSON.parse(response.body);
               console.log("Data getting at Bynder End Total:", dt.length );
+              ApiInfo.responce= "Data getting at Bynder End Total:"+ dt.length ;
+              ApiInfo.APIprocess.endTime= new Date() ;
               //console.log({ ID: data[0].ID,  name: data[0].name ,dataLength: dt.length, data : dt, });
               resolve( { ID: data[0].ID,  name: data[0].name , data : dt, });
             }catch(e){
                 reject( new Error('API Response Have Invalid Error: ', e.message));
+                ApiInfo.responce= 'API Response Have Invalid Error: ';
+                ApiInfo.APIprocess.endTime= new Date() ;
             }
         }
       })
     });
 	 // Promish 2 for Bynder API 
 	  myProm2.then(data=>{
-		  console.log( "Total Data Length :", data.data.length );
+		  console.log( "Total Data Length :", data.data.length, ApiInfo );
       //res.send(data);
       let $campSet={  process: true, processedPage: i /* totalPage: i,*/ }
         if(data.data.length < 500){  
@@ -406,12 +434,29 @@ poRoutes1.route('/jobprocessing2').post( function (req, res) {
               });
             }
          }
+         ApiInfo.process.endTime= new Date() ;
+         console.log("ApiInfo", ApiInfo);
+         let ApiPerformance = new Mdb.ApiPerformance(ApiInfo);
+          ApiPerformance.save().then(d=>{
+            console.log(d);
+          });
          res.send(responceDt);
-	  });
+    }).catch((Error)=>{
+      console.log("Error found in :", Error);
+      ApiInfo.process.endTime= new Date() ;
+      console.log("ApiInfo", ApiInfo);
+      ApiInfo.isError= true;
+      let ApiPerformance = new Mdb.ApiPerformance(ApiInfo);
+      ApiPerformance.save().then(d=>{
+        console.log(d);
+      });
+      res.send({"Error": Error});
+    })
   });
 });
 poRoutes1.route('/jobprocessing').post( function (req, res) {
   console.log("jobprocessing Action");
+  
   const myProm1 = new Promise(function(resolve, reject) {
       Mdb.campaign.find({ process: true, ExeOrder: true }).limit(1).then(dt=>{
         if(dt.length > 0) {

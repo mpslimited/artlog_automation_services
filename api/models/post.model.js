@@ -298,6 +298,16 @@ let campaign=new Schema({
   processedPage: {type:Number},
   lastExeTime: {type: Date}
 },{ collection: 'campaign'});
+let ApiPerformance=new Schema({
+  apiTaskName: { type: String} ,
+  process: { type: Object} ,
+  dataProcessed: { type: Object} ,
+  APISendInfo: { type: Object} ,
+  APIprocess: { type: Object} ,
+  responce: { type: String} ,
+  isError: { type: Boolean, default: false} , 
+  inserdedTime: {type: Date, default: Date.now }
+},{ collection: 'ApiPerformance'});
 let tempAssetCount = new Schema({
   count: { type: String} ,
 },{ collection: 'tempAssetCount'});
@@ -386,6 +396,7 @@ let asset=new Schema({
       metaproperties : mongoose.model('metaproperties', metaproperties),
       users: mongoose.model('users', users),
       campaign: mongoose.model('campaign', campaign),
+      ApiPerformance: mongoose.model('ApiPerformance', ApiPerformance),
       ExportSheetData: mongoose.model('ExportSheetData', ExportSheetData),
       delete_temp_data: mongoose.model('delete_temp_data', delete_temp_data),
       overdue_jobs:mongoose.model('overdue_jobs', overdue_jobs),
