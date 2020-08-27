@@ -299,6 +299,9 @@ let campaign=new Schema({
   lastExeTime: {type: Date}
 },{ collection: 'campaign'});
 let ApiPerformance=new Schema({
+  apiType:{type: Number},
+  trigger:{type: String},
+  nextRunTime:{type: Date},
   apiTaskName: { type: String} ,
   process: { type: Object} ,
   dataProcessed: { type: Object} ,

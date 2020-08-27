@@ -9,6 +9,7 @@ const async = require("async");
 let Mdb = require('../models/post.model');
 let AssetTags = require("../models/AssetTags");
 let Metadt = require("../models/Metadt");
+let moment = require('moment');
 let appConfig = require('../models/config');
 
 const oauth = OAuth({
@@ -556,10 +557,15 @@ postRoutes.route('/approvedworkfolwasset').post(function (req, res) {
 
 
 postRoutes.route('/updatePresets').post(function (req, res) {
+  // here we have need to add API performance action
   console.log("updatePresets Action");
+  
   let ApiInfo = {};
-  ApiInfo.apiTaskName = 'Bynder Jobs syncing';
-  ApiInfo.process={ startTime: new Date() } ;
+  ApiInfo.apiTaskName = 'Bynder Presets sync';
+  let ApiObj = appConfig.getApiConfigByID(2);
+  let  startTime = moment().toDate();
+  let nextRunTime = moment().add(ApiObj.addedm, 'minutes').toDate()
+  ApiInfo.process={ apiType: ApiObj.ID , startTime: startTime, trigger: ApiObj.trigger, nextRunTime: nextRunTime } ;
   let testQ={
     $or: [{  presetName: { $exists: false } }, { presetName: "" }]
   }
@@ -569,18 +575,31 @@ postRoutes.route('/updatePresets').post(function (req, res) {
       persetsIds= persetsIds.filter(d=>d!=null);
       console.log("Un-updated Preset jobs,", dt.length, "Total Unique Preset: ", persetsIds.length);
       // console.log("Data ", persetsIds.length);
-      ApiInfo.dataProcessed = { ID: dt[0].presetID , name : "Un-updated Preset job:" + dt.length + "Total Unique Preset: "+ persetsIds.length }
+      ApiInfo.dataProcessed = { ID: dt[0].presetID , name : "Un-updated Preset job:" + dt.length + "Total Unique Preset: "+ persetsIds.length ,key: 'P:'+persetsIds.length }
+      let TotalPresets=0; let TotalActions =[];
       for (let t = 0; t < persetsIds.length; t++) {
         if (!!persetsIds[t]) {
           var token = appConfig.getToken();
           var request_data = appConfig.getActionInfo("getPresetByJobs", persetsIds[t]);
+          ApiInfo.APISendInfo ={ url: request_data.url, data:request_data.data};
+
           request({  url: request_data.url, method: request_data.method, form: request_data.data, headers: oauth.toHeader(oauth.authorize(request_data, token)) }, function (error, response, body) {
-            if(error){
+            console.log("TotalPresets"+ TotalPresets); let actPer = { presetID: persetsIds[TotalPresets]};
+            TotalPresets ++;
+          if(error){
               console.log("Error IN Api", error);
+              actPer.error ='Error IN Api '+ error;
             }
-            if (response.statusCode == 200) {
+            else if(response.body.indexOf('<html')==-1 && response.body.indexOf('<body')==-1) {
+              console.log("Invalid Api response! sending HTML data!");
+              actPer.error ='Invalid Api response! sending HTML data!';
+            }
+            else if (response.statusCode == 200) {
+              
               console.log(response.body);
               let persetDt = JSON.parse(response.body);
+              actPer.resp ="Preset API getting of : "+ presetID;
+              actPer.responed = true;
               let where = { presetID: persetDt.preset.ID, presetName: { $exists: false } };
               console.log(persetDt.preset.ID ," ID and => ", JSON.stringify(persetDt.preset.presetstages) );
               Mdb.bynder_jobs.find(where).then(data=>{
@@ -616,7 +635,22 @@ postRoutes.route('/updatePresets').post(function (req, res) {
               })
             }else{
               console.log("Preset API have Some Error: ", response.statusCode);
+              actPer.error ="Preset API have Some Error: "+ response.statusCode;
             }
+            // final stage of cond
+            TotalActions.push(actPer);
+            if( TotalPresets == persetsIds.length  ){
+              ApiInfo.process.endTime= new Date() ;
+              ApiInfo.responce= "Data processed of "+ dt.length + " Presets" ;
+              console.log("ALL TotalPresets"+ TotalPresets);
+              res.send({action: TotalPresets, description: TotalActions});
+              let ApiPerformance = new Mdb.ApiPerformance(ApiInfo);
+              ApiPerformance.save().then(d=>{
+                console.log(d);
+              });
+              // here responce
+            }
+
           });
         }
       }

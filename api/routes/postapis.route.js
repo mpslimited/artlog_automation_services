@@ -61,51 +61,6 @@ poRoutes1.route('/dataAutomation').post( function (req, res) {
   })
 }); 
 
-const redis = require("redis");
-const axios = require("axios");
-const port_redis = process.env.PORT || 6379;
-const redis_client = redis.createClient(port_redis);
-
-
-poRoutes1.route('/activeJobs').post( function (req, res) {
-  Mdb.bynder_jobs.find({ "job_active_stage.status": {
-    $in: ["Active","NeedsChanges"]
-  }}).then((data)=>{
-    if(data.length > 0){ //3600,
-      redis_client.set('active',  JSON.stringify(data));
-      res.send({'msg':'active job moved in redis', 'Length': data.length});
-    }
-  });
-});
-poRoutes1.route('/approvedJobs').post( function (req, res) {
-  Mdb.bynder_jobs.find(
-    { "job_active_stage.status": "Approved", 'job_date_finished': null } 
-    //{ id: 'aed3fe5f-f0b4-4d98-b1a9-85ae091444dd'}
-  ).then((data)=>{
-    if(data.length > 0){ //3600,
-      //redis_client.set('approved',  JSON.stringify(data));
-      //res.send({'msg':'approved job moved in redis', 'Length': data.length});
-      for( let dt of data ) {
-        if(dt.Preset_Stages.length > 0 ) {
-         //console.log("data:",dt.id, "===>",dt.Preset_Stages[ dt.Preset_Stages.length-1 ] ,"======>>",  dt.Preset_Stages);
-         Mdb.bynder_jobs.updateMany({ id: dt.id},{
-            $set: {
-              job_date_finished : dt.Preset_Stages[ dt.Preset_Stages.length-1 ].job_date_finished || dt.Preset_Stages[ dt.Preset_Stages.length-1 ].start_date
-            }
-          }).then(ddata=>{
-            console.log("Data:", ddata);
-          });
-        }
-        if(dt.id == data[data.length -1 ].id){
-          res.send({ 'DataProcessed': data.length });
-        }
-      }
-    } else {
-      res.send({mag:'data Not found..!'});
-    }
-  });
-}); 
-
 poRoutes1.route('/existingArtTeamData1').post( function (req, res) {
   console.log("finding jobs for update");
   Mdb.bynder_jobs.find({  "Preset_Stages.StageNames":'Art 2: Designer Create Asset', receiveddate: {$exists: false }}).then((data)=>{
@@ -289,15 +244,18 @@ poRoutes1.route('/refreshJobs').post( function (req, res) {
 poRoutes1.route('/jobprocessing2').post( function (req, res) {
   console.log("jobprocessing Action");
   let ApiInfo = {};
-  ApiInfo.apiTaskName = 'Bynder Jobs syncing';
-  ApiInfo.process={ startTime: new Date() } ;
+  ApiInfo.apiTaskName = 'Bynder Jobs sync';
+  let ApiObj = appConfig.getApiConfigByID(1);
+  let  startTime = moment().toDate();
+  let nextRunTime = moment().add(ApiObj.addedm, 'minutes').toDate()
+  ApiInfo.process={ apiType: ApiObj.ID , startTime: startTime, trigger: ApiObj.trigger, nextRunTime: nextRunTime } ;
   const myProm1 = new Promise(function(resolve, reject) {
       Mdb.campaign.find({ process: true, ExeOrder: true }).limit(1).then(dt=>{
         if(dt.length > 0) {
-          ApiInfo.dataProcessed = { ID: dt[0].ID, name: dt[0].name };
+          ApiInfo.dataProcessed = { ID: dt[0].ID, name: dt[0].name, key:dt[0].key };
           resolve(dt);
-
         } else {
+          ApiInfo.dataProcessed = { ID: '', name: '', key:'Round Rotation' };
           ApiInfo.isRounded = true;
           ApiInfo.process.endTime= new Date() ;
           res.send({'msg':'Api Round complated data will be processed next round'});
@@ -559,7 +517,7 @@ poRoutes1.route('/jobprocessing').post( function (req, res) {
               })
               myProm3.then((docs)=>{
                 if(docs.filter(d=> d.id =='2626c8ac-167e-422b-b766-60a7a0990aef').length > 0){
-                  console.log("Data syncing found", JobsResult[k]);
+                  console.log("Data sync found", JobsResult[k]);
                 }
                 if(docs.length > 0){   // Update Cases 
                   

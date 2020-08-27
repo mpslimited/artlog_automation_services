@@ -5,13 +5,9 @@ const OAuth = require('oauth-1.0a');
 const crypto = require('crypto');
 const await = require("await");
 const async = require("async");
-const redis = require("redis");
 let moment = require('moment');
 
-//const axios = require("axios");
 
-//const port_redis = process.env.PORT || 6379;
-//const redis_client = redis.createClient(port_redis);
 
 let Mdb = require('../models/post.model');
 let AssetTags = require("../models/AssetTags");
@@ -53,35 +49,6 @@ Mdb.assetMeta.find({}, { "curricula_wip.options": 1 }).then((dt) => {
 
 // new changes 
 // starships
-//  @desc Return Starships data for particular starship id Radis Implementation Data //
-/*
-postRoutes.route('/active').post( async (req, res) => {
-  try {
-    Mdb.bynder_jobs.find( { 'job_active_stage.status':{ $in :['Active','NeedsChanges']} }).then(data=>{
-      redis_client.setex('ActiveData', 3600*12, JSON.stringify(data));
-      res.send({'msg': 'Active Data refresh in Redis server', key: 'ActiveData', totalCount: data.length });
-    }).catch(Err=>{
-      console.log("Error In Data:", Err);
-    })
-  } catch (error) {
-    console.log(error);
-    return res.status(500).json(error);
-  }
-});
-postRoutes.route('/approved').post( async (req, res) => {
-  try {
-    Mdb.bynder_jobs.find( { 'job_active_stage.status': 'Approved'} ).then(data=>{
-      redis_client.setex('ApprovedData', 3600*12, JSON.stringify(data));
-      res.send({'msg': 'Approved Data refresh in Redis server', key: 'ApprovedData', totalCount: data.length });
-    }).catch(Err=>{
-      console.log("Error In Data:", Err);
-    })
-  } catch (error) {
-    console.log(error);
-    return res.status(500).json(error);
-  }
-});
-*/
 
 // end new changes
 postRoutes.route('/updateAsset/').post(function (req, res) {

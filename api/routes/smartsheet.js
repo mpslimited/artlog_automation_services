@@ -10,10 +10,7 @@ const Mdb  = require('../models/post.model');
 const checkToken = require('../models/middleware');
 const mongoose = require( 'mongoose' );
 const jwt = require('jsonwebtoken');
-const redis = require("redis");
 let moment = require('moment'); //Test By Pradeep sir
-//const port_redis = process.env.PORT || 6379;
-//const redis_client = redis.createClient(port_redis);
 
 //let appConfig=require('./config');
 // Metadt= new Metadt('dddd');
@@ -582,7 +579,8 @@ postRoutes.route('/addnewjobs').post(function (req, res) {
               isPaging			: d.isPaging,
               comment			  : d.comment,
               mverification		: d.mverification,
-              generatedTags		: d.generatedTags
+              generatedTags		: d.generatedTags,
+              jobMetaproperties: d.jobMetaproperties
             }));
 
             let k=0;
@@ -640,7 +638,8 @@ postRoutes.route('/addnewjobs').post(function (req, res) {
               dtt.forEach(response => {
                 var objData = response.toObject();
                 if(!!response.jobMetaproperties){
-                  let Meta= new Metadt(response)
+                  let Meta= new Metadt(response);
+                  Meta.getInitDataSet(objData);
                   Meta.iniMeta(WorkFlowJobsMetaData);
                   Meta.initAssetMeta(GCurriculaWIP);
                   Meta.PrintAssetMeta(GPrintReady)
@@ -877,136 +876,9 @@ postRoutes.route('/searchdtinit').post(async (req, res)=> {
     }
   });
 });
-//const redis = require("redis");
-//const axios = require("axios");
-const port_redis = process.env.PORT || 6379;
-const redis_client = redis.createClient(port_redis);
 
-postRoutes.route('/artlogdata11', checkToken.checkToken).post(function (req, res) {
-  console.log("req parameters :" , req.body);
-  let dataResult=[];
-  redis_client.get('active', function(err, resData) {
-   let data = JSON.parse(resData);
-   console.log( "DATA Length :", data.length);
-   for(let  dtkey in data){
-    //var objData = data[dtkey].toObject();
-    var objData = data[dtkey];
-    if(!!data[dtkey].jobMetaproperties){
-      let Meta= new Metadt(data[dtkey])
-      Meta.iniMeta(WorkFlowJobsMetaData);
-      Meta.initAssetMeta(GCurriculaWIP);
-      Meta.PrintAssetMeta(GPrintReady)
-      let Mdt= Meta.getMeta();
-      let metaObj=Object.entries(data[dtkey].jobMetaproperties);
-      if(data[dtkey].Preset_Stages.length > 0 ){
-       let lastChangeCreated= data[dtkey].Preset_Stages[data[dtkey].Preset_Stages.length -1].start_date;
-       let lastChangeComplated=(!!data[dtkey].Preset_Stages[data[dtkey].Preset_Stages.length -1].job_date_finished)?
-        data[dtkey].Preset_Stages[data[dtkey].Preset_Stages.length -1].job_date_finished: new Date();
-        objData.lastage=dateDiffinDurationStage(lastChangeComplated, lastChangeCreated);
-      }
-      var dateCreatedJob =  data[dtkey].dateCreated ||Mdt.dateCreatedM ;
-      if(data[dtkey].job_date_finished===null && data[dtkey].job_active_stage.status!="Approved"){
-        data[dtkey].job_date_finished=new Date().toISOString();
-      }else if(data[dtkey].job_date_finished===null){
-        data[dtkey].job_date_finished=new Date().toISOString();
-      }
-      objData.cstage=""; objData.workflow=Meta.getWorkflow();
-      objData.mathAuditRC = 0;
-      if(objData.Preset_Stages.length > 0){
-        // IT Should be another that we can not captuchred 
-        objData.mathAuditRC= objData.Preset_Stages.filter( d => d.StageNames =='Math Audit Review' ).length;
-        let ob=objData.Preset_Stages[ objData.Preset_Stages.length-1 ];
-        if(ob.hasOwnProperty('name')){
-          objData.cstage=ob.name;
-        }else if(ob.hasOwnProperty('StageNames')){
-          objData.cstage=ob.StageNames;
-        }
-        if(objData.cstage=="" && !!ob.position && objData.presetstages.length > 0){
-          let objdt=objData.presetstages.filter(d=> d.position == ob.position);
-          if(objdt.length > 0)
-          objData.cstage = objdt[0].name;
-        }
-      }
-       // Art Team Columns // 
-      // objData.receiveddate      =   Meta.getMathAuditStartDt(objData);
-      // objData.mpsDueDate        =   Meta.getMpsDueDate(objData);
-       objData.artTeamStatus     =   Meta.getTeamStatus(objData);
-       objData.artTeamPriority   =   Meta.getTeamPriority(objData);
-       objData.exceptionCategory =   Meta.getExceptionCategory(objData);
-       objData.exception         =   Meta.getExceptoin(objData);
-       //------------------------//
-       objData.currentRTeam =   Meta.getStageRTeam(objData.cstage);
-       objData.totalage     =   dateDiffinDurationStage(data[dtkey].job_date_finished , dateCreatedJob );
-       objData.lesson       =   Mdt.lesson;
-       objData.lessonlet    =   Mdt.lessonlet;
-       objData.component    =   Mdt.component; 
-       objData.tags         =   Mdt.tag; 
-       objData.gradeID      =   Mdt.grade;
-       objData.grade        =   Mdt.gradeVal;
-       objData.moduleID     =   Mdt.module;
-       objData.module       =   Mdt.moduleVal;
-       objData.topic        =   Mdt.topic;
-       objData.facing       =   Mdt.facingVal;
-       objData.facingID     =   Mdt.facing;
-       objData.series       =   Mdt.series;
-       //test
-       objData.revisionID   =   Mdt.revision;
-       objData.revisionC    =   Mdt.revisionVal;
-       objData.artcomplexID =   Mdt.artComplex;
-       objData.artcomplex   =   Mdt.artComplexVal;
-       objData.artassionID  =   Mdt.artAssion;
-       objData.artassion    =   Mdt.artAssionVal;
-       objData.riskID       =   Mdt.risk;
-       objData.risk         =   Mdt.riskVal;
-       objData.impactId     =   Mdt.impact;
-       objData.impact       =   Mdt.impactVal;
-       objData.curriculum   =   Mdt.wip;
-       objData.creditLine   =   Mdt.creditLine;
-       objData.printAsset   =   Mdt.printAsset;
-       objData.printReady   =   Mdt.printReady;
-       objData.permissionType = Mdt.permissionType
-    }
-    //console.log("Object Final VAlues: ==>", objData);
-    dataResult.push(objData); 
-  }
-   job_keys=dataResult.filter( (d)=> d.job_key!="" ).map(d=>d.job_key);
-   GridFilters={
-    mathAuditors     :   [...new Set(dataResult.filter( (v, i)=> !!v.mathAuditor ).map(d=>d.mathAuditor))].sort(),
-    pageNos          :   [...new Set(dataResult.filter( (v, i)=> !!v.pageNo ).map(d=>d.pageNo))].sort(),
-    flagedTeams      :   [...new Set(dataResult.filter( (v, i)=> !!v.flagedTeam ).map(d=>d.flagedTeam))].sort(),
-    printAssets      :   [...new Set(dataResult.filter( (v, i)=> !!v.printAsset ).map(d=>d.printAsset))].sort(),
-    printReadys      :   [...new Set(dataResult.filter( (v, i)=> !!v.printReady ).map(d=>d.printReady))].sort(),
-    permissionTypes  :   [...new Set(dataResult.filter( (v, i)=> !!v.permissionType ).map(d=>d.permissionType))].sort(),
-    curriculum       :   [...new Set(dataResult.filter( (v, i)=> !!v.curriculum ).map(d=>d.curriculum))].sort(),
-    workflow         :   [...new Set(dataResult.filter( (v, i)=> !!v.workflow ).map(d=>d.workflow))].sort(),
-    currentRTeam     :   [...new Set(dataResult.filter( (v, i)=> !!v.currentRTeam ).map(d=>d.currentRTeam))].sort(),
-    lesson           :   [...new Set(dataResult.filter( (v, i)=> !!v.lesson ).map(d=>d.lesson))].sort(), 
-    lessonlet        :   [...new Set(dataResult.filter( (v, i)=> !!v.lessonlet ).map(d=> d.lessonlet))].sort(),
-    component        :   [...new Set(dataResult.filter( (d)=> !!d.component ).map(d=>d.component))].sort(),
-    grade            :   [...new Set(dataResult.filter( (d)=> !!d.grade ).map(d=>d.grade))].sort(),
-    module           :   [...new Set(dataResult.filter( (d)=> !!d.module ).map(d=>d.module))].sort(),
-    artcomplex       :   [...new Set(dataResult.filter( (d)=> !!d.artcomplex ).map(d=>d.artcomplex))].sort(),
-    artassion        :   [...new Set( dataResult.filter( (d)=> !!d.artassion ).map(d=>d.artassion))].sort(),
-    risk             :   [...new Set(dataResult.filter( (d)=> !!d.risk ).map(d=>d.risk))].sort(),
-    impact           :   [...new Set(dataResult.filter( (d)=> !!d.impact ).map(d=>d.impact))].sort(),
-    facing           :   [...new Set(dataResult.filter( (d)=> !!d.facing ).map(d=>d.facing))].sort(),
-    series           :   [...new Set(dataResult.filter( (d)=> !!d.series ).map(d=>d.series))].sort(),
-    topic            :   [...new Set(dataResult.filter( (d)=> !!d.topic ).map(d=>d.topic))].sort(),
-    batch            :   [...new Set(dataResult.filter( (d)=> !!d.batch ).map(d=>d.batch))].sort(),
-    revision         :   [...new Set(dataResult.filter( (d)=> !!d.revisionC ).map(d=>d.revisionC ))].sort(),
-    cstages          :   [...new Set(dataResult.filter( (d)=> !!d.cstage ).map(d=>d.cstage))].sort(),
-    cstatus          :   [...new Set(dataResult.filter( (d)=> !!d.job_active_stage.status ).map(d=>d.job_active_stage.status))].sort(),
-   };
-    console.log("result length:", dataResult.length )
-    
 
-    // Mdb.bynder_jobs.find(q, fields ).count().then(dt=>{
-      dt=500;
-      let result={ artLogData : dataResult, GridFilters : GridFilters, totalCount: dt};
-      res.send( result );
-    // })
-  });
-});
+
 postRoutes.route('/artlogdata', checkToken.checkToken).post(function (req, res) {
     console.log("req parameters :" , req.body, new Date().toISOString());
     let $and = [ ];
@@ -1232,8 +1104,8 @@ postRoutes.route('/artlogteamdata', checkToken.checkToken).post(function (req, r
   let q ={};
   //if(sData.rTypeData =="1"){
     let dateReq = moment().format('YYYY-MM-DD');
-    if(!!sData.rDate.year && !!sData.rDate.month && !!sData.rDate.day) {
-      dateReq = new Date(sData.rDate.year+'-'+sData.rDate.month+'-'+sData.rDate.day);
+    if(!!sData.year && !!sData.month && !!sData.day) {
+      dateReq = new Date(sData.year+'-'+sData.month+'-'+sData.day);
     }
     
     let start = moment(dateReq).format('YYYY-MM-DD') +'T00:00:00';
@@ -2149,14 +2021,59 @@ postRoutes.route('/dsmsummary', checkToken.checkToken).post(function (req, res) 
 //apiperformance
 postRoutes.route('/apiperformance', checkToken.checkToken).post(function (req, res) {
   console.log("Action apiperformance");
-  Mdb.ApiPerformance.find({}).limit(100).then((data)=>{
+  const myProm1 = new Promise(function(resolve, reject) {
+    let q = { 
+      $group: {
+        _id : '$apiTaskName',
+        apiTaskName : { $last: '$apiTaskName' },
+        process : { $last: '$process' },
+        dataProcessed : { $last: '$dataProcessed' },
+        APISendInfo : { $last: '$APISendInfo' },
+        responce : { $last: '$responce' },
+        inserdedTime : { $last: '$inserdedTime' },
+        isError : { $last: '$isError' },
+        count : { $sum: 1 }
+       }
+    };
+    Mdb.ApiPerformance.aggregate(q).then((data)=>{
+      resolve(data);
+    }).catch(Error=>{
+      console.log("Error:",Error);
+      reject( new Error('REJECTError:', Error));
+    })
+  });
+  myProm1.then(data => {
+    Mdb.ApiPerformance.find({}).sort({"_id":1}).limit(100).then((result)=>{
+      res.send({ data: data, result: result});
+    });
+  })
+  /*
+  Mdb.ApiPerformance.find({}).sort({"_id":1}).limit(100).then((data)=>{
     res.send(data);
   }).catch(Error=>{
     console.log("Error:",Error);
+    
   })
+  */
 
 });
+var csv      = require('csv-express');
 
+postRoutes.route('/exporttocsv', checkToken.checkToken).post( (req, res) => {
+  console.log("Action : exporttocsv");
+  //res.send("data testing");
+  Mdb.bynder_jobs.find({},{ID:1,job_key:1}).sort({_id:-1}).limit(5).then((jobsData) => {
+    res.send(jobsData);
+    /*
+    let filename='Bynder_jobs.csv';
+      res.setHeader('Content-Type', 'text/csv');
+      res.setHeader("Content-Disposition", 'attachment; filename='+filename);
+      res.csv(jobsData.map(d => d._doc), true);
+      */
+  }).catch(Error =>{
+    console.log("Error in Data:", Error);
+  });
+});
 
 function dateDiff( string1, string2){
   try{

@@ -21,7 +21,18 @@ var appConfig = {
       { action: 'getAssetsProp', URL:'https://greatminds.getbynder.com/api/v4/metaproperties/', extraConfog: false, other:''},
       { action: 'updateAsset',URL:'https://greatminds.getbynder.com/api/v4/media/', extraConfog: true, other:''},
       { action: 'test4', URL:'', extraConfog: false, other:''}
-], getActionInfo (name, id) { // same as "sayHi: function()"
+],
+APIconfig: [
+    {ID:1, name:'Jobs sync', trigger: 'Same day in every 3 minuts', addedm: 3},
+    {ID:2, name:'Presets sync', trigger: 'Same day in every 30 minuts', addedm: 30},
+    {ID:1, trigger: 'Same day in every 30 minuts', addedm: 30},
+    {ID:1, trigger: 'Same day in every 3 minuts', addedm: 3},
+    {ID:1, trigger: 'Same day in every 3 minuts', addedm: 3},
+],
+getApiConfigByID( id ){
+    return this.APIconfig.find(d => d.ID == id );
+}
+, getActionInfo (name, id) { // same as "sayHi: function()"
         var data=this.apiAction.filter(function(data) {
             return data.action == name;
         }); 
