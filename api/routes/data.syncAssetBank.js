@@ -45,7 +45,7 @@ Mdb.assetMeta.find({}, { "curricula_wip.options": 1 }).then((dt) => {
 
 postRoutes.route('/updateAsset/').post(function (req, res) {
   console.log("updateAssetasset data :", req.body);
-  Mdb.bynder_jobs.find({ updateTag: 'Processing', assetID: {$exists: true} }).limit(1).then((data) => {
+  Mdb.bynder_jobs.find({ updateTag: 'Processing', assetID: {$exists: true} }).then((data) => {
     if(data.length > 0){
       res.send({'TotLength': data.length,"target":'For UpdateAsset' });
       for(let dt of data){
@@ -62,11 +62,14 @@ postRoutes.route('/updateAsset/').post(function (req, res) {
         let formData= { tags: allTags.join(',') };
         request_data.data={ } //tags : dt.generatedTags };
         let authheader= oauth.toHeader( oauth.authorize(request_data, appConfig.getToken()) );
-        let updtInfo= new Promise(resolve => {
-            request({ method: "POST", url: request_data.url,  headers: authheader , formData: formData}, 
-              function (error, response, body) {
-                if(!error)
+        let updtInfo= new Promise(resolve, reject => {
+            request({ method: "POST", url: request_data.url,  headers: authheader , formData: formData},function (error, response, body) {
+                if(!error) {
                   resolve(body);
+                 } else {
+                  reject([]);
+                  console.log("Error in DT:", error );
+                } 
             });
         }).then(value => {
             // process value here
@@ -80,6 +83,8 @@ postRoutes.route('/updateAsset/').post(function (req, res) {
             }).catch(Err=>{
               console.log("Error in Data Update:", Err);
             });
+        }).catch( Err => {
+          console.log("Error on Tag Pushing :", Err);
         });
         console.log(updtInfo, "data => ", data);
       }

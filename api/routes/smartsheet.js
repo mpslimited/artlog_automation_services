@@ -138,7 +138,14 @@ postRoutes.route('/gridStage', verifyToken).post(function (req, res) {
 })
 postRoutes.route('/searchState', verifyToken).post(function (req, res) {  
   console.log("ACTION : searchState REQ==>",req.body);
-  let searchState= new Mdb.searchState({uid: req.headers['authuser'] , searchTitle : req.body.searchText, fields: req.body.frmdt, state:'SearchStage' });
+  let frm = JSON.parse(req.body.frmdt);
+  let searchState= new Mdb.searchState(
+    {uid: req.headers['authuser']  , 
+    tab: frm.tabData,
+    searchTitle : req.body.searchText, 
+    fields: req.body.frmdt, 
+    state:'SearchStage' 
+  });
   searchState.save().then((rs)=>{
     console.log("value saved sucessfully ", rs); 
     res.send(rs);
@@ -729,7 +736,7 @@ postRoutes.route('/updateAsset', checkToken.checkToken).post(function (req, res)
   for(let d of data){
     console.log("data processing =>", JSON.stringify(d));
       Mdb.bynder_jobs.updateOne({_id: d._id},{
-        $set:{ isMailed: false, updateTag:'Processing', generatedTags:  d.generatedTags } 
+        $set:{ isMailed: false, updateTag:'Processing', generatedTags:  d.generatedTags , tagGenerationDt: new Date() } 
       }).then((rs)=>{
         console.log("successfully updated:", rs);
       }).catch(Err=>{
@@ -962,7 +969,7 @@ postRoutes.route('/artlogdata', checkToken.checkToken).post(function (req, res) 
     Mdb.bynder_jobs.find(q ).sort({job_key:-1}).then((data)=>{
       console.log("data responded in DB TIMEs :", data.length, new Date().toISOString());
     let dataResult=[];
-         let Meta= new Metadt()
+    let Meta= new Metadt()
         Meta.iniMeta(WorkFlowJobsMetaData);
         Meta.initAssetMeta(GCurriculaWIP);
         Meta.PrintAssetMeta(GPrintReady)
@@ -1724,8 +1731,11 @@ postRoutes.route('/createdcompletedjobs', checkToken.checkToken).post( async fun
     console.log("Err in Tat==>", Err);
   });
 });
-//scorecardload 
 postRoutes.route('/scorecardload', checkToken.checkToken).post( async function (req, res) {
+
+});
+//scorecardload 
+postRoutes.route('/scorecardload1', checkToken.checkToken).post( async function (req, res) {
   console.log("\n\n ACTION scorecardload data comming =>", JSON.stringify(req.body),"\n");
   var workflowPreset="", compaignId ="",jobType="", grade="", modules="", startDateRange="", endDateRange="", currentStatus=[], jobTypeTemp="", isOverdue=false;
   if(req.body.workflowPreset){ workflowPreset=req.body.workflowPreset; }

@@ -67,6 +67,7 @@ let bynder_jobs_refresh = new Schema({
 });
 
 let bynder_jobs= new Schema({
+  tagGenerationDt: {type: String},
   assetID   : {type : String},
   id: { type: String},
   jobID:{type:String},
@@ -231,6 +232,7 @@ let bynder_jobs_old= new Schema({
     })
     let searchState= new Schema({
       uid : {type: String},
+      tab: { type: String},
       searchTitle : { type: String },
       fields      : { type: Object},
       isDefault : { type: Boolean},
