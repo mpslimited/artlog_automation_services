@@ -965,7 +965,7 @@ postRoutes.route('/artlogdata', checkToken.checkToken).post(function (req, res) 
     console.log("Calling artlogdata Data " , JSON.stringify(q), JSON.stringify(fields));
     // testing in Live Build with Pradeep Sir 
     //.skip(  parseInt(req.body.fromPage)).limit( parseInt(req.body.toPage) ).
-    //.skip(2000)
+    //.skip(2000) export dt
     Mdb.bynder_jobs.find(q ).sort({job_key:-1}).then((data)=>{
       console.log("data responded in DB TIMEs :", data.length, new Date().toISOString());
     let dataResult=[];
