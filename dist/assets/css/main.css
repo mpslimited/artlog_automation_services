@@ -4635,7 +4635,7 @@ input[type="button"].btn-block {
   .input-group-prepend .btn,
   .input-group-append .btn {
     position: relative;
-    z-index: 1; }
+    z-index: 2; }
     .input-group-prepend .btn:focus,
     .input-group-append .btn:focus {
       z-index: 3; }
@@ -10148,14 +10148,14 @@ input:focus {
 /* Typography */
 body {
   font-size: 1rem;
-  font-family: "Open Sans", "Helvetica Neue", sans-serif;
+  font-family: "ubuntu-regular", sans-serif;
   font-weight: initial;
   line-height: normal;
   -webkit-font-smoothing: antialiased; }
 
 h1, h2, h3, h4, h5, h6,
 .h1, .h2, .h3, .h4, .h5, .h6 {
-  font-family: "Open Sans", "Helvetica Neue", sans-serif }
+  font-family: "ubuntu-medium", sans-serif; }
 
 p {
   font-size: 0.875rem; }
@@ -10296,7 +10296,7 @@ pre {
 code {
   padding: 5px;
   color: #d0002a;
-  font-family: "Open Sans", "Helvetica Neue", sans-serif;
+  font-family: "ubuntu-light", sans-serif;
   font-size: 0.875rem;
   border-radius: 4px; }
 
@@ -10332,7 +10332,7 @@ code {
   -webkit-transition: all 0.25s ease;
   -ms-transition: all 0.25s ease;
   font-size: calc(0.875rem - 0.05rem);
-  font-family: "Open Sans", "Helvetica Neue", sans-serif; }
+  font-family: "ubuntu-regular", sans-serif; }
   .footer a {
     color: #1bcfb4;
     font-size: inherit; }
@@ -10431,7 +10431,7 @@ code {
   flex-grow: 1; }
 
 .font-weight-light {
-  font-family: "Open Sans", "Helvetica Neue", sans-serif; }
+  font-family: "ubuntu-light", sans-serif; }
 
 .font-weight-bold {
   font-family: "ubuntu-bold", sans-serif; }
