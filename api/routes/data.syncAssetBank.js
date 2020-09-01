@@ -108,7 +108,7 @@ postRoutes.route('/notification1').post(function (req, res) {
   let today = moment().set("hour", 0).set('minute',0).toString();
   let table =`<table border="1" width="100%">
       <tr>
-      <th> ProcessID</th><th> Job Key</th><th>Tag Pushing Status</th><th>Is Index</th>
+      <th> ProcessID</th><th> Job Key</th><th>Tag Pushing Status</th>
       </tr>`;
   Mdb.bynder_jobs.find(
     { updateTag: { $exists: true }, 
