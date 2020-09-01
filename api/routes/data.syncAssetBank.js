@@ -105,12 +105,17 @@ postRoutes.route('/notification1').post(function (req, res) {
     html: ''
   };
   //abbi.hoerst@greatminds.org need to be intregated In Live
+  let today = moment().set("hour", 0).set('minute',0).toString();
   let table =`<table border="1" width="100%">
       <tr>
       <th> ProcessID</th><th> Job Key</th><th>Tag Pushing Status</th><th>Is Index</th>
       </tr>`;
   Mdb.bynder_jobs.find(
-    { updateTag: { $exists: true },  isMailed: 'false'}
+    { updateTag: { $exists: true }, 
+    tagGenerationDt: {
+        $exists: true,
+        $gte: new Date(today)
+    },  isMailed: 'false'  }
     ).then(data=>{
       if(data.length > 0){
         /*jshint esversion: 6 */
@@ -121,8 +126,9 @@ postRoutes.route('/notification1').post(function (req, res) {
             <td> ${data[temp]._id }</td>
             <td> ${data[temp].job_key }</td>
             <td> ${data[temp].updateTag }</td>
-            <td> ${ isindex  }</td>
+          
           </tr>` ;
+          // <td> ${ isindex  }</td>
         }
         table=table + `</table>`;
         let msg='<p>Dear User,<p><p>Automated tag generation and pushing to asset bank activity has been completed. Please see the status report below for complete details.</p>';
