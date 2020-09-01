@@ -45,7 +45,7 @@ Mdb.assetMeta.find({}, { "curricula_wip.options": 1 }).then((dt) => {
 
 postRoutes.route('/updateAsset/').post(function (req, res) {
   console.log("updateAssetasset data :", req.body);
-  Mdb.bynder_jobs.find({ updateTag: 'Processing', assetID: {$exists: true} }).then((data) => {
+  Mdb.bynder_jobs.find({ updateTag: 'Processing', assetID: {$exists: true} }).limit(1).then((data) => {
     if(data.length > 0){
       res.send({'TotLength': data.length,"target":'For UpdateAsset' });
       for(let dt of data){
@@ -60,14 +60,14 @@ postRoutes.route('/updateAsset/').post(function (req, res) {
           }
         }
         let formData= { tags: allTags.join(',') };
-        request_data.data={ } //tags : dt.generatedTags };
+        request_data.data={ } ;//tags : dt.generatedTags };
         let authheader= oauth.toHeader( oauth.authorize(request_data, appConfig.getToken()) );
-        let updtInfo= new Promise(resolve, reject => {
+        let updtInfo= new Promise(resolve  => {
             request({ method: "POST", url: request_data.url,  headers: authheader , formData: formData},function (error, response, body) {
                 if(!error) {
                   resolve(body);
                  } else {
-                  reject([]);
+                  //reject([]);
                   console.log("Error in DT:", error );
                 } 
             });
@@ -93,6 +93,60 @@ postRoutes.route('/updateAsset/').post(function (req, res) {
     console.log("Error:", Err);
    });
   //res.send(request_data);
+});
+postRoutes.route('/notification1').post(function (req, res) {
+  console.log("notification action")
+  var transporter = nodemailer.createTransport({
+    host: '10.31.3.71', port: 25});
+  var mailOptions = {
+    from: 'greatminds-support@mpslimited.com',
+    to: appConfig.getNotification(),
+    subject: appConfig.getNotificationSub(),
+    html: ''
+  };
+  //abbi.hoerst@greatminds.org need to be intregated In Live
+  let table =`<table border="1" width="100%">
+      <tr>
+      <th> ProcessID</th><th> Job Key</th><th>Tag Pushing Status</th><th>Is Index</th>
+      </tr>`;
+  Mdb.bynder_jobs.find(
+    { updateTag: { $exists: true },  isMailed: 'false'}
+    ).then(data=>{
+      if(data.length > 0){
+        /*jshint esversion: 6 */
+        console.log("data is:", data.length);
+        for( let temp =0; temp < data.length; temp ++){
+          let isindex= ( typeof data[temp].depopulate === 'undefined ')? "Index": "Duplicate";
+          table= table + `<tr>
+            <td> ${data[temp]._id }</td>
+            <td> ${data[temp].job_key }</td>
+            <td> ${data[temp].updateTag }</td>
+            <td> ${ isindex  }</td>
+          </tr>` ;
+        }
+        table=table + `</table>`;
+        let msg='<p>Dear User,<p><p>Automated tag generation and pushing to asset bank activity has been completed. Please see the status report below for complete details.</p>';
+        msg=msg + table +`<br> Thanks,<br> Administrator`;
+        mailOptions.html=msg;
+        transporter.sendMail(mailOptions, function(error, info){
+          if (error) {
+            console.log(error);
+          } else {
+            console.log('Email sent: ' + info.response, info.messageId);
+            let serIds=data.map(d=>d._id);
+           /* Mdb.bynder_jobs.updateMany({ _id: {$in : serIds}},{ $set: { isMailed: 'true'}}).then(d=>{
+              console.log("Mail sended");
+            });
+            */
+            res.send({"sended": new Date()});
+          }
+        });
+      }else{
+        res.send({"Not send": new Date()});
+      }
+    }).catch(Err=>{
+      console.log("Error In data", Err);
+    });
 });
 postRoutes.route('/notification').post(function (req, res) {
   console.log("notification action")

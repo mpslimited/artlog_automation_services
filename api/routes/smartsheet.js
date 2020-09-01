@@ -966,7 +966,7 @@ postRoutes.route('/artlogdata', checkToken.checkToken).post(function (req, res) 
     // testing in Live Build with Pradeep Sir 
     //.skip(  parseInt(req.body.fromPage)).limit( parseInt(req.body.toPage) ).
     //.skip(2000) export dt
-    Mdb.bynder_jobs.find(q ).sort({job_key:-1}).then((data)=>{
+    Mdb.bynder_jobs.find(q ).sort({job_key:-1}).limit(2000).then((data)=>{
       console.log("data responded in DB TIMEs :", data.length, new Date().toISOString());
     let dataResult=[];
     let Meta= new Metadt()
