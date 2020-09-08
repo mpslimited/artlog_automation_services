@@ -1731,11 +1731,11 @@ postRoutes.route('/createdcompletedjobs', checkToken.checkToken).post( async fun
     console.log("Err in Tat==>", Err);
   });
 });
-postRoutes.route('/scorecardload', checkToken.checkToken).post( async function (req, res) {
+postRoutes.route('/scorecardload1', checkToken.checkToken).post( async function (req, res) {
 
 });
 //scorecardload 
-postRoutes.route('/scorecardload1', checkToken.checkToken).post( async function (req, res) {
+postRoutes.route('/scorecardload', checkToken.checkToken).post( async function (req, res) {
   console.log("\n\n ACTION scorecardload data comming =>", JSON.stringify(req.body),"\n");
   var workflowPreset="", compaignId ="",jobType="", grade="", modules="", startDateRange="", endDateRange="", currentStatus=[], jobTypeTemp="", isOverdue=false;
   if(req.body.workflowPreset){ workflowPreset=req.body.workflowPreset; }
@@ -1814,24 +1814,39 @@ postRoutes.route('/scorecardload1', checkToken.checkToken).post( async function 
     serchFilter.push({ "presetName" : {"$regex":new RegExp(".*"+workflowPreset+".*") } }); 
   }
   if(!workflowPreset){
-    for( let temp=0; temp < PermissionsData.length; temp++){
+   // for( let temp=0; temp < PermissionsData.length; temp++){
       let serchFilterUnder=[];
       for(let tt=0; tt < serchFilter.length; tt++){
         serchFilterUnder.push(serchFilter[tt] ) ;
       }
       let Query2=[ project1];
-      serchFilterUnder.push( { "presetName" : {"$regex": new RegExp(".*"+PermissionsData[temp]+".*") } } ); 
+      //serchFilterUnder.push( { "presetName" : {"$regex": new RegExp(".*"+PermissionsData[temp]+".*") } } ); 
       Query2.push(  { $match: { $and: serchFilterUnder } });
       console.log("without Preset data==>", JSON.stringify(Query2) ,"\n\n");
         await  Mdb.bynder_jobs.aggregate(Query2).then((res)=>{
           for(let key=0; key< res.length; key++){  
-            res[key].duration= res[key].CalDuration;
+            res[key].duration= parseInt(res[key].CalDuration);
+             //console.log(res[key].presetName)
+             if(!!res[key].presetName && res[key].presetName.indexOf('Permission') > -1){
+              res[key].workflow = 'Permission';
+             } else if(!!res[key].presetName && res[key].presetName.indexOf('Created Image') > -1){
+              res[key].workflow = 'Created Image';
+             } else if(!!res[key].presetName && res[key].presetName.indexOf('Shutterstock') > -1){
+              res[key].workflow = 'Shutterstock';
+             } else if(!!res[key].presetName && res[key].presetName.indexOf('Clip Art') > -1){
+              res[key].workflow = 'Clip Art';
+             } else if(!!res[key].presetName && res[key].presetName.indexOf('Photograph') > -1){
+              res[key].workflow = 'Photograph';
+             }  else {
+              res[key].workflow = 'Other';
+             }
           }
-          permissionResponce.push({ "data" : res, "permission": PermissionsData[temp] } );
+          
+          permissionResponce = res;
         }).catch((Err)=>{
           console.log("Error in permission data", Err);
         }); 
-      }
+      //}
     }else{
       var TatQuery={};
       if(isOverdue){
@@ -1860,21 +1875,33 @@ postRoutes.route('/scorecardload1', checkToken.checkToken).post( async function 
     console.log("Dynamic Search Query==>", JSON.stringify(Query));
     await  Mdb.bynder_jobs.aggregate(Query).then((res)=>{
       for(let key=0; key< res.length; key++){
-        res[key].duration= res[key].CalDuration;//dateDiffC(res[key].dateCompleted, res[key].dateCreated);
+        res[key].duration=  parseInt(res[key].CalDuration); //dateDiffC(res[key].dateCompleted, res[key].dateCreated);
       }
       permissionResponce.push({ "data" : res, "permission": workflowPreset } );
     }).catch((Err)=>{
       console.log("Error in permission data", Err);
     });
     }
-  var docs='';
-  await Mdb.bynder_jobs.aggregate([ {"$group" : {_id: { "status":"$job_active_stage.status"},  count:{$sum:1} } }])
+  let campaignIDDt = [];
+  await Mdb.bynder_jobs.aggregate([ {"$group" : {_id: { "campaignID":"$campaignID", "status":"$job_active_stage.status"},  count:{$sum:1} } }])
     .then((docs)=>{
-    var data={ GraphCreatedJobs: resultData, jobsStatus:docs, permissionResponce:permissionResponce };
+    //var data={ GraphCreatedJobs: resultData, jobsStatus:docs, permissionResponce:permissionResponce };
+    //res.send(data);
+    campaignIDDt = docs;
+    var data={ GraphCreatedJobs: resultData, jobsStatus: [], campaignIDDt: campaignIDDt, permissionResponce:permissionResponce };
     res.send(data);
   }).catch((Err)=>{
     console.log("Error in groops");
   });
+ /* var docs='';
+  await Mdb.bynder_jobs.aggregate([ {"$group" : {_id: { "status":"$job_active_stage.status"},  count:{$sum:1} } }])
+    .then((docs)=>{
+    var data={ GraphCreatedJobs: resultData, jobsStatus:docs, campaignIDDt: campaignIDDt, permissionResponce:permissionResponce };
+    res.send(data);
+  }).catch((Err)=>{
+    console.log("Error in groops");
+  });
+  */
 });
 //scorecarddata
 postRoutes.route('/scorecarddata', checkToken.checkToken).post(function (req, res) {
@@ -2054,7 +2081,7 @@ postRoutes.route('/apiperformance', checkToken.checkToken).post(function (req, r
     })
   });
   myProm1.then(data => {
-    Mdb.ApiPerformance.find({}).sort({"_id":1}).limit(100).then((result)=>{
+    Mdb.ApiPerformance.find({}).sort({"_id":-1}).limit(100).then((result)=>{
       res.send({ data: data, result: result});
     });
   })
