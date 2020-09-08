@@ -2081,7 +2081,7 @@ postRoutes.route('/apiperformance', checkToken.checkToken).post(function (req, r
     })
   });
   myProm1.then(data => {
-    Mdb.ApiPerformance.find({}).sort({"_id":-1}).limit(100).then((result)=>{
+    Mdb.ApiPerformance.find({}).sort({"_id":-1}).limit(1000).then((result)=>{
       res.send({ data: data, result: result});
     });
   })
