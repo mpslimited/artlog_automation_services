@@ -1,0 +1,15 @@
+################################################### Cron For Bynder Reporting  ###############################################################
+*/5 * * * *   /usr/bin/curl    http://10.31.1.143:4000/data/synccampaignId  -O -s >>  /mnt/Grate-mind/bynder-logs/output.txt
+*/1 * * * *  /bin/bash  /home/bhagwat/nodeservicecheck.sh
+*/1 * * * *   /usr/bin/curl   http://10.31.1.143:4000/data/syncdatajobs  -O -s >> /mnt/Grate-mind/bynder-logs/output.txt
+*/16 * * * * /bin/bash /home/rajat.malik/apperrorcheck.sh
+*/30 * * * * /usr/bin/curl http://10.31.1.143:4000/data/updateriskimpact  -O -s >> /mnt/Grate-mind/bynder-logs/output.txt
+*/2 * * * *   /usr/bin/curl   http://10.31.1.143:4000/data/syncpresets  -O -s >> /mnt/Grate-mind/bynder-logs/output.txt
+################################################### Cron For GMARTLOG ###############################################################
+*/5 *   * * *   /usr/bin/curl   -X POST https://gmartlogautomationdemo.mpstechnologies.com/sync/approvedworkfolwasset   -O -s >> /mnt/Grate-mind/bynder-logs/output.txt
+*/5 *   * * *   /usr/bin/curl   -X POST https://gmartlogautomationdemo.mpstechnologies.com/sync/notification   -O -s >> /mnt/Grate-mind/bynder-logs/output.txt
+*/2  *  * * *   /usr/bin/curl   -X POST https://gmartlogautomationdemo.mpstechnologies.com/sync/updateAsset   -O -s >> /mnt/Grate-mind/bynder-logs/output.txt
+00  */4  * * *   /usr/bin/curl   -X POST https://gmartlogautomationdemo.mpstechnologies.com/sync/assetSynced   -O -s >> /mnt/Grate-mind/bynder-logs/output.txt
+00 */6 * * *   /usr/bin/curl -X POST https://gmartlogautomationdemo.mpstechnologies.com/sync/updatePresets -O -s >> /mnt/Grate-mind/bynder-logs/output.txt
+######################################################Cron For Restart QA Tomcat  ######################################################################
+*/1 * * * * /bin/sh /home/bhagwat/gm-check.sh  2>&1

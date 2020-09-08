@@ -1,0 +1,29 @@
+/2zw    * /bin/sh /data/GreatMinds/mail.sh  2>O&1
+/1    * /bin/sh /home/bhagwat/gm-check.sh  2>&1
+55 11   5 /bin/sh /home/bhagwat/repo-back.sh 2>&1
+/1    *   /usr/bin/curl   http://10.31.1.150:4000/data/syncdatajobs  -O -s >> /data/GreatMinds/bynder-logs/output.txt
+/30    * /usr/bin/curl http://10.31.1.150:4000/data/updateriskimpact  -O -s >> /data/GreatMinds/bynder-logs/output.txt
+#*/5       /usr/bin/curl    http://10.31.1.150:4000/data/synccampaignId  -O -s >>  /data/GreatMinds/bynder-logs/output.txt
+/2    *   /usr/bin/curl   http://10.31.1.150:4000/data/syncpresets  -O -s >> /data/GreatMinds/bynder-logs/output.txt
+/16    * /bin/bash /home/rajat.malik/apperrorcheck.sh
+/16    * /bin/bash /home/rajat.malik/dataerrorcheck.sh
+/5     pgrep rsync > /dev/null ||rsync -avz /data/Mps_Great_Minds_Repo/ /data/Backup_Mps_Great_Minds_Repo/
+
+############################################## Cron For GMARTLOG ########################################################################################
+00 /1    /usr/bin/curl -X POST https://gmartlogautomation.mpstechnologies.com/sync/notification -O -s >> /data/GreatMinds/bynder-logs/output.txt
+/5     * /usr/bin/curl -X POST https://gmartlogautomation.mpstechnologies.com/sync/approvedworkfolwasset -O -s >> /data/GreatMinds/bynder-logs/output.txt
+#######    this is not a Bynder Api
+/2    *   /usr/bin/curl -X POST https://gmartlogautomation.mpstechnologies.com/sync/updateAsset -O -s >> /data/GreatMinds/bynder-logs/output.txt
+/15    * /usr/bin/curl -X POST https://gmartlogautomation.mpstechnologies.com/sync/assetSynced -O -s >> /data/GreatMinds/bynder-logs/output.txt
+this should be 40 min
+00 /2     /usr/bin/curl -X POST https://gmartlogautomation.mpstechnologies.com/sync/updatePresets -O -s >> /data/GreatMinds/bynder-logs/output.txt
+/1      *  /usr/bin/curl  -X POST https://gmartlogautomation.mpstechnologies.com/apiData/jobprocessing  -O -s >> /data/GreatMinds/bynder-logs/output.txt
+/20    *   /usr/bin/curl   -X POST https://gmartlogautomation.mpstechnologies.com/dataApi/activeJobs   -O -s >> 
+
+
+ccg kkkkkh bfgc eeerr x 
+
+curl   -X POST https://gmartlogautomationdemo.mpstechnologies.com/dataApi/thumbsdatameOSDP
+.;S
+
+curl   -X POST https://gmartlogautomation.mpstechnologies.com/dataApi/jobprocessing
