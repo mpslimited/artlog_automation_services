@@ -23,12 +23,13 @@ var appConfig = {
       { action: 'test4', URL:'', extraConfog: false, other:''}
 ],
 APIconfig: [
-    {ID:1, name:'Jobs sync', trigger: 'Same day in every 3 minuts', addedm: 3},
-    {ID:2, name:'Presets sync', trigger: 'Same day in every 30 minuts', addedm: 30},
-    {ID:1, trigger: 'Same day in every 30 minuts', addedm: 30},
-    {ID:1, trigger: 'Same day in every 3 minuts', addedm: 3},
-    {ID:1, trigger: 'Same day in every 3 minuts', addedm: 3},
+    {ID:1, name:'Jobs sync', trigger: 'Same day in every 3 mins', addedm: 3},
+    {ID:2, name:'Presets sync', trigger: 'Same day in every 30 mins', addedm: 30},
+    {ID:1, trigger: 'Same day in every 30 mins', addedm: 30},
+    {ID:1, trigger: 'Same day in every 3 mins', addedm: 3},
+    {ID:1, trigger: 'Same day in every 3 mins', addedm: 3},
 ],
+campaignsNANID: [ 'f2e038c4-9191-4480-a55e-2dc92d3f52e7', '3b6d57c7-55c1-489b-aeff-b81b7aaff1ef', '0ad18ec8-8648-4d15-8681-2c3f4e0ee914', 'bb6f3943-5a47-49f0-ab82-c6278d1dad29'],
 getApiConfigByID( id ){
     return this.APIconfig.find(d => d.ID == id );
 }
