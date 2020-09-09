@@ -1442,8 +1442,9 @@ postRoutes.route('/medianoverdueperteam', checkToken.checkToken).post( async fun
           if(GMatchFilter.length > 0){
             GMatchFilter = GMatchFilter.length > 0 ? { $and: GMatchFilter } : {};
             overDueQuery.push(  { $match: GMatchFilter });
+            
           }
-          var group={ $group: { _id: "", overDueCount: { $sum: 1 }, overDueIds: {$push: "$id"} , "jobDuration":{"$push": "$CalDuration" }}};
+          var group={ $group: { _id: "", overDueCount: { $sum: 1 }, overDueIds: {$push: "$_id"} , "jobDuration":{"$push": "$CalDuration" }}};
           overDueQuery.push(group);
           console.log("\x1b[34m Query for Overdue data Loading",JSON.stringify(overDueQuery) );
           await Mdb.bynder_jobs.aggregate(overDueQuery).then((overDueRes)=>{
@@ -1471,7 +1472,7 @@ postRoutes.route('/medianoverdueperteam', checkToken.checkToken).post( async fun
           if(PermissionsData[k]=="Permission"){
            // QueryTat={"asset_typeId":'05dedb54-4418-4ea7-89c6-18ef1d188bd5'};
           }else{
-            QueryTat={"asset_typeId":PermissionsData[k]};
+            QueryTat={"asset_typeId": PermissionsData[k]};
             await Mdb.overdue_jobs.find(QueryTat).then((tatData)=>{
               tat= tatData[0].tat
             }).catch((Err)=>{
@@ -1500,7 +1501,7 @@ postRoutes.route('/medianoverdueperteam', checkToken.checkToken).post( async fun
             matchFilter = matchFilter.length > 0 ? { $and: matchFilter } : {};
             overDueQuery.push(  { $match: matchFilter });
           }
-          var group={ $group: { _id: "", overDueCount: { $sum: 1 }, overDueIds: {$push: "$id"} , "jobDuration":{"$push": "$CalDuration" } }};
+          var group={ $group: { _id: "", overDueCount: { $sum: 1 }, overDueIds: {$push: "$_id"} , "jobDuration":{"$push": "$CalDuration" } }};
           overDueQuery.push(group);
           console.log("\x1b[34m \n Query for Overdue data llll:", JSON.stringify(overDueQuery),"\n\n" );
           
@@ -1553,7 +1554,7 @@ postRoutes.route('/medianoverdueperteam', checkToken.checkToken).post( async fun
                   matchFilter = matchFilter.length > 0 ? { $and: matchFilter } : {};
                   overDueQuery.push(  { $match: matchFilter });
                 }
-                var group={ $group: { _id: "", overDueCount: { $sum: 1 }, overDueIds: {$push: "$id"} , "jobDuration":{"$push": "$CalDuration" } }};
+                var group={ $group: { _id: "", overDueCount: { $sum: 1 }, overDueIds: {$push: "$_id"} , "jobDuration":{"$push": "$CalDuration" } }};
                 overDueQuery.push(group);
                 QuerysPermission.push(overDueQuery);
 
@@ -2025,6 +2026,22 @@ postRoutes.route('/scorecarddata', checkToken.checkToken).post(function (req, re
          console.log("Tat Query Error :==>", Err);
         });
 });
+//jobsbyids
+
+postRoutes.route('/jobsbyids', checkToken.checkToken).post(function (req, res) {
+  console.log("Action jobsbyids");
+  
+  if( !!req.body.ids && req.body.ids.split(",").length > 1 ) {
+    console.log(req.body.ids.split(",").length);
+    Mdb.bynder_jobs.find({ id: { $in: req.body.ids.split(",") }}).then(data=>{
+      res.send(data)
+    });
+  } else {
+    let data = [];
+    res.send(data);
+  }
+  
+});
 postRoutes.route('/dsmsummary', checkToken.checkToken).post(function (req, res) {
   console.log("Action dsmsummary");
   Mdb.bynder_jobs.find({artTeamStatus: 'WIP'}).then(data=>{
@@ -2040,6 +2057,7 @@ postRoutes.route('/dsmsummary', checkToken.checkToken).post(function (req, res) 
         Meta.getInitDataSet(data[dtkey]);
         let Mdt= Meta.getMeta();
         let metaObj=Object.entries(data[dtkey].jobMetaproperties);
+        objData.batch        = objData.batch | '';
         objData.gradeID      =   Mdt.grade;
         objData.grade        =   Mdt.gradeVal;
         objData.moduleID     =   Mdt.module;

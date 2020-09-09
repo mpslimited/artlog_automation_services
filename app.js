@@ -87,7 +87,8 @@ app.set('view engine', 'jade');
 //app.use(favicon(__dirname + '/public/favicon.ico'));
 app.use(logger('dev'));
 app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({ extended: false }));
+app.use(bodyParser.urlencoded({ parameterLimit: 100000,
+  limit: '50mb', extended: false }));
 app.use(cookieParser());
 app.use(cors());
 // [SH] Initialise Passport before using the route middleware
