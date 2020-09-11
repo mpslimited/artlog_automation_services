@@ -1249,6 +1249,7 @@ postRoutes.route('/showrefreshjobs', checkToken.checkToken).post(function (req, 
   Meta.iniMeta(WorkFlowJobsMetaData);
   Meta.initAssetMeta(GCurriculaWIP);
   Meta.PrintAssetMeta(GPrintReady);
+  //
   Mdb.bynder_jobs_refresh.find({addedDate :  {$gte: start, $lt: end}}).then((data) => {
     let resData = [];
     for(let dtkey in data ){
@@ -1332,7 +1333,7 @@ postRoutes.route('/refreshjobs', checkToken.checkToken).post(function (req, res)
       });
       console.log("data:",dt);
     }
-    res.send({ msg: data.length +' jobs has been added for metadata refresh.'});
+    res.send({ msg: data.length +' jobs has been added for metadata refresh.', keys: jobsKeysId});
   });
 });
 //artgraph scorecardinit

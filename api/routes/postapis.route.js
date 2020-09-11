@@ -199,7 +199,7 @@ poRoutes1.route('/existingArtTeamData').post( function (req, res) {
 }); 
 
 poRoutes1.route('/refreshJobs').post( function (req, res) {
-  Mdb.bynder_jobs_refresh.find({ isRefresh: false}).limit(1).then((data)=>{
+  Mdb.bynder_jobs_refresh.find({ isRefresh: false}).limit(50).then((data)=>{
     console.log(data.length);
     if(data.length > 0 ) {
       for(let dt of data){
@@ -207,6 +207,9 @@ poRoutes1.route('/refreshJobs').post( function (req, res) {
         console.log("data", request_data.url,  request_data.data);
         request({url: request_data.url, method: request_data.method, qs: request_data.data, headers: oauth.toHeader(oauth.authorize(request_data, token)) }, function(error, response, body) {
          // console.log("data:", response);
+          if(error){
+            console.log("API Error :", error);
+          }
           if(!!response.body){
             let jsonDt = JSON.parse(response.body); 
             let job_key = (jsonDt.jobMetaproperties.hasOwnProperty('ccf531b93d1c46428aa5c52bc8cc639f'))? jsonDt.jobMetaproperties['ccf531b93d1c46428aa5c52bc8cc639f'].trim():''; 
