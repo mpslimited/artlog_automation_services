@@ -35,9 +35,12 @@ let moment = require('moment');
      }
      getInitDataSet(dt){
         this.data = dt;
-        if(dt.hasOwnProperty('jobMetaproperties')){
+        if(!!dt.jobMetaproperties && dt.hasOwnProperty('jobMetaproperties')){
             this.metaObj=Object.entries(dt.jobMetaproperties);
         }
+     }
+     getCampaignName(){
+         return '';
      }
      getAMetaOptionsBykey(key){
       let retdt=[];
@@ -360,6 +363,17 @@ let moment = require('moment');
      
      setGrade(value){
         this.data.jobMetaproperties[this.gradekey]=value;
+     }
+     getSMeat(){
+        let dt={ 
+            getjobkey    :   this.getJobkey(),
+            lesson       :   this.getLesson(),
+            grade        :   this.getGrade(),
+            gradeVal     :   this.getValByKeyID(this.gradekey, this.getGrade()),
+            module       :   this.getModule(),
+            moduleVal    :   this.getValByKeyID(this.modulekey, this.getModule())
+        }
+        return dt;
      }
      getMeta(){
         let dt={ 

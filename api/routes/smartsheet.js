@@ -1336,6 +1336,7 @@ postRoutes.route('/refreshjobs', checkToken.checkToken).post(function (req, res)
   });
 });
 //artgraph scorecardinit
+let scoreCardGbdt ={ campaigns:[], grades:[],modules:[] };
 postRoutes.route('/scorecardinit', checkToken.checkToken).post(function (req, res) {
   console.log("Action artgraph");
  const myProm1 = new Promise(function(resolve, reject) {
@@ -1351,10 +1352,14 @@ postRoutes.route('/scorecardinit', checkToken.checkToken).post(function (req, re
   });
   myProm1.then((data)=>{
     Mdb.metaproperties.find({ ID : '262f92ed-59b1-4c3a-a74d-6877d7f8ba4c' }).then(dt =>{
+      scoreCardGbdt.grades = GGrades;
+      scoreCardGbdt.modules = GModules;
+      scoreCardGbdt.campaigns = data;
       res.send({  grade: GGrades, module: GModules, campaigns:data , jobType: dt, msg:'text'});
     });
   });
 });
+
 //medianoverdueperteam
 postRoutes.route('/medianoverdueperteam', checkToken.checkToken).post( async function (req, res) { 
   console.log("\x1b[34m \n ACTION medianoverdueperteam =>", JSON.stringify(req.body), "\n");
@@ -1368,8 +1373,8 @@ postRoutes.route('/medianoverdueperteam', checkToken.checkToken).post( async fun
     if(req.body.modules){ modules=req.body.modules.split("-").join(""); }
     if(req.body.startDateRange){ startDateRange=req.body.startDateRange; }
     if(req.body.endDateRange){ endDateRange=req.body.endDateRange; }
-    if(req.body.currentStatus ){
-      currentStatus=req.body.currentStatus;
+    if(!!req.body.currentStatus ){
+      currentStatus=req.body.currentStatus.split(',');
       var neWcurrentStatus=[]; 
       if(currentStatus.length > 0 ){
         for(let temp =0; temp< currentStatus.length; temp++){
@@ -1442,7 +1447,7 @@ postRoutes.route('/medianoverdueperteam', checkToken.checkToken).post( async fun
           if(GMatchFilter.length > 0){
             GMatchFilter = GMatchFilter.length > 0 ? { $and: GMatchFilter } : {};
             overDueQuery.push(  { $match: GMatchFilter });
-            
+
           }
           var group={ $group: { _id: "", overDueCount: { $sum: 1 }, overDueIds: {$push: "$_id"} , "jobDuration":{"$push": "$CalDuration" }}};
           overDueQuery.push(group);
@@ -1465,9 +1470,6 @@ postRoutes.route('/medianoverdueperteam', checkToken.checkToken).post( async fun
         let PermissionsData=['Created Image','Shutterstock','Clip Art'];
         for(let k=0; k< PermissionsData.length; k++){
           var GlobalFiltes=[];
-          // for(let tt in GMatchFilter){
-          //   GlobalFiltes.push(GMatchFilter[tt] ) ;
-          // }
           var overdueQ=[],QueryTat; var tat=0;
           if(PermissionsData[k]=="Permission"){
            // QueryTat={"asset_typeId":'05dedb54-4418-4ea7-89c6-18ef1d188bd5'};
@@ -1521,7 +1523,7 @@ postRoutes.route('/medianoverdueperteam', checkToken.checkToken).post( async fun
         // for permission overdue data
         var IDS=[], QuerysPermission=[];
         await Mdb.metaproperties.find({ID:'262f92ed-59b1-4c3a-a74d-6877d7f8ba4c'},{"options.ID":1}).then((Data)=>{
-          console.log("All Tat Catatory data=",Data[0].options);
+         // console.log("All Tat Catatory data=",Data[0].options);
           for(let k=0; k < Data[0].options.length; k++){
               if(Data[0].options[k].ID && Data[0].options[k].ID!="")
               IDS.push(Data[0].options[k].ID);
@@ -1592,8 +1594,9 @@ postRoutes.route('/createdcompletedjobs', checkToken.checkToken).post( async fun
     if(req.body.modules){ modules=req.body.modules.split("-").join(""); }
     if(req.body.startDateRange){ startDateRange=req.body.startDateRange; }
     if(req.body.endDateRange){ endDateRange=req.body.endDateRange; }
+
     if(req.body.currentStatus ){
-      currentStatus=req.body.currentStatus;
+      currentStatus= JSON.parse(req.body.currentStatus);
       var neWcurrentStatus=[]; 
       if(currentStatus.length > 0 ){
         for(let temp=0; temp< currentStatus.length; temp++){
@@ -1732,46 +1735,45 @@ postRoutes.route('/createdcompletedjobs', checkToken.checkToken).post( async fun
     console.log("Err in Tat==>", Err);
   });
 });
-postRoutes.route('/scorecardload1', checkToken.checkToken).post( async function (req, res) {
-
-});
-//scorecardload 
 postRoutes.route('/scorecardload', checkToken.checkToken).post( async function (req, res) {
-  console.log("\n\n ACTION scorecardload data comming =>", JSON.stringify(req.body),"\n");
-  var workflowPreset="", compaignId ="",jobType="", grade="", modules="", startDateRange="", endDateRange="", currentStatus=[], jobTypeTemp="", isOverdue=false;
-  if(req.body.workflowPreset){ workflowPreset=req.body.workflowPreset; }
-  if(req.body.compaignId){ compaignId=req.body.compaignId; }
-  if(req.body.jobType){ jobType=req.body.jobType.split("-").join(""); }
-  if(req.body.grade){ grade=req.body.grade.split("-").join(""); }
-  if(req.body.modules){ modules=req.body.modules.split("-").join(""); }
-  if(req.body.startDateRange){ startDateRange=req.body.startDateRange; }
-  if(req.body.endDateRange){ endDateRange=req.body.endDateRange; }
-  if(req.body.currentStatus ){
-    currentStatus=req.body.currentStatus;
-    var neWcurrentStatus=[]; 
-    if(currentStatus.length > 0 ){
-      for(let temp=0; temp < currentStatus.length; temp++){
-        if( currentStatus[temp] != 'Overdue'){
-          neWcurrentStatus.push( currentStatus[temp] );
-        }
-        if( currentStatus[temp] == 'Overdue'){
-          isOverdue=true; 
-        }
-        if( currentStatus.indexOf('Overdue')>-1 &&   currentStatus.indexOf('Approved') == -1 ){
-          neWcurrentStatus.push("Active");
-          neWcurrentStatus.push("NeedsChanges");
-        }
-      }
-    }
-    currentStatus=neWcurrentStatus;
-  }
-  var frmDate, toDate, dt;
-  if(workflowPreset==""&& compaignId=="" &&jobType=="" &&grade==""&&modules==""&& currentStatus.length==0 &&startDateRange=="" && startDateRange==""){
-    currentStatus.push("Active");
-  }
+	console.log("\n\n ACTION scorecardload data comming =>", JSON.stringify(req.body),"\n");
+	var workflowPreset="", compaignId ="",jobType="", grade="", modules="", currentStatus=[], jobTypeTemp="", isOverdue=false;
+	if(req.body.workflowPreset){ workflowPreset=req.body.workflowPreset; }
+	if(req.body.compaignId){ compaignId=req.body.compaignId; }
+	if(req.body.jobType){ jobType=req.body.jobType.split("-").join(""); }
+	if(req.body.grade){ grade=req.body.grade.split("-").join(""); }
+	if(req.body.modules){ modules=req.body.modules.split("-").join(""); }
+	if(!!req.body.currentStatus && req.body.currentStatus!='' ){
+		currentStatus= JSON.parse(req.body.currentStatus);
+		var neWcurrentStatus=[]; 
+		if(currentStatus.length > 0 ){
+		  for(let temp=0; temp < currentStatus.length; temp++){
+			if( currentStatus[temp] != 'Overdue'){
+			  neWcurrentStatus.push( currentStatus[temp] );
+			}
+			if( currentStatus[temp] == 'Overdue'){
+			  isOverdue=true; 
+			}
+			if( currentStatus.indexOf('Overdue')>-1 &&   currentStatus.indexOf('Approved') == -1 ){
+			  neWcurrentStatus.push("Active");
+			  neWcurrentStatus.push("NeedsChanges");
+			}
+		  }
+		}
+		currentStatus=neWcurrentStatus;
+	}
+	if(workflowPreset==""&& compaignId=="" &&jobType=="" &&grade==""&&modules==""&& currentStatus.length==0 ){
+		currentStatus.push("Active");
+	}
+	var TatDays=0, TatRes = [];
+	await Mdb.overdue_jobs.find({}).then((resTat)=>{
+		TatRes = resTat;
+	}).catch((Err)=>{
+	  console.log("Error in tat Query==>", Err);
+	});
   var resultData=[];
   var count=0;
-  let PermissionsData=['Permission','Created Image','Shutterstock','Clip Art'];
+  
   var permissionResponce=[];
   var serchFilter=[];
   var Query=[];
@@ -1781,15 +1783,6 @@ postRoutes.route('/scorecardload', checkToken.checkToken).post( async function (
   if(grade){ serchFilter.push({ "jobMetaproperties.c0ac0a86e65f4f7ebd88dbd7e77965ef": grade }); }
   if(modules){ 
     serchFilter.push({ "jobMetaproperties.7388493928bc4a9aa57ca65306ed1579": modules }); 
-  }
-  if(startDateRange && startDateRange.indexOf(" - ") != -1){
-    dt= startDateRange.split(" - ");
-    frmDate=dt[0], toDate=dt[1];
-    serchFilter.push( {"dateCreated":{"$gte" : new Date(frmDate) }}, { "dateCreated":{"$lte" : new Date(toDate) }} );
-  }else if(endDateRange!="" && endDateRange.indexOf(" - ") != -1){
-    dt= endDateRange.split(" - ");
-    frmDate=dt[0], toDate=dt[1];
-    serchFilter.push( {"job_date_finished":{"$gte" : new Date(frmDate) }}, { "job_date_finished":{"$lte" : new Date(toDate) }} );
   }
   if(currentStatus && currentStatus.length >0 ){ 
     serchFilter.push({ "job_active_stage.status":{'$in': currentStatus }}); 
@@ -1804,6 +1797,7 @@ postRoutes.route('/scorecardload', checkToken.checkToken).post( async function (
   };
   //var lookup1=  {"$lookup":{"localField":"presetID","from":"job_presets","foreignField":"ID","as":"joincollection"}};
   var project1={"$project":{"presetName":1, "jobMetaproperties":1,"name":1,"job_duration":1,"job_date_finished":1,"dateCreated":1,"job_active_stage":1,"presetID":1,"createdByID":1,"campaignID":1,"jobID":1,"jobMetaproperties":1,
+  "job_key":1, "batch":1, "topic":1,
   "CalDuration":{"$cond":{"if": {"$eq":["$job_date_finished",""]} ,"then":{"$divide":[{"$subtract":[new Date(),"$dateCreated"]},86400000]},
       "else":{
           "$cond":{"if": {"$eq":["$job_date_finished",null]}, "then":  {"$divide":[{"$subtract":[new Date(),"$dateCreated"]},86400000]},
@@ -1814,96 +1808,107 @@ postRoutes.route('/scorecardload', checkToken.checkToken).post( async function (
   if(workflowPreset){ 
     serchFilter.push({ "presetName" : {"$regex":new RegExp(".*"+workflowPreset+".*") } }); 
   }
-  if(!workflowPreset){
-   // for( let temp=0; temp < PermissionsData.length; temp++){
-      let serchFilterUnder=[];
+  let serchFilterUnder=[];
       for(let tt=0; tt < serchFilter.length; tt++){
         serchFilterUnder.push(serchFilter[tt] ) ;
       }
       let Query2=[ project1];
-      //serchFilterUnder.push( { "presetName" : {"$regex": new RegExp(".*"+PermissionsData[temp]+".*") } } ); 
       Query2.push(  { $match: { $and: serchFilterUnder } });
       console.log("without Preset data==>", JSON.stringify(Query2) ,"\n\n");
+      let Mdt =new Metadt();
+      Mdt.iniMeta(WorkFlowJobsMetaData);
+      let Meta= new Metadt()
+      Mdt.initAssetMeta(GCurriculaWIP);
+      Mdt.PrintAssetMeta(GPrintReady);
         await  Mdb.bynder_jobs.aggregate(Query2).then((res)=>{
           for(let key=0; key< res.length; key++){  
             res[key].duration= parseInt(res[key].CalDuration);
+            res[key].CalDuration= parseFloat(res[key].CalDuration).toFixed(2);
              //console.log(res[key].presetName)
+             let tat =0;
              if(!!res[key].presetName && res[key].presetName.indexOf('Permission') > -1){
               res[key].workflow = 'Permission';
+              // here we have need to refract each Permission Type
+              if(!!res[key].jobMetaproperties && !!res[key].jobMetaproperties['262f92ed59b14c3aa74d6877d7f8ba4c']) {
+                let  dt = TatRes.filter(d=> d.asset_typeId.split('-').join('') === res[key].jobMetaproperties['262f92ed59b14c3aa74d6877d7f8ba4c'])
+                tat = (dt.length > 0 ) ? dt[0].tat : 0;
+                res[key].overDueStatus = (res[key].duration > tat) ? true : false;
+              } else {
+                let  dt = TatRes.filter(d=> d.asset_typeId ==='Unallocated');
+                tat = (dt.length > 0 ) ? dt[0].tat : 0;
+                res[key].overDueStatus = (res[key].duration > tat) ? true : false;
+              }
              } else if(!!res[key].presetName && res[key].presetName.indexOf('Created Image') > -1){
               res[key].workflow = 'Created Image';
-             } else if(!!res[key].presetName && res[key].presetName.indexOf('Shutterstock') > -1){
+              let  dt = TatRes.filter(d=> d.asset_typeId ===res[key].workflow)
+              tat = (dt.length > 0 ) ? dt[0].tat : 0;
+              res[key].overDueStatus = (res[key].duration > tat) ? true : false;
+             } else if(!!res[key].presetName && res[key].presetName.indexOf('Shutterstock Shutterstock') > -1){
               res[key].workflow = 'Shutterstock';
+              let  dt = TatRes.filter(d=> d.asset_typeId ===res[key].workflow)
+              tat = (dt.length > 0 ) ? dt[0].tat : 0;
+              res[key].overDueStatus = (res[key].duration > tat) ? true : false;
+              res[key].overDueTat = tat;
              } else if(!!res[key].presetName && res[key].presetName.indexOf('Clip Art') > -1){
               res[key].workflow = 'Clip Art';
+              let  dt = TatRes.filter(d=> d.asset_typeId ===res[key].workflow)
+              tat = (dt.length > 0 ) ? dt[0].tat : 0;
+              res[key].overDueStatus = (res[key].duration > tat) ? true : false;
              } else if(!!res[key].presetName && res[key].presetName.indexOf('Photograph') > -1){
               res[key].workflow = 'Photograph';
+              let  dt = TatRes.filter(d=> d.asset_typeId === 'Unallocated')
+              tat = (dt.length > 0 ) ? dt[0].tat : 0;
+              res[key].overDueStatus = (res[key].duration > tat) ? true : false;
              }  else {
               res[key].workflow = 'Other';
+              let  dt = TatRes.filter(d=> d.asset_typeId === 'Unallocated')
+              tat = (dt.length > 0 ) ? dt[0].tat : 0;
+              res[key].overDueStatus = (res[key].duration > tat) ? true : false;
              }
+             res[key].overDueTat = tat;
+             res[key].campaignName = getCampaignName(res[key].campaignID);
+             res[key].grade = getGradeName(res[key])
+             res[key].module = getModuleName(res[key]);
           }
-          
           permissionResponce = res;
         }).catch((Err)=>{
           console.log("Error in permission data", Err);
         }); 
-      //}
-    }else{
-      var TatQuery={};
-      if(isOverdue){
-        if(workflowPreset=="Permission"){
-          TatQuery={ asset_type: jobType};
-        }else{
-          TatQuery={ asset_type: workflowPreset };
-        }
-      }
-    console.log("TatQuery::====>", TatQuery);
-    var TatDays=0;
-    await Mdb.overdue_jobs.find(TatQuery).then((resTat)=>{
-      if(resTat.length ==1 && isOverdue){
-          TatDays=resTat[0].tat;
-          serchFilter.push({ CalDuration: { $gte: TatDays } });
-      }
-    }).catch((Err)=>{
-      console.log("Error in tat Query==>", Err);
-    });
-  console.log("data finding testing ================>");
-  if(serchFilter.length > 0){
-    serchFilter = serchFilter.length > 0 ? { $and: serchFilter } : {};
-    Query.push(  { $match: serchFilter });
-  }
-    /* eslint-disable */ 
-    console.log("Dynamic Search Query==>", JSON.stringify(Query));
-    await  Mdb.bynder_jobs.aggregate(Query).then((res)=>{
-      for(let key=0; key< res.length; key++){
-        res[key].duration=  parseInt(res[key].CalDuration); //dateDiffC(res[key].dateCompleted, res[key].dateCreated);
-      }
-      permissionResponce.push({ "data" : res, "permission": workflowPreset } );
-    }).catch((Err)=>{
-      console.log("Error in permission data", Err);
-    });
-    }
+      
   let campaignIDDt = [];
-  await Mdb.bynder_jobs.aggregate([ {"$group" : {_id: { "campaignID":"$campaignID", "status":"$job_active_stage.status"},  count:{$sum:1} } }])
-    .then((docs)=>{
-    //var data={ GraphCreatedJobs: resultData, jobsStatus:docs, permissionResponce:permissionResponce };
-    //res.send(data);
+  
+  await Mdb.bynder_jobs.aggregate(
+    [
+      { $match: { $and: serchFilterUnder } },
+      {"$group" : {_id: { "campaignID":"$campaignID", "status":"$job_active_stage.status"},  count:{$sum:1} } }]
+    ).then((docs)=>{
     campaignIDDt = docs;
-    var data={ GraphCreatedJobs: resultData, jobsStatus: [], campaignIDDt: campaignIDDt, permissionResponce:permissionResponce };
+    var data={ GraphCreatedJobs: resultData, jobsStatus: [], campaignIDDt: campaignIDDt, permissionResponce:permissionResponce , TatRes: TatRes};
     res.send(data);
   }).catch((Err)=>{
     console.log("Error in groops");
   });
- /* var docs='';
-  await Mdb.bynder_jobs.aggregate([ {"$group" : {_id: { "status":"$job_active_stage.status"},  count:{$sum:1} } }])
-    .then((docs)=>{
-    var data={ GraphCreatedJobs: resultData, jobsStatus:docs, campaignIDDt: campaignIDDt, permissionResponce:permissionResponce };
-    res.send(data);
-  }).catch((Err)=>{
-    console.log("Error in groops");
-  });
-  */
 });
+function getCampaignName(campaignID){
+  let d = scoreCardGbdt.campaigns.filter(d=> d.ID== campaignID);
+  return (d.length > 0)? d[0].name : '';
+}
+function getGradeName(dt) {
+  let res = '';
+  if(!!dt.jobMetaproperties && !!dt.jobMetaproperties['c0ac0a86e65f4f7ebd88dbd7e77965ef'] && dt.jobMetaproperties['c0ac0a86e65f4f7ebd88dbd7e77965ef']!=''){
+    let d = scoreCardGbdt.grades.filter(d=> d.id == dt.jobMetaproperties['c0ac0a86e65f4f7ebd88dbd7e77965ef']);
+    res = (d.length > 0) ? d[0].value: '';
+  }
+  return res;
+}
+function getModuleName(dt) {
+  let res = '';
+  if(!!dt.jobMetaproperties && !!dt.jobMetaproperties['7388493928bc4a9aa57ca65306ed1579'] && dt.jobMetaproperties['7388493928bc4a9aa57ca65306ed1579']!=''){
+    let d = scoreCardGbdt.modules.filter(d=> d.id == dt.jobMetaproperties['7388493928bc4a9aa57ca65306ed1579']);
+    res = (d.length > 0) ? d[0].value: '';
+  }
+  return res;
+}
 //scorecarddata
 postRoutes.route('/scorecarddata', checkToken.checkToken).post(function (req, res) {
   console.log("Action scorecarddata");
@@ -1918,8 +1923,8 @@ postRoutes.route('/scorecarddata', checkToken.checkToken).post(function (req, re
      if(req.body.endDateRange){ endDateRange=req.body.endDateRange; }
      if(req.body.currentStatus){ currentStatus=req.body.currentStatus; }
      var frmDate, toDate, dt, isOverdue;
-     if(req.body.currentStatus ){
-      currentStatus=req.body.currentStatus;
+     if(!!req.body.currentStatus ){
+      currentStatus=req.body.currentStatus.split(',');
       var neWcurrentStatus=[]; 
       if(currentStatus.length > 0 ){
         for(let temp=0; temp < currentStatus.length; temp++){
@@ -1969,7 +1974,10 @@ postRoutes.route('/scorecarddata', checkToken.checkToken).post(function (req, re
       // }
       let pipeline=[];
       if(compaignId){  pipeline.push( {"$match":{"campaignID":{"$eq": compaignId }}} );  }
-      pipeline.push({"$project":{ "presetName":1,"campaignID":1,"id":1,"jobMetaproperties":1,"name":1,"job_duration":1,"job_date_finished":1,"dateCreated":1,"job_active_stage":1,"presetID":1,"createdByID":1,"campaignID":1,"jobID":1,"Preset_Stages":1,
+      pipeline.push({"$project":{
+         "presetName":1,"campaignID":1,"id":1,"jobMetaproperties":1,"name":1,
+         "job_duration":1,"job_date_finished":1, "job_key":1, "batch":1, "topic":1,
+         "dateCreated":1,"job_active_stage":1,"presetID":1,"createdByID":1,"campaignID":1,"jobID":1,"Preset_Stages":1,
         "CalDuration":{"$cond":{"if":{"$eq":["$job_date_finished",""]},
         "then":{"$divide":[{"$subtract":[ new Date(),"$dateCreated"]},86400000]},
         "else":{"$cond":{"if":{"$eq":["$job_date_finished",null]},
@@ -2055,7 +2063,7 @@ postRoutes.route('/dsmsummary', checkToken.checkToken).post(function (req, res) 
       var objData = data[dtkey].toObject();
       if(!!data[dtkey].jobMetaproperties){
         Meta.getInitDataSet(data[dtkey]);
-        let Mdt= Meta.getMeta();
+        let Mdt= Meta.getSMeat();
         let metaObj=Object.entries(data[dtkey].jobMetaproperties);
         objData.batch        = objData.batch | '';
         objData.gradeID      =   Mdt.grade;
