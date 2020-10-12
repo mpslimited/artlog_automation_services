@@ -1240,6 +1240,96 @@ postRoutes.route('/artlogteamdata', checkToken.checkToken).post(function (req, r
     })
   })
 });
+postRoutes.route('/deletejobsreferesh', checkToken.checkToken).post(function (req, res) {
+  console.log("Action:deletejobsreferesh", req.body.filters);
+  let jobsKeys= req.body.filters.split(',');
+  //Spaces seprator handling;
+  //if(typeof a != "object" && jobsKeys.trim()!=''){ jobsKeys.split(' '); }
+  let jobsKeysId = [];
+  for(let k in jobsKeys){
+    //if(jobsKeys[k].trim()!=""){
+      jobsKeysId.push(jobsKeys[k]);
+    //}
+  }
+  Mdb.bynder_jobs.find({job_key: {$in : jobsKeysId}}).then(data=>{
+    for(let dt of data){
+
+      let refreshData = {
+        id        : dt.id,
+        assetID   : dt.assetID,
+        jobID     : dt.jobID,
+        job_key   : dt.job_key,
+        jobMetaproperties : dt.jobMetaproperties,
+        isDeleted: false,
+        addedDate : new Date()
+      }
+      console.log("refreshData:", refreshData);
+      var bynder_jobs_deletelist =  Mdb.bynder_jobs_deletelist(refreshData);
+      bynder_jobs_deletelist.save().then((rs) => {
+        console.log('data has been saved: result', rs);
+        //resolve(JobsResult);
+      });
+      console.log("data:",dt);
+    }
+    res.send({ msg: data.length +' jobs has been added for Delete List.', keys: jobsKeysId});
+  });
+});
+postRoutes.route('/deletelistjobs', checkToken.checkToken).post(function (req, res) {
+  console.log("Action data deletelistjobs");
+  var start = new Date();
+  start.setHours(0,0,0,0);
+  var end = new Date();
+  end.setHours(23,59,59,999);
+  let Meta= new Metadt()
+  Meta.iniMeta(WorkFlowJobsMetaData);
+  Meta.initAssetMeta(GCurriculaWIP);
+  Meta.PrintAssetMeta(GPrintReady);
+  Mdb.bynder_jobs_deletelist.find({addedDate :  {$gte: start, $lt: end}}).then((data) => {
+    let resData = [];
+    for(let dtkey in data ){
+      var objData = data[dtkey].toObject();
+      if( !!data[dtkey].jobMetaproperties ||!!data[dtkey].jobMetaproperties) {
+        Meta.getInitDataSet(data[dtkey]);
+        let Mdt= Meta.getMeta();
+        let metaObj=Object.entries(data[dtkey].jobMetaproperties);
+         objData.lesson       =   Mdt.lesson;
+         objData.lessonlet    =   Mdt.lessonlet;
+         objData.component    =   Mdt.component; 
+         objData.tags         =   Mdt.tag; 
+         objData.gradeID      =   Mdt.grade;
+         objData.grade        =   Mdt.gradeVal;
+         objData.moduleID     =   Mdt.module;
+         objData.module       =   Mdt.moduleVal;
+         objData.topic        =   Mdt.topic;
+         objData.facing       =   Mdt.facingVal;
+         objData.facingID     =   Mdt.facing;
+         objData.series       =   Mdt.series;
+         //test
+         objData.job_key      =   Meta.getOldJobkey();
+         objData.revisionID   =   Mdt.revision;
+         objData.revisionC    =   Mdt.revisionVal;
+         objData.artcomplexID =   Mdt.artComplex;
+         objData.artcomplex   =   Mdt.artComplexVal;
+         objData.artassionID  =   Mdt.artAssion;
+         objData.artassion    =   Mdt.artAssionVal;
+         objData.riskID       =   Mdt.risk;
+         objData.risk         =   Mdt.riskVal;
+         objData.impactId     =   Mdt.impact;
+         objData.impact       =   Mdt.impactVal;
+         objData.curriculum   =   Mdt.wip;
+         objData.creditLine   =   Mdt.creditLine;
+         objData.printAsset   =   Mdt.printAsset;
+         objData.printReady   =   Mdt.printReady;
+         objData.permissionType = Mdt.permissionType
+
+        resData.push(objData);
+      }
+    }
+    res.send(resData);
+  }).catch(Err=>{
+    console.log(Err);
+  })
+});
 postRoutes.route('/showrefreshjobs', checkToken.checkToken).post(function (req, res) {
   var start = new Date();
   start.setHours(0,0,0,0);
@@ -1333,7 +1423,7 @@ postRoutes.route('/refreshjobs', checkToken.checkToken).post(function (req, res)
       });
       console.log("data:",dt);
     }
-    res.send({ msg: data.length +' jobs has been added for metadata refresh.', keys: jobsKeysId});
+    res.send({ msg: data.length +' jobs has been added for metadata refresh.', keys: jobsKeysId, data: data.length});
   });
 });
 //artgraph scorecardinit
@@ -2127,7 +2217,7 @@ postRoutes.route('/apiperformance', checkToken.checkToken).post(function (req, r
 postRoutes.route('/exporttocsv', checkToken.checkToken).post( (req, res) => {
   console.log("Action : exporttocsv");
   //res.send("data testing");
-  Mdb.bynder_jobs.find({},{ID:1,job_key:1}).sort({_id:-1}).limit(5).then((jobsData) => {
+  Mdb.bynder_jobs.find({},{ID:1,job_key:1}).sort({_id:-1}).then((jobsData) => {
     res.send(jobsData);
     /*
     let filename='Bynder_jobs.csv';

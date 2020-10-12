@@ -199,7 +199,7 @@ poRoutes1.route('/existingArtTeamData').post( function (req, res) {
 }); 
 
 poRoutes1.route('/refreshJobs').post( function (req, res) {
-  Mdb.bynder_jobs_refresh.find({ isRefresh: false}).limit(50).then((data)=>{
+  Mdb.bynder_jobs_refresh.find({ isRefresh: false, isExists: {$exists: false}}).limit(50).then((data)=>{
     console.log(data.length);
     if(data.length > 0 ) {
       for(let dt of data){
@@ -209,12 +209,22 @@ poRoutes1.route('/refreshJobs').post( function (req, res) {
          // console.log("data:", response);
           if(error){
             console.log("API Error :", error);
-          }
-          if(!!response.body){
+          } else if(response.body.indexOf('<body') > -1){
+            console.log(response.body);
+            //isExists
+            /*Mdb.bynder_jobs_refresh.updateOne({ id: jsonDt.id, isRefresh: false, isExists: {$exists: false} },{
+              $set:{
+                isExists: false,
+                errorDesc: response.body
+              }
+            }).then((rs)=>{
+              console.log("Data not found in Bynder");
+            });*/
+          } else if(!!response.body){
             let jsonDt = JSON.parse(response.body); 
             let job_key = (jsonDt.jobMetaproperties.hasOwnProperty('ccf531b93d1c46428aa5c52bc8cc639f'))? jsonDt.jobMetaproperties['ccf531b93d1c46428aa5c52bc8cc639f'].trim():''; 
             //console.log(jsonDt.id,  jsonDt.NewjobMetaproperties, job_key );
-            Mdb.bynder_jobs_refresh.updateOne({ id: jsonDt.id, isRefresh: false },{
+            Mdb.bynder_jobs_refresh.updateOne({ id: jsonDt.id, isRefresh: false, isExists: {$exists: false} },{
               $set:{
                 NewjobMetaproperties : jsonDt.jobMetaproperties,
                 isRefresh: true,

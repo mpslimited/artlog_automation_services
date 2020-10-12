@@ -61,11 +61,23 @@ let bynder_jobs_refresh = new Schema({
   OldjobMetaproperties:{ type: Object},
   NewjobMetaproperties:{ type: Object},
   isRefresh: { type: Boolean},
+  isExists: {type: Boolean},
   addedDate: { type : Date },
 },{
    collection: 'bynder_jobs_refresh'
 });
-
+let bynder_jobs_deletelist = new Schema({
+  assetID   : {type : String},
+  id: { type: String},
+  job_key: { type: String},
+  jobID:{type:String},
+  jobMetaproperties:{ type: Object},
+  isRefresh: { type: Boolean},
+  isExists: {type: Boolean},
+  addedDate: { type : Date },
+},{
+   collection: 'bynder_jobs_deletelist'
+});
 let bynder_jobs= new Schema({
   tagGenerationDt: {type: Date},
   assetID   : {type : String},
@@ -395,6 +407,7 @@ let asset=new Schema({
       job_presets: mongoose.model('job_presets', job_presets),
       bynder_jobs: mongoose.model('bynder_jobs', bynder_jobs),
       bynder_jobs_refresh: mongoose.model('bynder_jobs_refresh', bynder_jobs_refresh),
+      bynder_jobs_deletelist: mongoose.model('bynder_jobs_deletelist', bynder_jobs_deletelist),
       bynder_jobs_old: mongoose.model('bynder_jobs_old', bynder_jobs_old),
       presetdataupdate: mongoose.model('presetdataupdate', presetdataupdate),
       searchState: mongoose.model('searchState', searchState),
