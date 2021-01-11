@@ -168,10 +168,10 @@ poRoutes1.route('/mpsdueDate').post( function (req, res) {
   });
 })
 poRoutes1.route('/existingArtTeamData').post( function (req, res) {
-  Mdb.bynder_jobs.find().then((data)=>{
+  Mdb.bynder_jobs.find({"job_active_stage.status": 'Active'}).then((data)=>{
      for(let dt of data){
        if(!!dt.presetstages && dt.presetstages.length > 0 && !!dt.Preset_Stages && dt.Preset_Stages.length > 0){
-      return 'Content Feedback 1';
+     // return 'Content Feedback 1';
         let dd = dt.presetstages.filter(d => d.name =='Designer Create Asset' || d.name =='Art 2: Designer Create Asset');
         if(dd.length > 0 ){
          let poData= dt.Preset_Stages.filter(d => d.position == dd[0].position );
@@ -434,7 +434,7 @@ poRoutes1.route('/jobprocessing').post( function (req, res) {
           resolve(dt);
         } else {
           //bb6f3943-5a47-49f0-ab82-c6278d1dad29
-          let where ={ ExeOrder: true }
+          let where ={ ExyeOrder: true }
           Mdb.campaign.updateMany(where ,{
            $set:{
             process: false,

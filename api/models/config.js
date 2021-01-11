@@ -49,6 +49,9 @@ getApiConfigByID( id ){
     getConsumer(){
         return this.consumer;
     },
+    getConsumer() {
+        return this.consumer;
+    },
     getToken(){
         return this.token;
     },

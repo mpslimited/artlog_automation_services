@@ -795,7 +795,7 @@ postRoutes.route('/updatelaststage').post(function (req, res) {
    });
 });
 
-postRoutes.route('/searchdtinit').post(async (req, res)=> {
+postRoutes.route('/searchdtinit').post(async (req, res)=> {  
   //,'Approved','Cancelled'
   let dataResult =[]
   let NoSql = { 'job_active_stage.status' :{ $nin :['Active','NeedsChanges'] }};
@@ -950,14 +950,14 @@ postRoutes.route('/artlogdata', checkToken.checkToken).post(function (req, res) 
     }
     let q={"job_active_stage.status": { $in: [ 'Active', 'NeedsChanges']} ,
     "campaignID":{"$in": ['4924dc05-03c5-4086-90ce-41d8bf501684',
-     '9618db88-fc78-47a5-9916-e864e696ae11','5bf2ed40-6b98-45b2-b926-5eb4445ed38d'] } };
+     '9618db88-fc78-47a5-9916-e864e696ae11','5bf2ed40-6b98-45b2-b926-5eb4445ed38d','5aaa32f4-0a67-4daa-a404-3def00d73475','fd4c4b58-baee-41b4-adb4-24fcd3cf4ae6'] } };
       
     if(!!req.body.jobkey && req.body.jobkey!=""){
       q={"job_key": req.body.jobkey }
     }else if($and.length >0){
       // condition for ignore other Jobs  '4924dc05-03c5-4086-90ce-41d8bf501684',
      // '9618db88-fc78-47a5-9916-e864e696ae11',
-      $and.push( {"campaignID":{"$in": ['4924dc05-03c5-4086-90ce-41d8bf501684','9618db88-fc78-47a5-9916-e864e696ae11', '5bf2ed40-6b98-45b2-b926-5eb4445ed38d'] } });
+      $and.push( {"campaignID":{"$in": ['4924dc05-03c5-4086-90ce-41d8bf501684','9618db88-fc78-47a5-9916-e864e696ae11', '5bf2ed40-6b98-45b2-b926-5eb4445ed38d','5aaa32f4-0a67-4daa-a404-3def00d73475','fd4c4b58-baee-41b4-adb4-24fcd3cf4ae6'] } });
        q= { $and};
     }
    // q={  job_key:"EM2-5207" };
@@ -966,7 +966,7 @@ postRoutes.route('/artlogdata', checkToken.checkToken).post(function (req, res) 
     // testing in Live Build with Pradeep Sir 
     //.skip(  parseInt(req.body.fromPage)).limit( parseInt(req.body.toPage) ).
     //.skip(2000) export dt
-    Mdb.bynder_jobs.find(q ).sort({job_key:-1}).then((data)=>{
+    Mdb.bynder_jobs.find(q ).sort({job_key:-1}).limit(100).then((data)=>{
       console.log("data responded in DB TIMEs :", data.length, new Date().toISOString());
     let dataResult=[];
     let Meta= new Metadt()

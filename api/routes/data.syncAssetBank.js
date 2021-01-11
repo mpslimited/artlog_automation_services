@@ -13,7 +13,7 @@ let moment = require('moment');
 let appConfig = require('../models/config');
 
 const oauth = OAuth({
-  consumer: { key: '71BEFFCC-2CC9-476D-93A8A79BB92BD87B', secret: 'a8de7d89165b8234405b35c83553a318' },
+  consumer: appConfig.getConsumer(),
   signature_method: 'HMAC-SHA1', hash_function (base_string, key) {
     return crypto.createHmac('sha1', key).update(base_string).digest('base64');
   }
@@ -437,8 +437,8 @@ postRoutes.route('/assetSynced/').post(function (req, res) {
             do{
               console.log("Init page:", page)
               //https://gmartlogautomation.mpstechnologies.com
-              //excuteURL("http://localhost:3000/sync/getAssets/"+page, true);
-              excuteURL("https://gmartlogautomation.mpstechnologies.com/sync/getAssets/"+page, true);
+             // excuteURL("http://localhost:3000/sync/getAssets/"+page, true);
+              excuteURL("https://gmartlogautomationdemo.mpstechnologies.com/sync/getAssets/"+page, true);
               if(!( page <  Totalpage)){
                 res.send({data:"jobs merged",d: new Date()});
               }
@@ -533,7 +533,7 @@ postRoutes.route('/updateStageName').post(function (req, res) {
 // Missing StageName
 postRoutes.route('/missingStages').post(function (req, res) {
   //let q= {"Preset_Stages.StageNames":{$exists: false}};
-  Mdb.bynder_jobs.find({}).then(data=>{
+  Mdb.bynder_jobs.find({'job_active_stage.status':'Active'}).then(data=>{
     for( let dt of data){
       let allStages=dt.Preset_Stages;
       for(let temp=0; temp < allStages.length; temp ++){
@@ -633,7 +633,8 @@ postRoutes.route('/updatePresets').post(function (req, res) {
   ApiInfo.process={ apiType: ApiObj.ID , startTime: startTime, trigger: ApiObj.trigger, nextRunTime: nextRunTime } ;
   let testQ={
     $or: [{  presetName: { $exists: false } }, { presetName: "" }]
-  }
+  };
+ // testQ = { presetID : "2c918082-7346-db6b-0173-49ec71020113" , presetName: { $exists: false }  };
   Mdb.bynder_jobs.find( testQ ).then(dt => {
     if (dt.length > 0) {
       let persetsIds = [...new Set(dt.map(d => d.presetID))];
@@ -655,7 +656,7 @@ postRoutes.route('/updatePresets').post(function (req, res) {
               console.log("Error IN Api", error);
               actPer.error ='Error IN Api '+ error;
             }
-            else if(response.body.indexOf('<html')==-1 && response.body.indexOf('<body')==-1) {
+            else if(response.body.indexOf('<html')!=-1 && response.body.indexOf('<body')!=-1) {
               console.log("Invalid Api response! sending HTML data!");
               actPer.error ='Invalid Api response! sending HTML data!';
             }
@@ -663,7 +664,7 @@ postRoutes.route('/updatePresets').post(function (req, res) {
               
               console.log(response.body);
               let persetDt = JSON.parse(response.body);
-              actPer.resp ="Preset API getting of : "+ presetID;
+              actPer.resp ="Preset API getting of : "+ persetDt.preset.ID;
               actPer.responed = true;
               let where = { presetID: persetDt.preset.ID, presetName: { $exists: false } };
               console.log(persetDt.preset.ID ," ID and => ", JSON.stringify(persetDt.preset.presetstages) );
