@@ -434,11 +434,13 @@ postRoutes.route('/assetSynced/').post(function (req, res) {
             if((page!=1) &&(totalDB%limit > 0 || page < Totalpage)  ){
               page++;
             }
+            page=1;
+            Totalpage=30;
             do{
               console.log("Init page:", page)
               //https://gmartlogautomation.mpstechnologies.com
-             // excuteURL("http://localhost:3000/sync/getAssets/"+page, true);
-              excuteURL("https://gmartlogautomationdemo.mpstechnologies.com/sync/getAssets/"+page, true);
+              excuteURL("http://localhost:3000/sync/getAssets/"+page, true);
+             // excuteURL("https://gmartlogautomationdemo.mpstechnologies.com/sync/getAssets/"+page, true);
               if(!( page <  Totalpage)){
                 res.send({data:"jobs merged",d: new Date()});
               }

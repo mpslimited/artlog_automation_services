@@ -888,7 +888,7 @@ postRoutes.route('/searchdtinit').post(async (req, res)=> {
 postRoutes.route('/artlogautoset', checkToken.checkToken).post(function (req, res) {
   console.log("req parameters :" , req.body, new Date().toISOString());
   let q =  { 'job_active_stage.status':'Active' };
-  if( req.body.status!= 'Active' ){
+  if(!!req.body.status && req.body.status!= 'Active' ){
     q =  { 'job_active_stage.status':'Approved' };
   }
   Mdb.bynder_jobs.find(q ).sort({job_key:-1}).then((data)=>{
@@ -981,23 +981,12 @@ postRoutes.route('/artlogautoset', checkToken.checkToken).post(function (req, re
        objData.permissionType = Mdt.permissionType
     //}
       //console.log("Object Final VAlues: ==>", objData);
-    //  console.log("data testing :", objData);
+      console.log("data testing :", objData);
       //dataResult.push(objData);
       Mdb.bynder_jobs.updateOne({
-        _id: mongoose.Types.ObjectId(objData._id.toString())
+        _id: objData._id
       },{
         $set:{
-          workflow: objData.workflow,
-          mathAuditRC: objData.mathAuditRC,
-          cstage: objData.cstage,
-          currentRTeam : objData.currentRTeam,
-          lastage: objData.lastage,
-          totalage: objData.totalage,
-          lesson: objData.lesson,
-          lessonlet: objData.lessonlet,
-          component: objData.component, 
-          tags: objData.tags,
-          //testing 123
           grade: objData.grade,
           gradeID: objData.gradeID,
           module: objData.module,
@@ -1114,8 +1103,7 @@ postRoutes.route('/artlogdataApprove', checkToken.checkToken).post(function (req
       console.log("Error in Find Query", Error);
     })
 
-});
-
+})
 postRoutes.route('/artlogdata', checkToken.checkToken).post(function (req, res) {
     console.log("req parameters :" , req.body, new Date().toISOString());
     let $and = [ ];
@@ -1178,78 +1166,159 @@ postRoutes.route('/artlogdata', checkToken.checkToken).post(function (req, res) 
         {"job_active_stage.status":{"$ne":"Cancelled"}}
       ) 
     }
-    
     let q={"job_active_stage.status": { $in: [ 'Active', 'NeedsChanges']} ,
     "campaignID":{"$in": ['4924dc05-03c5-4086-90ce-41d8bf501684',
      '9618db88-fc78-47a5-9916-e864e696ae11','5bf2ed40-6b98-45b2-b926-5eb4445ed38d','5aaa32f4-0a67-4daa-a404-3def00d73475','fd4c4b58-baee-41b4-adb4-24fcd3cf4ae6'] } };
-     // Global search filters 
-     let df = {};
-     if (!!req.body.filters && req.body.filters!="") {
-      let filters =JSON.parse(req.body.filters);
-      for( let keys of Object.keys(filters)) {
-        if(filters[keys].value!="" && (keys =="job_key" || keys =="name") ){
-          df[keys] = { $regex:  new RegExp( filters[keys].value + ".*") };// new RegExp('/'+ filters[keys].value +'/i');
-        } else {
-          df[keys] = filters[keys].value;
-        }
-        $and.push(df);
-      }
-    }
+      
     if(!!req.body.jobkey && req.body.jobkey!=""){
       q={"job_key": req.body.jobkey }
-    }  else if($and.length >0){
-    // condition for ignore other Jobs  '4924dc05-03c5-4086-90ce-41d8bf501684',
-    // '9618db88-fc78-47a5-9916-e864e696ae11',
-    $and.push( {"campaignID":{"$in": ['4924dc05-03c5-4086-90ce-41d8bf501684','9618db88-fc78-47a5-9916-e864e696ae11', '5bf2ed40-6b98-45b2-b926-5eb4445ed38d','5aaa32f4-0a67-4daa-a404-3def00d73475','fd4c4b58-baee-41b4-adb4-24fcd3cf4ae6'] } });
-      q = { $and };
+    }else if($and.length >0){
+      // condition for ignore other Jobs  '4924dc05-03c5-4086-90ce-41d8bf501684',
+     // '9618db88-fc78-47a5-9916-e864e696ae11',
+      $and.push( {"campaignID":{"$in": ['4924dc05-03c5-4086-90ce-41d8bf501684','9618db88-fc78-47a5-9916-e864e696ae11', '5bf2ed40-6b98-45b2-b926-5eb4445ed38d','5aaa32f4-0a67-4daa-a404-3def00d73475','fd4c4b58-baee-41b4-adb4-24fcd3cf4ae6'] } });
+       q= { $and};
     }
-    // q={  job_key:"EM2-5207" };
+   // q={  job_key:"EM2-5207" };
     let fields={ batchCDate:1,receiveddate:1,mpsDueDate:1,artTeamStatus : 1, artTeamPriority : 1, exceptionCategory : 1, exception:1, presetstages:1,mathAuditor:1,flagedTeam:1,dateCreated:1, job_date_finished:1,pageNo:1,killed:1,flaged:1,batch:1,presetstages:1,isPaging:1, comment:1, mverification:1, duplicate:1, presetName:1, Preset_Stages:1, id:1, name:1, description:1, job_active_stage:1, jobMetaproperties:1, jobID:1, job_key:1, dateCreated:1, job_date_finished:1, thumb:1, generatedTags:1};
-    console.log("Calling artlogdata Data " , JSON.stringify(q));
+    console.log("Calling artlogdata Data " , JSON.stringify(q), JSON.stringify(fields));
     // testing in Live Build with Pradeep Sir 
-    //.skip(2000) export dt
-    /*pagination Script here*/
     //.skip(  parseInt(req.body.fromPage)).limit( parseInt(req.body.toPage) ).
-    Mdb.bynder_jobs.find(q ).sort({job_key:-1}).skip(  parseInt(req.body.fromPage)).limit( parseInt(req.body.toPage) ).then((data)=>{
-        let GridFilters={
-      
-          mathAuditors     :   [...new Set(data.filter( (v, i)=> !!v.mathAuditor ).map(d=>d.mathAuditor))].sort(),
-          pageNos          :   [...new Set(data.filter( (v, i)=> !!v.pageNo ).map(d=>d.pageNo))].sort(),
-          flagedTeams      :   [...new Set(data.filter( (v, i)=> !!v.flagedTeam ).map(d=>d.flagedTeam))].sort(),
-          printAssets      :   [...new Set(data.filter( (v, i)=> !!v.printAsset ).map(d=>d.printAsset))].sort(),
-          printReadys      :   [...new Set(data.filter( (v, i)=> !!v.printReady ).map(d=>d.printReady))].sort(),
-          permissionTypes  :   [...new Set(data.filter( (v, i)=> !!v.permissionType ).map(d=>d.permissionType))].sort(),
-          curriculum       :   [...new Set(data.filter( (v, i)=> !!v.curriculum ).map(d=>d.curriculum))].sort(),
-          workflow         :   [...new Set(data.filter( (v, i)=> !!v.workflow ).map(d=>d.workflow))].sort(),
-          currentRTeam     :   [...new Set(data.filter( (v, i)=> !!v.currentRTeam ).map(d=>d.currentRTeam))].sort(),
-          lesson           :   [...new Set(data.filter( (v, i)=> !!v.lesson ).map(d=>d.lesson))].sort(), 
-          lessonlet        :   [...new Set(data.filter( (v, i)=> !!v.lessonlet ).map(d=> d.lessonlet))].sort(),
-          component        :   [...new Set(data.filter( (d)=> !!d.component ).map(d=>d.component))].sort(),
-          grade            :   [...new Set(data.filter( (d)=> !!d.grade ).map(d=>d.grade))].sort(),
-          module           :   [...new Set(data.filter( (d)=> !!d.module ).map(d=>d.module))].sort(),
-          artcomplex       :   [...new Set(data.filter( (d)=> !!d.artcomplex ).map(d=>d.artcomplex))].sort(),
-          artassion        :   [...new Set( data.filter( (d)=> !!d.artassion ).map(d=>d.artassion))].sort(),
-          risk             :   [...new Set(data.filter( (d)=> !!d.risk ).map(d=>d.risk))].sort(),
-          impact           :   [...new Set(data.filter( (d)=> !!d.impact ).map(d=>d.impact))].sort(),
-          facing           :   [...new Set(data.filter( (d)=> !!d.facing ).map(d=>d.facing))].sort(),
-          series           :   [...new Set(data.filter( (d)=> !!d.series ).map(d=>d.series))].sort(),
-          topic            :   [...new Set(data.filter( (d)=> !!d.topic ).map(d=>d.topic))].sort(),
-          batch            :   [...new Set(data.filter( (d)=> !!d.batch ).map(d=>d.batch))].sort(),
-          revision         :   [...new Set(data.filter( (d)=> !!d.revisionC ).map(d=>d.revisionC ))].sort(),
-          cstages          :   [...new Set(data.filter( (d)=> !!d.cstage ).map(d=>d.cstage))].sort(),
-          cstatus          :   [...new Set(data.filter( (d)=> !!d.job_active_stage.status ).map(d=>d.job_active_stage.status))].sort(),
+    //.skip(2000) export dt
+    Mdb.bynder_jobs.find(q ).sort({job_key:-1}).limit(100).then((data)=>{
+      console.log("data responded in DB TIMEs :", data.length, new Date().toISOString());
+    let dataResult=[];
+    let Meta= new Metadt()
+        Meta.iniMeta(WorkFlowJobsMetaData);
+        Meta.initAssetMeta(GCurriculaWIP);
+        Meta.PrintAssetMeta(GPrintReady)
+    for(let  dtkey in data){
+      var objData = data[dtkey].toObject();
+      if(!!data[dtkey].jobMetaproperties){
+        Meta.getInitDataSet(data[dtkey]);
+        let Mdt= Meta.getMeta();
+        let metaObj=Object.entries(data[dtkey].jobMetaproperties);
+        if(data[dtkey].Preset_Stages.length > 0 ){
+         let lastChangeCreated= data[dtkey].Preset_Stages[data[dtkey].Preset_Stages.length -1].start_date;
+         let lastChangeComplated=(!!data[dtkey].Preset_Stages[data[dtkey].Preset_Stages.length -1].job_date_finished)?
+          data[dtkey].Preset_Stages[data[dtkey].Preset_Stages.length -1].job_date_finished: new Date();
+          objData.lastage=dateDiffinDurationStage(lastChangeComplated, lastChangeCreated);
+        }
+        var dateCreatedJob =  data[dtkey].dateCreated ||Mdt.dateCreatedM ;
+        if(data[dtkey].job_date_finished===null && data[dtkey].job_active_stage.status!="Approved"){
+          data[dtkey].job_date_finished=new Date().toISOString();
+        }else if(data[dtkey].job_date_finished===null){
+          data[dtkey].job_date_finished=new Date().toISOString();
+        }
+        objData.cstage=""; objData.workflow=Meta.getWorkflow();
+        objData.mathAuditRC = 0;
+        if(objData.Preset_Stages.length > 0){
+          // IT Should be another that we can not captuchred 
+          objData.mathAuditRC= objData.Preset_Stages.filter( d => d.StageNames =='Math Audit Review' ).length;
+          let ob=objData.Preset_Stages[ objData.Preset_Stages.length-1 ];
+          if(ob.hasOwnProperty('name')){
+            objData.cstage=ob.name;
+          }else if(ob.hasOwnProperty('StageNames')){
+            objData.cstage=ob.StageNames;
+          }
+          if(objData.cstage=="" && !!ob.position && objData.presetstages.length > 0){
+            let objdt=objData.presetstages.filter(d=> d.position == ob.position);
+            if(objdt.length > 0)
+            objData.cstage = objdt[0].name;
+          }
+        }
+        objData.comment = (objData.flaged)? objData.flaggedComment +'|'+ objData.flaggedUser +'|'+ moment(objData.flaggedDate).format('MM-DD-YYYY') :'';
+        //demo
+        objData.artTeamPriority   =   Meta.getTeamPriority(objData);
+        objData.artTeamStatus     =   Meta.getTeamStatus(objData);
+        objData.batchCDate        =  (objData.batchCDate!="" && typeof objData.batchCDate != "undefined")? moment(objData.batchCDate).format('DD/MM/YYYY'):'';
+        objData.receiveddate      =  (objData.receiveddate!="" && typeof objData.receiveddate != "undefined")? moment(objData.receiveddate).format('DD/MM/YYYY'):'';
+        objData.mpsDueDate        =  (objData.mpsDueDate!="" && typeof objData.mpsDueDate != "undefined")? moment(objData.mpsDueDate).format('DD/MM/YYYY'):'';
         
-        };
-        Mdb.bynder_jobs.find( q ).count().then(countVal =>{
-          // result prepration
-          let result={ artLogData : data, GridFilters : GridFilters, totalCount: countVal};
-          res.send( result );
-        }).catch(Error =>{
-          console.log("Error In Total Count data", Error);
-        });
-    }).catch((Err)=>
-     console.log("Error in finder ERROR:", Err )
-    );
+         // Art Team Columns // 
+         /*objData.receiveddate      =   Meta.getMathAuditStartDt(objData);
+         objData.mpsDueDate        =   Meta.getMpsDueDate(objData);
+         objData.artTeamStatus     =   Meta.getTeamStatus(objData);
+         objData.artTeamPriority   =   Meta.getTeamPriority(objData);
+         objData.exceptionCategory =   Meta.getExceptionCategory(objData);
+         objData.exceptoin         =   Meta.getExceptoin(objData);
+         */
+         //------------------------//
+         objData.currentRTeam =   Meta.getStageRTeam(objData.cstage);
+         objData.totalage     =   dateDiffinDurationStage(data[dtkey].job_date_finished , dateCreatedJob );
+         objData.lesson       =   Mdt.lesson;
+         objData.lessonlet    =   Mdt.lessonlet;
+         objData.component    =   Mdt.component; 
+         objData.tags         =   Mdt.tag; 
+         objData.gradeID      =   Mdt.grade;
+         objData.grade        =   Mdt.gradeVal;
+         objData.moduleID     =   Mdt.module;
+         objData.module       =   Mdt.moduleVal;
+         objData.topic        =   Mdt.topic;
+         objData.facing       =   Mdt.facingVal;
+         objData.facingID     =   Mdt.facing;
+         objData.series       =   Mdt.series;
+         //test
+         objData.revisionID   =   Mdt.revision;
+         objData.revisionC    =   Mdt.revisionVal;
+         objData.artcomplexID =   Mdt.artComplex;
+         objData.artcomplex   =   Mdt.artComplexVal;
+         objData.artassionID  =   Mdt.artAssion;
+         objData.artassion    =   Mdt.artAssionVal;
+         objData.riskID       =   Mdt.risk;
+         objData.risk         =   Mdt.riskVal;
+         objData.impactId     =   Mdt.impact;
+         objData.impact       =   Mdt.impactVal;
+         objData.curriculum   =   Mdt.wip;
+         objData.creditLine   =   Mdt.creditLine;
+         objData.printAsset   =   Mdt.printAsset;
+         objData.printReady   =   Mdt.printReady;
+         objData.permissionType = Mdt.permissionType
+      }
+      //console.log("Object Final VAlues: ==>", objData);
+      dataResult.push(objData);
+    }
+    console.log("objData data responded in DB TIME:",  new Date().toISOString());
+     job_keys=dataResult.filter( (d)=> d.job_key!="" ).map(d=>d.job_key);
+     GridFilters={
+      
+      mathAuditors     :   [...new Set(dataResult.filter( (v, i)=> !!v.mathAuditor ).map(d=>d.mathAuditor))].sort(),
+      pageNos          :   [...new Set(dataResult.filter( (v, i)=> !!v.pageNo ).map(d=>d.pageNo))].sort(),
+      flagedTeams      :   [...new Set(dataResult.filter( (v, i)=> !!v.flagedTeam ).map(d=>d.flagedTeam))].sort(),
+      printAssets      :   [...new Set(dataResult.filter( (v, i)=> !!v.printAsset ).map(d=>d.printAsset))].sort(),
+      printReadys      :   [...new Set(dataResult.filter( (v, i)=> !!v.printReady ).map(d=>d.printReady))].sort(),
+      permissionTypes  :   [...new Set(dataResult.filter( (v, i)=> !!v.permissionType ).map(d=>d.permissionType))].sort(),
+      curriculum       :   [...new Set(dataResult.filter( (v, i)=> !!v.curriculum ).map(d=>d.curriculum))].sort(),
+      workflow         :   [...new Set(dataResult.filter( (v, i)=> !!v.workflow ).map(d=>d.workflow))].sort(),
+      currentRTeam     :   [...new Set(dataResult.filter( (v, i)=> !!v.currentRTeam ).map(d=>d.currentRTeam))].sort(),
+      lesson           :   [...new Set(dataResult.filter( (v, i)=> !!v.lesson ).map(d=>d.lesson))].sort(), 
+      lessonlet        :   [...new Set(dataResult.filter( (v, i)=> !!v.lessonlet ).map(d=> d.lessonlet))].sort(),
+      component        :   [...new Set(dataResult.filter( (d)=> !!d.component ).map(d=>d.component))].sort(),
+      grade            :   [...new Set(dataResult.filter( (d)=> !!d.grade ).map(d=>d.grade))].sort(),
+      module           :   [...new Set(dataResult.filter( (d)=> !!d.module ).map(d=>d.module))].sort(),
+      artcomplex       :   [...new Set(dataResult.filter( (d)=> !!d.artcomplex ).map(d=>d.artcomplex))].sort(),
+      artassion        :   [...new Set( dataResult.filter( (d)=> !!d.artassion ).map(d=>d.artassion))].sort(),
+      risk             :   [...new Set(dataResult.filter( (d)=> !!d.risk ).map(d=>d.risk))].sort(),
+      impact           :   [...new Set(dataResult.filter( (d)=> !!d.impact ).map(d=>d.impact))].sort(),
+      facing           :   [...new Set(dataResult.filter( (d)=> !!d.facing ).map(d=>d.facing))].sort(),
+      series           :   [...new Set(dataResult.filter( (d)=> !!d.series ).map(d=>d.series))].sort(),
+      topic            :   [...new Set(dataResult.filter( (d)=> !!d.topic ).map(d=>d.topic))].sort(),
+      batch            :   [...new Set(dataResult.filter( (d)=> !!d.batch ).map(d=>d.batch))].sort(),
+      revision         :   [...new Set(dataResult.filter( (d)=> !!d.revisionC ).map(d=>d.revisionC ))].sort(),
+      cstages          :   [...new Set(dataResult.filter( (d)=> !!d.cstage ).map(d=>d.cstage))].sort(),
+      cstatus          :   [...new Set(dataResult.filter( (d)=> !!d.job_active_stage.status ).map(d=>d.job_active_stage.status))].sort(),
+    
+    };
+      console.log("result length:", dataResult.length , new Date().toISOString());
+      
+      console.log("objData data MAPED responded in DB TIME:", dataResult.length , new Date().toISOString());
+      //Mdb.bynder_jobs.find(q, fields ).count().then(dt=>{
+        let result={ artLogData : dataResult, GridFilters : GridFilters, totalCount: dataResult.length};
+        console.log("result responce:", new Date().toISOString());
+        res.send( result );
+        console.log("============>result length:", dataResult.length , new Date().toISOString());
+      //})
+      
+    }).catch((Err)=>console.log("Error in finder ERROR:", Err));
 });
 
 postRoutes.route('/artlogteamdata', checkToken.checkToken).post(function (req, res) {

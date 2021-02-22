@@ -307,13 +307,14 @@ poRoutes1.route('/jobprocessing2').post( function (req, res) {
             i= data[0].processedPage +1;
           } else {
             i = 1;
-          }
+          } 
+           data[0].lastExeTime = '2021-01-01'; //for old days data sync
           let tillDate = moment().add(1, 'days').toISOString();  
           var request_data=appConfig.getActionInfo("jobsbycampaignid", data[0].ID );
               request_data.data= {  
               dateModifiedFrom: new Date(data[0].lastExeTime).toISOString(),
               dateModifiedTo : tillDate,
-              limit: 500, page: i  
+              limit: 250, page: i  
           };
           ApiInfo.APISendInfo ={ url: request_data.url, data:request_data.data};
           console.log("request_data ===>", request_data.url, request_data.data );
@@ -364,7 +365,7 @@ poRoutes1.route('/jobprocessing2').post( function (req, res) {
 		  console.log( "Total Data Length :", data.data.length, ApiInfo );
       //res.send(data);
       let $campSet={  process: true, processedPage: i /* totalPage: i,*/ }
-        if(data.data.length < 500){  
+        if(data.data.length < 250){  
           $campSet.lastExeTime = moment().startOf('day').toISOString(); 
           $campSet.totalPage = i; 
           $campSet.process = false  
@@ -409,7 +410,7 @@ poRoutes1.route('/jobprocessing2').post( function (req, res) {
          console.log("ApiInfo", ApiInfo);
          let ApiPerformance = new Mdb.ApiPerformance(ApiInfo);
           ApiPerformance.save().then(d=>{
-            console.log(d);
+            console.log(JSON.stringify(d));
           });
          res.send(responceDt);
     }).catch((Error)=>{

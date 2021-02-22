@@ -1,5 +1,7 @@
 const mongoose = require('mongoose');
 const mongooseAggregatePaginate = require('mongoose-aggregate-paginate');
+const mongoosePaginate = require("mongoose-paginate-v2");
+
 let Schema = mongoose.Schema;
 //.plugin(mongooseAggregatePaginate)
 //Schema.plugin(mongooseAggregatePaginate);
@@ -153,9 +155,46 @@ let bynder_jobs= new Schema({
   updatethm: { type : Boolean   },
   Preset_Stagesq : { type: Array},
   presetstagesq : { type: Array},
+  //for dynamic Search columns 
+  workflow: { type : String   },
+  mathAuditRC: { type : String   },
+  cstage: { type : String   },
+  currentRTeam : { type : String   },
+  lastage: { type : String   },
+  totalage: { type : String   },
+  lesson: { type : String   },
+  lessonlet: { type : String   },
+  component: { type : String   }, 
+  tags: { type : String   },
+  //Other
+  grade: { type : String   },
+  gradeID: { type : String   },
+  module: { type : String   },
+  moduleID: { type : String   },
+  topic : { type : String   },
+  facing : { type : String   },
+  facingID : { type : String   },
+  series : { type : String   },
+  revision : { type : String   },
+  revisionID: { type : String   },
+  artcomplex : { type : String   },
+  artcomplexID : { type : String   },
+  artassion : { type : String   },
+  artassionID : { type : String   },
+  risk : { type : String   },
+  riskID : { type : String   },
+  impact: { type : String   },
+  impactId : { type : String   },
+  curriculum: { type : String   },
+  creditLine : { type : String   },
+  printAsset : { type : String   },
+  printReady : { type : String   },
+  permissionType: { type : String   },
  },{
     collection: 'bynder_jobs'
 });
+bynder_jobs.plugin(mongoosePaginate);
+
 let bynder_jobs_old= new Schema({
   assetID   : {type : String},
   id: { type: String},
@@ -404,20 +443,20 @@ let asset=new Schema({
       assetMeta:  mongoose.model('assetMeta', assetMeta),
       tempAssetCount:mongoose.model('tempAssetCount', tempAssetCount),
       apiErrors: mongoose.model('apiErrors', apiErrors),
-      job_presets: mongoose.model('job_presets', job_presets),
-      bynder_jobs: mongoose.model('bynder_jobs', bynder_jobs),
-      bynder_jobs_refresh: mongoose.model('bynder_jobs_refresh', bynder_jobs_refresh),
-      bynder_jobs_deletelist: mongoose.model('bynder_jobs_deletelist', bynder_jobs_deletelist),
-      bynder_jobs_old: mongoose.model('bynder_jobs_old', bynder_jobs_old),
-      presetdataupdate: mongoose.model('presetdataupdate', presetdataupdate),
-      searchState: mongoose.model('searchState', searchState),
+      job_presets : mongoose.model('job_presets', job_presets),
+      bynder_jobs : mongoose.model('bynder_jobs', bynder_jobs),
+      bynder_jobs_refresh : mongoose.model('bynder_jobs_refresh', bynder_jobs_refresh),
+      bynder_jobs_deletelist : mongoose.model('bynder_jobs_deletelist', bynder_jobs_deletelist),
+      bynder_jobs_old : mongoose.model('bynder_jobs_old', bynder_jobs_old),
+      presetdataupdate : mongoose.model('presetdataupdate', presetdataupdate),
+      searchState : mongoose.model('searchState', searchState),
       metaproperties : mongoose.model('metaproperties', metaproperties),
-      users: mongoose.model('users', users),
-      campaign: mongoose.model('campaign', campaign),
-      ApiPerformance: mongoose.model('ApiPerformance', ApiPerformance),
-      ExportSheetData: mongoose.model('ExportSheetData', ExportSheetData),
-      delete_temp_data: mongoose.model('delete_temp_data', delete_temp_data),
-      overdue_jobs:mongoose.model('overdue_jobs', overdue_jobs),
-      api_error_notification: mongoose.model('api_error_notification', api_error_notification),
+      users : mongoose.model('users', users),
+      campaign : mongoose.model('campaign', campaign),
+      ApiPerformance : mongoose.model('ApiPerformance', ApiPerformance),
+      ExportSheetData : mongoose.model('ExportSheetData', ExportSheetData),
+      delete_temp_data : mongoose.model('delete_temp_data', delete_temp_data),
+      overdue_jobs : mongoose.model('overdue_jobs', overdue_jobs),
+      api_error_notification : mongoose.model('api_error_notification', api_error_notification),
     };
   module.exports = Mdb;
