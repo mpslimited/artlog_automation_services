@@ -1,0 +1,26 @@
+Last Day ==> Active vs Approved then data loss then recover Active tab data ==>
+1: pending points export data achually it is tricky to combine data at export time
+case 1: which i am tring ==>
+	we have all approved jobs
+	once data exported then internally i am sending the request to server for active jobs. it is tricky becouse here 
+	we have need to code on dat
+	aGrid Library that is incoded form (short code of javascript ) there is no angular code working. 
+Case 2: 
+	when we try to export All(Active and approved) data then 
+		Achullty we have alrady Approved data so we have try to hit a angular ajex request for 
+2: All the pending tabs data recoverd
+=====================================
+1: score card View
+2: API Status
+3: Approved jobs combine Report
+4: Job Duration
+5: 
+
+
+----------- 
+6: job refresh
+--------------
+
+scorecarddata	SCORECARDDATA
+scorecardload	SCORECARDLOAD
+createdcompletedjobs           ARTLOG_CREATEDCOMPLETEDJOBS

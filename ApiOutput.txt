@@ -1,0 +1,293 @@
+<!doctype html>
+<html class="no-js" lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="description" content="">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="x-csrf-token" content="3d4510dacfe1bfd24c149bb1d05aeef44e4dbd7f">
+    <meta name="base-cloudfront-url" content="https://d8ejoa1fys2rk.cloudfront.net/frontend/0.1.144/">
+    <title>Great Minds Portal</title>
+        <link rel="stylesheet" href="https://d8ejoa1fys2rk.cloudfront.net/frontend/0.1.144/styles/css/notifications.css" />
+    <link rel="stylesheet" href="https://d8ejoa1fys2rk.cloudfront.net/frontend/0.1.144/styles/css/icons.css" />
+    <link rel="stylesheet" href="https://d8ejoa1fys2rk.cloudfront.net/frontend/0.1.144/styles/css/bootstrap.css" />
+    <link rel="stylesheet" href="https://d8ejoa1fys2rk.cloudfront.net/frontend/0.1.144/styles/css/base.css" />
+    <link rel="stylesheet" href="https://d8ejoa1fys2rk.cloudfront.net/frontend/0.1.144/styles/css/modules.css" />
+    <link rel="stylesheet" href="https://d8ejoa1fys2rk.cloudfront.net/frontend/0.1.144/deps/select2/dist/css/select2.css" />
+    <link rel="stylesheet" href=https://d8ejoa1fys2rk.cloudfront.net/5.0.5/includes/themes/default.css>
+
+    <script src="https://d8ejoa1fys2rk.cloudfront.net/frontend/0.1.144/deps/modernizr/modernizr.js"></script>
+</head>
+
+
+    <body class="api">
+
+<aside class="notifications-panel" aria-expanded="false">
+    <section class="notifications-left has-content">
+        <ul class="notifications-flyover">
+
+        </ul>
+    </section>
+    <section class="notifications-right">
+        <header class="notifications-header">
+            Notification center
+            <div class="notifications-close">
+                <button class="icon-group-close">
+                    <i class="fa fa-times-circle"></i>
+                </button>
+            </div>
+        </header>
+        <ul class="notifications-list">
+        </ul>
+    </section>
+</aside>
+
+<header class="base">
+<style>
+.fixedHeight{
+    height: 70px;
+}
+@media only screen and (max-width: 768px){
+.correctPosition{
+    margin-top:-15px !important;
+}
+.d-flex{
+    display:flex;
+}
+.alignItems{
+    align-items:baseline;
+}
+.toCenter{ 
+margin-left:5%;
+}
+.navbar-nav > li > a{
+    font-size: 10pt !important;
+    padding: 0 10px !important;
+}
+.navbar-default .navbar-nav.nav-main{
+    height: 70px;
+}
+.navbar-brand{
+    max-height:70px;
+    max-width: 225px;
+}
+}
+</style>
+    <nav class="navbar navbar-primary navbar-default navbar-fixed-top fixedHeight">
+        <div class="container d-flex alignItems correctPosition">
+            <div class="navbar-header">
+                <a href="/" title="Great Minds"  class="navbar-brand" tabindex="-1">
+                    <img src="https://d4n5pyzr6ibrc.cloudfront.net/visual/accountlogo/A945DE76-2587-49E2-87321DFF88139192/small-746AB39B-1224-4B54-958F02491874F53A.png?response-content-disposition=inline" alt="Great Minds">
+                </a>
+            </div>
+        </div>
+    </nav>
+
+</header>
+
+
+
+    <div class="container">
+
+    
+
+	<div class="row">
+		<div class="col-md-6 col-md-offset-3">
+			<div class="text-center">
+				<h1><i class="fa fa-exclamation-triangle"></i> Not found</h1>
+				<p class="lead">We couldn&#39;t find the page you were looking for.</p>
+			</div>
+		</div>
+	</div>
+
+
+    </div> <!-- End Container -->
+    <div id="dialog-region" class="modal fade"></div>
+
+        <script src="https://d8ejoa1fys2rk.cloudfront.net/frontend/0.1.144/deps/jquery/dist/jquery.js"></script>
+    <script src="https://d8ejoa1fys2rk.cloudfront.net/frontend/0.1.144/deps/jquery-ui/jquery-ui.js"></script>
+    <script src="https://d8ejoa1fys2rk.cloudfront.net/frontend/0.1.144/deps/bootstrap/dist/js/bootstrap.min.js"></script>
+    <script src="https://d8ejoa1fys2rk.cloudfront.net/frontend/0.1.144/deps/bootstrap-datepicker/js/bootstrap-datepicker.js"></script>
+    <script src="https://d8ejoa1fys2rk.cloudfront.net/frontend/0.1.144/deps/moment/moment.js"></script>
+    <script src="https://d8ejoa1fys2rk.cloudfront.net/frontend/0.1.144/deps/eonasdan-bootstrap-datetimepicker/build/js/bootstrap-datetimepicker.min.js"></script>
+    <script src="https://d8ejoa1fys2rk.cloudfront.net/frontend/0.1.144/deps/lodash/lodash.js"></script>
+    <script src="https://d8ejoa1fys2rk.cloudfront.net/frontend/0.1.144/deps/backbone/backbone.js"></script>
+    <script src="https://d8ejoa1fys2rk.cloudfront.net/frontend/0.1.144/deps/marionette/lib/backbone.marionette.js"></script>
+    <script src="https://d8ejoa1fys2rk.cloudfront.net/frontend/0.1.144/deps/backbone.radio/build/backbone.radio.js"></script>
+    <script src="https://d8ejoa1fys2rk.cloudfront.net/frontend/0.1.144/deps/backbone.syphon/lib/backbone.syphon.js"></script>
+    <script src="https://d8ejoa1fys2rk.cloudfront.net/frontend/0.1.144/deps/backbone.stickit/backbone.stickit.js"></script>
+    <script src="https://d8ejoa1fys2rk.cloudfront.net/frontend/0.1.144/deps/select2/dist/js/select2.js"></script>
+    <script src="https://d8ejoa1fys2rk.cloudfront.net/frontend/0.1.144/deps/jquery.role/lib/jquery.role.js"></script>
+    <script src="https://d8ejoa1fys2rk.cloudfront.net/frontend/0.1.144/deps/jade/runtime.js"></script>
+    <script src="https://d8ejoa1fys2rk.cloudfront.net/frontend/0.1.144/deps/jed/jed.js"></script>
+    <script src="https://d8ejoa1fys2rk.cloudfront.net/frontend/0.1.144/deps/spin.js/spin.js"></script>
+    <script src="https://d8ejoa1fys2rk.cloudfront.net/frontend/0.1.144/deps/is-js/is.js"></script>
+    <script src="https://d8ejoa1fys2rk.cloudfront.net/frontend/0.1.144/deps/replaceholder/replaceholder.js"></script>
+    <script src="https://d8ejoa1fys2rk.cloudfront.net/frontend/0.1.144/deps/DecentStringFormatter/src/dsf.js"></script>
+    <script src="https://d8ejoa1fys2rk.cloudfront.net/frontend/0.1.144/scripts/main.js"></script>
+    <script src="https://d8ejoa1fys2rk.cloudfront.net/frontend/0.1.144/scripts/templates/components.js"></script>
+    <script src="https://d8ejoa1fys2rk.cloudfront.net/frontend/0.1.144/scripts/modules/notifications/notifications.js"></script>
+
+<script type="text/javascript">
+    Bynder.init({momentLocale: false}).then(function(){
+
+
+
+    });
+</script>
+
+
+
+
+
+<script src='https://d8ejoa1fys2rk.cloudfront.net/frontend/0.1.144/scripts/es6-promise-polyfill.js'></script>
+<div
+    id="bynderParamountRoot"
+    class="bynder-frontend"
+    data-name="paramount"
+    data-version="0.0.158"
+    data-port="3018"
+    style="display: none;"
+></div>
+<script src="https://d8ejoa1fys2rk.cloudfront.net/pynder/microfrontends/0.1.73/app.bundle.js"></script>
+
+
+    
+
+
+<script type="text/javascript">
+    // Created this function instead of using Object.assign because of IE11 incompatibility 
+       function objectAssign(target, source) {
+            var data = [target, source]
+            result = data.reduce(function(accumulatedData, currentData) {
+                Object.keys(currentData).forEach(function(key) {
+                    accumulatedData[key] = currentData[key];
+                });
+                return accumulatedData;
+            }, {});
+            return result;
+        }
+
+
+
+        var anonymousData = {
+            ip: '0.0.0.0',
+            page: {
+                title: '',
+                url: '',
+                referrer: ''
+            }
+        };
+
+        function getCFUUIDFromUUID(UUID) {
+            return UUID.replace(/-([^-]*)$/, '$1').toUpperCase();
+        }
+
+        function getAmplitudeSessionId() {
+            function sessionIsExpired(sessionExpirationTimestamp) {
+                if (!sessionExpirationTimestamp) {
+                    return true;
+                }
+                return new Date(sessionExpirationTimestamp) < new Date();
+            }
+
+            var sessionId = localStorage.getItem('amplitude.session_id');
+            var sessionExpirationTimestamp = localStorage.getItem('amplitude.session_expiration_timestamp');
+
+            if (!sessionId || sessionIsExpired(sessionExpirationTimestamp)) {
+                sessionId = new Date().getTime();
+                localStorage.setItem('amplitude.session_id', sessionId);
+            }
+
+            var SESSION_EXPIRED_AFTER_MIN = 30;
+            sessionExpirationTimestamp = new Date().setMinutes(
+                new Date().getMinutes() + SESSION_EXPIRED_AFTER_MIN
+            );
+            localStorage.setItem('amplitude.session_expiration_timestamp', sessionExpirationTimestamp);
+
+            return sessionId;
+        }
+
+            var isUserTrackable = "True" === "True" ? true : false;
+            !function(){
+                var analytics=window.analytics=window.analytics||[];
+                var sessionId = getAmplitudeSessionId();
+                var integrationData = {integrations: {Amplitude: {session_id: sessionId}}};
+                if(!analytics.initialize)if(analytics.invoked)window.console&&console.error&&console.error("Segment snippet included twice.");else{analytics.invoked=!0;analytics.methods=["trackSubmit","trackClick","trackLink","trackForm","pageview","identify","reset","group","track","ready","alias","debug","page","once","off","on"];analytics.factory=function(t){return function(){var e=Array.prototype.slice.call(arguments);e.unshift(t);analytics.push(e);return analytics}};for(var t=0;t<analytics.methods.length;t++){var e=analytics.methods[t];analytics[e]=analytics.factory(e)}analytics.load=function(t,e){var n=document.createElement("script");n.type="text/javascript";n.async=!0;n.src=("https:"===document.location.protocol?"https://":"http://")+"cdn.segment.com/analytics.js/v1/"+t+"/analytics.min.js";var o=document.getElementsByTagName("script")[0];o.parentNode.insertBefore(n,o);analytics._loadOptions=e};analytics.SNIPPET_VERSION="4.1.0";
+                analytics.load("lWkz09G1aKpd3Zl9sfSC6au6XpHgu7dZ");
+
+                if (isUserTrackable) {
+                    analytics.identify(getCFUUIDFromUUID("None"), {
+                        "Company": "None",
+                        "Department": "None",
+                        "Job": "None",
+                        "Country": "None",
+                        "Timezone": "None",
+                        "Times logged in": parseInt("None"),
+                        },
+                        integrationData
+                    );
+
+                    analytics.group(getCFUUIDFromUUID("a945de76-2587-49e2-8732-1dff88139192"), {
+                        "Group type": "Account",
+                        "Account name": "Great Minds",
+                        "Preferred language": "None",
+                        "Account domain": "greatminds.getbynder.com",
+                        "Account theme": "default",
+                        "Account country": "",
+                        "Default language": "en_US",
+                        "Account modules": ["Digital Templates Basic", "Image bank", "Workflow"]
+                        }, 
+                        integrationData
+                    );
+                } else {
+                    analytics.identify('', {
+                        "Timezone": "None",
+                        "Times logged in": parseInt("None"),
+                        "Preferred language": "None",
+                        }, 
+                        integrationData
+                    );
+                    analytics.group('77efe2fc0c136f28c6b763e695ae113a579b85aee5cad4d586d22a6fb319519b', {
+                        "Account theme": "default",
+                        "Default language": "en_US",
+                        "Account modules": ["Digital Templates Basic", "Image bank", "Workflow"]
+                        }, 
+                        integrationData
+                    );
+                }
+
+                analytics.page(window.location.pathname, isUserTrackable ? undefined : anonymousData.page, {
+                    ip: isUserTrackable ? undefined : anonymousData.ip,
+                    integrations: {
+                        Amplitude: {
+                            session_id: getAmplitudeSessionId()
+                        }
+                    }
+                });
+            }}();
+
+        /* Anonymize all PII
+        * Use this function instead of analytics.track
+        */
+        var bynder = bynder ? bynder : {};
+        bynder.track = function (title, props) {
+            var integrationData = {
+                'integrations': {
+                    'Amplitude': {
+                        'session_id': getAmplitudeSessionId().toString()
+                    }
+                }
+            }
+
+            return analytics
+                ? analytics.track(title, props, objectAssign(anonymousData, integrationData))
+                : null;
+        };
+</script>
+
+    
+
+
+
+</body>
+</html>

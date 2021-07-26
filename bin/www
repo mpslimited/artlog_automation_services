@@ -24,8 +24,10 @@ var server = http.createServer(app);
  * Listen on provided port, on all network interfaces.
  */
 
+console.log("port-------------", port);
 
 server.listen(port);
+
 server.on('connection', function(socket) {
   console.log("A new connection was made by a client.");
   socket.setTimeout(80 * 1000); 

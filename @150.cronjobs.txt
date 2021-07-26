@@ -27,3 +27,4 @@ curl   -X POST https://gmartlogautomationdemo.mpstechnologies.com/dataApi/thumbs
 .;S
 
 curl   -X POST https://gmartlogautomation.mpstechnologies.com/dataApi/jobprocessing
+jobprocessing2

@@ -25,6 +25,7 @@ const routesApi = require('./api/routes/index');
 const syncAssetBank = require('./api/routes/data.syncAssetBank');
 const routessmartsheetApi = require('./api/routes/smartsheet');
 const routesApiData = require('./api/routes/data.services');
+const rndRoute = require('./api/routes/rndRoure');
 const app = express()
 const publicRoot = 'dist';
 var accessLogStream = fs.createWriteStream(path.join(__dirname, 'logs/access.log'), 
@@ -63,7 +64,7 @@ app.use('/dataApi', poRoutes1);
 app.use('/api', routessmartsheetApi);
 app.use('/apiData', routesApiData);
 app.use('/sync', syncAssetBank);
-
+app.use('/rnd', rndRoute);
 /*
 app.get("/*", (request, res, next) => {
   let refUrl=request.headers.referer || request.url;

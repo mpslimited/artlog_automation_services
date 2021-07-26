@@ -88,7 +88,7 @@ rndRoute.route('/artlogdata', checkToken.checkToken).post(function (req, res) {
     }
    // q={  job_key:"EM2-5207" };
     let fields={ batchCDate:1,receiveddate:1,mpsDueDate:1,artTeamStatus : 1, artTeamPriority : 1, exceptionCategory : 1, exception:1, presetstages:1,mathAuditor:1,flagedTeam:1,dateCreated:1, job_date_finished:1,pageNo:1,killed:1,flaged:1,batch:1,presetstages:1,isPaging:1, comment:1, mverification:1, duplicate:1, presetName:1, Preset_Stages:1, id:1, name:1, description:1, job_active_stage:1, jobMetaproperties:1, jobID:1, job_key:1, dateCreated:1, job_date_finished:1, thumb:1, generatedTags:1};
-    console.log("Calling artlogdata Data " , JSON.stringify(q), JSON.stringify(fields));
+    console.log("Calling artlogdata Data rnd" , JSON.stringify(q), JSON.stringify(fields));
     // testing in Live Build with Pradeep Sir 
     //.skip(  parseInt(req.body.fromPage)).limit( parseInt(req.body.toPage) ).
     //.skip(2000) export dt
