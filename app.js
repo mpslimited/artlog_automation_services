@@ -65,7 +65,7 @@ app.use('/api', routessmartsheetApi);
 app.use('/apiData', routesApiData);
 app.use('/sync', syncAssetBank);
 app.use('/rnd', rndRoute);
-/*
+// /*
 app.get("/*", (request, res, next) => {
   let refUrl=request.headers.referer || request.url;
   var url = require('url');
@@ -77,7 +77,7 @@ app.get("/*", (request, res, next) => {
   }
   res.sendFile("index.html", { root: publicRoot });
 });
-*/
+// */
 app.use((req, res, next) => {
   let error = new Error("Invalid RestAPI call!")
   error.status = 404;
