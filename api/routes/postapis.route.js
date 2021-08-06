@@ -333,6 +333,7 @@ poRoutes1.route('/jobprocessing2').post( function (req, res) {
             try{
               
               dt= JSON.parse(response.body);
+              console.log("Data getting at Bynder End Total:--------", response );
               console.log("Data getting at Bynder End Total:", dt.length );
               ApiInfo.responce= "Data getting at Bynder End Total:"+ dt.length ;
               ApiInfo.APIprocess.endTime= new Date() ;

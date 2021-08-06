@@ -747,6 +747,7 @@ postRoutes.route('/updateAsset', checkToken.checkToken).post(function (req, res)
 });
 postRoutes.route('/artloginit', checkToken.checkToken).post(function (req, res) {
   Mdb.searchState.find({ uid: req.headers['authuser'] }).then((dt)=>{
+    console.log(' GCurriculaWIP  ' , GCurriculaWIP);
     let resJSON={ inData:dt, grade: GGrades, module: GModules, artcomplex: GArtComplex, artAssign: GArtAssign, risk: GRisk, impact: GImpact, wip: GCurriculaWIP
     }
     res.send(resJSON);
@@ -1020,6 +1021,10 @@ postRoutes.route('/artlogdata', checkToken.checkToken).post(function (req, res) 
     $and.push( { "permissionType" : req.body.permissionType } ); 
   }      
   
+  if(!!req.body.jobkey && req.body.jobkey!=""){
+    $and.push(q={"job_key": req.body.jobkey } ); 
+  }  
+  
   
 // filter end By Gurpreet
 
@@ -1060,36 +1065,45 @@ postRoutes.route('/artlogdata', checkToken.checkToken).post(function (req, res) 
     }else{
       $and.push( {"job_active_stage.status":{"$in": st } });
     }
-  }else if($and.length >0){
-    $and.push(
-      {"job_active_stage.status":{"$ne":"Cancelled"}}
-    ) 
+  }else{
+    $and.push( {"job_active_stage.status":{"$in": ['NeedsChanges'] } });
+
   }
+  //  if($and.length >0){
+  //   $and.push(
+  //     {"job_active_stage.status":{"$ne":"Cancelled"}}
+  //   ) 
+  // }
+  q = { $and };
+  console.log("Calling artlogdata Data sm $and" , JSON.stringify($and));
+  // q={"job_key": req.body.jobkey }
   
-  let q={"job_active_stage.status": { $in: [ 'Active', 'NeedsChanges']} ,
-  "campaignID":{"$in": ['4924dc05-03c5-4086-90ce-41d8bf501684',
-   '9618db88-fc78-47a5-9916-e864e696ae11','5bf2ed40-6b98-45b2-b926-5eb4445ed38d','5aaa32f4-0a67-4daa-a404-3def00d73475','fd4c4b58-baee-41b4-adb4-24fcd3cf4ae6'] } };
-   // Global search filters 
-   let df = {};
-   if (!!req.body.filters && req.body.filters!="") {
-    let filters =JSON.parse(req.body.filters);
-    for( let keys of Object.keys(filters)) {
-      if(filters[keys].value!="" && (keys =="job_key" || keys =="name") ){
-        df[keys] = { $regex:  new RegExp( filters[keys].value + ".*") };// new RegExp('/'+ filters[keys].value +'/i');
-      } else {
-        df[keys] = filters[keys].value;
-      }
-      $and.push(df);
-    }
-  }
-  if(!!req.body.jobkey && req.body.jobkey!=""){
-    q={"job_key": req.body.jobkey }
-  }  else if($and.length >0){
+  // let q={"job_active_stage.status": { $in: [ 'Active', 'NeedsChanges']} ,
+  // "campaignID":{"$in": ['4924dc05-03c5-4086-90ce-41d8bf501684',
+  //  '9618db88-fc78-47a5-9916-e864e696ae11','5bf2ed40-6b98-45b2-b926-5eb4445ed38d','5aaa32f4-0a67-4daa-a404-3def00d73475','fd4c4b58-baee-41b4-adb4-24fcd3cf4ae6'] } };
+  //  // Global search filters 
+  //  let df = {};
+  //  if (!!req.body.filters && req.body.filters!="") {
+  //   let filters =JSON.parse(req.body.filters);
+  //   for( let keys of Object.keys(filters)) {
+  //     if(filters[keys].value!="" && (keys =="job_key" || keys =="name") ){
+  //       df[keys] = { $regex:  new RegExp( filters[keys].value + ".*") };// new RegExp('/'+ filters[keys].value +'/i');
+  //     } else {
+  //       df[keys] = filters[keys].value;
+  //     }
+  //     $and.push(df);
+  //   }
+  // }
+  
+  // console.log("Calling artlogdata Data sm $and" , JSON.stringify($and));
+  // if(!!req.body.jobkey && req.body.jobkey!=""){
+  //   q={"job_key": req.body.jobkey }
+  // }  else if($and.length >0){
   // condition for ignore other Jobs  '4924dc05-03c5-4086-90ce-41d8bf501684',
   // '9618db88-fc78-47a5-9916-e864e696ae11',
-  $and.push( {"campaignID":{"$in": ['4924dc05-03c5-4086-90ce-41d8bf501684','9618db88-fc78-47a5-9916-e864e696ae11', '5bf2ed40-6b98-45b2-b926-5eb4445ed38d','5aaa32f4-0a67-4daa-a404-3def00d73475','fd4c4b58-baee-41b4-adb4-24fcd3cf4ae6'] } });
-    q = { $and };
-  }
+  // $and.push( {"campaignID":{"$in": ['4924dc05-03c5-4086-90ce-41d8bf501684','9618db88-fc78-47a5-9916-e864e696ae11', '5bf2ed40-6b98-45b2-b926-5eb4445ed38d','5aaa32f4-0a67-4daa-a404-3def00d73475','fd4c4b58-baee-41b4-adb4-24fcd3cf4ae6'] } });
+  //   q = { $and };
+  // }
   // q={  job_key:"EM2-5207" };
   let fields={ batchCDate:1,receiveddate:1,mpsDueDate:1,artTeamStatus : 1, artTeamPriority : 1, exceptionCategory : 1, exception:1, presetstages:1,mathAuditor:1,flagedTeam:1,dateCreated:1, job_date_finished:1,pageNo:1,killed:1,flaged:1,batch:1,presetstages:1,isPaging:1, comment:1, mverification:1, duplicate:1, presetName:1, Preset_Stages:1, id:1, name:1, description:1, job_active_stage:1, jobMetaproperties:1, jobID:1, job_key:1, dateCreated:1, job_date_finished:1, thumb:1, generatedTags:1};
   console.log("Calling artlogdata Data sm 222" , JSON.stringify(q));
@@ -1244,7 +1258,7 @@ dataResult.push(objData);
        
       
       };
-      console.log('-------------Data-------',dataResult);
+      // console.log('-------------Data-------',dataResult);
       Mdb.bynder_jobs.find( q ).count().then(countVal =>{
         // result prepration
         let result={ artLogData : dataResult, GridFilters : GridFilters, totalCount: countVal};
