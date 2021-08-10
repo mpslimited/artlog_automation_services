@@ -42,12 +42,11 @@ Mdb.assetMeta.find({}, { "curricula_wip.options": 1 }).then((dt) => {
     GMeta.initAssetMeta(GCurriculaWIP);
   }
 }).catch((Err) => { console.log(" Error in ASset Meta:", Err); });
-// changed 
+
 postRoutes.route('/updateAsset/').post(function (req, res) {
   console.log("updateAssetasset data :", req.body);
   Mdb.bynder_jobs.find({ updateTag: 'Processing', assetID: {$exists: true} }).limit(1).then((data) => {
     if(data.length > 0){
-      // console.log('data:---',data);
       res.send({'TotLength': data.length,"target":'For UpdateAsset' });
       for(let dt of data){
         var request_data = appConfig.getActionInfo("updateAsset", data[0].assetID +"/" );
@@ -63,9 +62,6 @@ postRoutes.route('/updateAsset/').post(function (req, res) {
         let formData= { tags: allTags.join(',') };
         request_data.data={ } ;//tags : dt.generatedTags };
         let authheader= oauth.toHeader( oauth.authorize(request_data, appConfig.getToken()) );
-        console.log('formData---', formData);
-        console.log(' request_data.url---',  request_data.url);
-        console.log('headers:---', authheader);
         let updtInfo= new Promise(resolve  => {
             request({ method: "POST", url: request_data.url,  headers: authheader , formData: formData},function (error, response, body) {
                 if(!error) {
@@ -438,13 +434,11 @@ postRoutes.route('/assetSynced/').post(function (req, res) {
             if((page!=1) &&(totalDB%limit > 0 || page < Totalpage)  ){
               page++;
             }
-            page=1;
-            Totalpage=30;
             do{
               console.log("Init page:", page)
               //https://gmartlogautomation.mpstechnologies.com
-              excuteURL("http://localhost:3000/sync/getAssets/"+page, true);
-             // excuteURL("https://gmartlogautomationdemo.mpstechnologies.com/sync/getAssets/"+page, true);
+              //excuteURL("http://localhost:3000/sync/getAssets/"+page, true);
+              excuteURL("https://gmartlogautomation.mpstechnologies.com/sync/getAssets/"+page, true);
               if(!( page <  Totalpage)){
                 res.send({data:"jobs merged",d: new Date()});
               }

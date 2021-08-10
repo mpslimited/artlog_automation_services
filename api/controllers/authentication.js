@@ -23,8 +23,7 @@ module.exports.register = function(req, res) {
 };
 
 module.exports.login = function(req, res) {
-
-  console.log("-------------REQ==>-------------",req.body);
+  console.log("REQ==>",req.body);
   passport.authenticate('local', function(err, user, info){
     var token;
     if (err) {

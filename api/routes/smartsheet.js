@@ -731,7 +731,7 @@ postRoutes.route('/addnewjobs').post(function (req, res) {
     }
 });
 postRoutes.route('/updateAsset', checkToken.checkToken).post(function (req, res) {
-  console.log("req parameters----------------------------- :" , req.body);
+  console.log("req parameters :" , req.body);
   let data=JSON.parse(req.body.data)
   for(let d of data){
     console.log("data processing =>", JSON.stringify(d));
@@ -745,9 +745,9 @@ postRoutes.route('/updateAsset', checkToken.checkToken).post(function (req, res)
   }
   res.send({'msg': 'processing'});
 });
-
 postRoutes.route('/artloginit', checkToken.checkToken).post(function (req, res) {
   Mdb.searchState.find({ uid: req.headers['authuser'] }).then((dt)=>{
+    console.log(' GCurriculaWIP  ' , GCurriculaWIP);
     let resJSON={ inData:dt, grade: GGrades, module: GModules, artcomplex: GArtComplex, artAssign: GArtAssign, risk: GRisk, impact: GImpact, wip: GCurriculaWIP
     }
     res.send(resJSON);
@@ -796,7 +796,7 @@ postRoutes.route('/updatelaststage').post(function (req, res) {
    });
 });
 
-postRoutes.route('/searchdtinit').post(async (req, res)=> {  
+postRoutes.route('/searchdtinit').post(async (req, res)=> {
   //,'Approved','Cancelled'
   let dataResult =[]
   let NoSql = { 'job_active_stage.status' :{ $nin :['Active','NeedsChanges'] }};
@@ -886,238 +886,393 @@ postRoutes.route('/searchdtinit').post(async (req, res)=> {
 });
 
 
-postRoutes.route('/artlogautoset', checkToken.checkToken).post(function (req, res) {
-  console.log("req parameters :" , req.body, new Date().toISOString());
-  let q =  { 'job_active_stage.status':'Active' };
-  if( req.body.status!= 'Active' ){
-    q =  { 'job_active_stage.status':'Approved' };
-  }
-  Mdb.bynder_jobs.find(q ).sort({job_key:-1}).then((data)=>{
-    console.log("data responded in DB TIMEs :", data.length, new Date().toISOString());
-  let dataResult=[];
-  let Meta= new Metadt()
-      Meta.iniMeta(WorkFlowJobsMetaData);
-      Meta.initAssetMeta(GCurriculaWIP);
-      Meta.PrintAssetMeta(GPrintReady)
-  for(let  dtkey in data){
-    var objData = data[dtkey].toObject();
-    if(!!data[dtkey].jobMetaproperties){
-      Meta.getInitDataSet(data[dtkey]);
-      let Mdt= Meta.getMeta();
-      let metaObj=Object.entries(data[dtkey].jobMetaproperties);
-      if(data[dtkey].Preset_Stages.length > 0 ){
-       let lastChangeCreated= data[dtkey].Preset_Stages[data[dtkey].Preset_Stages.length -1].start_date;
-       let lastChangeComplated=(!!data[dtkey].Preset_Stages[data[dtkey].Preset_Stages.length -1].job_date_finished)?
-        data[dtkey].Preset_Stages[data[dtkey].Preset_Stages.length -1].job_date_finished: new Date();
-        objData.lastage=dateDiffinDurationStage(lastChangeComplated, lastChangeCreated);
-      }
-      var dateCreatedJob =  data[dtkey].dateCreated ||Mdt.dateCreatedM ;
-      if(data[dtkey].job_date_finished===null && data[dtkey].job_active_stage.status!="Approved"){
-        data[dtkey].job_date_finished=new Date().toISOString();
-      }else if(data[dtkey].job_date_finished===null){
-        data[dtkey].job_date_finished=new Date().toISOString();
-      }
-      objData.cstage=""; objData.workflow=Meta.getWorkflow();
-      objData.mathAuditRC = 0;
-      if(objData.Preset_Stages.length > 0){
-        // IT Should be another that we can not captuchred 
-        objData.mathAuditRC= objData.Preset_Stages.filter( d => d.StageNames =='Math Audit Review' ).length;
-        let ob=objData.Preset_Stages[ objData.Preset_Stages.length-1 ];
-        if(ob.hasOwnProperty('name')){
-          objData.cstage=ob.name;
-        }else if(ob.hasOwnProperty('StageNames')){
-          objData.cstage=ob.StageNames;
-        }
-        if(objData.cstage=="" && !!ob.position && objData.presetstages.length > 0){
-          let objdt=objData.presetstages.filter(d=> d.position == ob.position);
-          if(objdt.length > 0)
-          objData.cstage = objdt[0].name;
-        }
-      }
-      objData.comment = (objData.flaged)? objData.flaggedComment +'|'+ objData.flaggedUser +'|'+ moment(objData.flaggedDate).format('MM-DD-YYYY') :'';
-      objData.artTeamPriority   =   Meta.getTeamPriority(objData);
-      objData.artTeamStatus     =   Meta.getTeamStatus(objData);
-      objData.batchCDate        =  (objData.batchCDate!="" && typeof objData.batchCDate != "undefined")? moment(objData.batchCDate).format('DD/MM/YYYY'):'';
-      objData.receiveddate      =  (objData.receiveddate!="" && typeof objData.receiveddate != "undefined")? moment(objData.receiveddate).format('DD/MM/YYYY'):'';
-      objData.mpsDueDate        =  (objData.mpsDueDate!="" && typeof objData.mpsDueDate != "undefined")? moment(objData.mpsDueDate).format('DD/MM/YYYY'):'';
-      
-       // Art Team Columns // 
-       /*objData.receiveddate      =   Meta.getMathAuditStartDt(objData);
-       objData.mpsDueDate        =   Meta.getMpsDueDate(objData);
-       objData.artTeamStatus     =   Meta.getTeamStatus(objData);
-       objData.artTeamPriority   =   Meta.getTeamPriority(objData);
-       objData.exceptionCategory =   Meta.getExceptionCategory(objData);
-       objData.exceptoin         =   Meta.getExceptoin(objData);
-       */
-       //------------------------//
-       objData.currentRTeam =   Meta.getStageRTeam(objData.cstage);
-       objData.totalage     =   dateDiffinDurationStage(data[dtkey].job_date_finished , dateCreatedJob );
-       objData.lesson       =   Mdt.lesson;
-       objData.lessonlet    =   Mdt.lessonlet;
-       objData.component    =   Mdt.component; 
-       objData.tags         =   Mdt.tag; 
-       objData.gradeID      =   Mdt.grade;
-       objData.grade        =   Mdt.gradeVal;
-       objData.moduleID     =   Mdt.module;
-       objData.module       =   Mdt.moduleVal;
-       objData.topic        =   Mdt.topic;
-       objData.facing       =   Mdt.facingVal;
-       objData.facingID     =   Mdt.facing;
-       objData.series       =   Mdt.series;
-       //test
-       objData.revisionID   =   Mdt.revision;
-       objData.revisionC    =   Mdt.revisionVal;
-       objData.artcomplexID =   Mdt.artComplex;
-       objData.artcomplex   =   Mdt.artComplexVal;
-       objData.artassionID  =   Mdt.artAssion;
-       objData.artassion    =   Mdt.artAssionVal;
-       objData.riskID       =   Mdt.risk;
-       objData.risk         =   Mdt.riskVal;
-       objData.impactId     =   Mdt.impact;
-       objData.impact       =   Mdt.impactVal;
-       objData.curriculum   =   Mdt.wip;
-       objData.creditLine   =   Mdt.creditLine;
-       objData.printAsset   =   Mdt.printAsset;
-       objData.printReady   =   Mdt.printReady;
-       objData.permissionType = Mdt.permissionType
-    //}
-      //console.log("Object Final VAlues: ==>", objData);
-    //  console.log("data testing :", objData);
-      //dataResult.push(objData);
-      Mdb.bynder_jobs.updateOne({
-        _id: mongoose.Types.ObjectId(objData._id.toString())
-      },{
-        $set:{
-          workflow: objData.workflow,
-          mathAuditRC: objData.mathAuditRC,
-          cstage: objData.cstage,
-          currentRTeam : objData.currentRTeam,
-          lastage: objData.lastage,
-          totalage: objData.totalage,
-          lesson: objData.lesson,
-          lessonlet: objData.lessonlet,
-          component: objData.component, 
-          tags: objData.tags,
-          //testing 123
-          grade: objData.grade,
-          gradeID: objData.gradeID,
-          module: objData.module,
-          moduleID: objData.moduleID,
-          topic : objData.topic,
-          facing : objData.facing,
-          facingID : objData.facingID,
-          series : objData.series,
-          revision : objData.revisionC,
-          revisionID: objData.revisionID,
-          artcomplex : objData.artcomplex,
-          artcomplexID : objData.artcomplexID,
-          artassion : objData.artassion,
-          artassionID : objData.artassionID,
-          risk : objData.risk,
-          riskID : objData.riskID,
-          impact: objData.impact,
-          impactId : objData.impactId,
-          curriculum: objData.curriculum,
-          creditLine : objData.creditLine,
-          printAsset : objData.printAsset,
-          printReady : objData.printReady,
-          permissionType: objData.permissionType
-        }
-      }).then(dt=>{
-        console.log("result updated at :", dt);
-      }).catch(error => {
-        console.log("Error found data at:", error);
-      })
-    }
-  }
- 
-    
-  }).catch((Err)=>console.log("Error in finder ERROR:", Err));
-});
-postRoutes.route('/artlogdataApprove', checkToken.checkToken).post(function (req, res) {
-  console.log("req parameters :" , req.body, new Date().toISOString());
-    let $and = [ ];
-    if(!!req.body.grade && req.body.grade!=""){
-      let g=req.body.grade.split(",");
-      if(g.length ==1){
-        $and.push( { "jobMetaproperties.c0ac0a86e65f4f7ebd88dbd7e77965ef" : g[0] } )
-      }else{
-        $and.push( { "jobMetaproperties.c0ac0a86e65f4f7ebd88dbd7e77965ef" :{ $in: g }} )
-      }
-    }
-    if(!!req.body.module && req.body.module!=""){
-      let m=req.body.module.split(",");
-      let $or=[];
-      if(m.length ==1){
-        $or.push( { "jobMetaproperties.7388493928bc4a9aa57ca65306ed1579" : m[0] } ) 
-      }else{
-        $or.push( { "jobMetaproperties.7388493928bc4a9aa57ca65306ed1579" :{$in:  m  }  }) 
-      }
-      $and.push({$or:$or})
-    }
-    if(!!req.body.topic && req.body.topic!=""){
-      $and.push( { "batch" : req.body.topic } ); 
-    }
-    if(!!req.body.curricula && req.body.curricula!=""){
-      $and.push( { "jobMetaproperties.0790cd4f2aed4ce0a315ff8034a43994" : req.body.curricula } ); 
-    }
-    if(!!req.body.added && req.body.added!= ""){
-      if(req.body.added==1){
-        $and.push({ "duplicate" : {$exists: false} });
-      }else if(req.body.added==2){
-        $and.push({ "duplicate" : true });
-      }else if(req.body.added==3){
-        $and.push({ "duplicate" : false });
-      }else if(req.body.added==4){
-        $and.push({ "flaged" : true });
-      }else if(req.body.added==5){
-        $and.push({ "killed" : true });
-      }else if(req.body.added==6){
-        $and.push({ "killed" : {$ne: true} });
-      }else if(req.body.added==7){
-        $and.push({ "job_active_stage.position" : 2 });
-      }
-    }
-    if(!!req.body.workflow && req.body.workflow!=""){
-      $and.push({'presetName':{ $regex:  new RegExp(".*"+req.body.workflow+".*") }} ) 
-    }
-    if(req.body.status && req.body.status!=""){
-      let st=req.body.status.split(",");
-      if(st.indexOf('Active') > -1){
-        st.push('NeedsChanges')
-      }
-      if(st.length ==0){
-        $and.push( {"job_active_stage.status":{"$in": st[0] } });
-      }else{
-        $and.push( {"job_active_stage.status":{"$in": st } });
-      }
-    }else if($and.length >0){
-      $and.push(
-        {"job_active_stage.status":{"$ne":"Cancelled"}}
-      ) 
-    }
-    let q={"job_active_stage.status": { $in: [ 'Active', 'NeedsChanges']} ,
-    "campaignID":{"$in": ['4924dc05-03c5-4086-90ce-41d8bf501684',
-     '9618db88-fc78-47a5-9916-e864e696ae11','5bf2ed40-6b98-45b2-b926-5eb4445ed38d','5aaa32f4-0a67-4daa-a404-3def00d73475','fd4c4b58-baee-41b4-adb4-24fcd3cf4ae6'] } };
-      
-    if(!!req.body.jobkey && req.body.jobkey!=""){
-      q={"job_key": req.body.jobkey }
-    }else if($and.length >0){
-      $and.push( {"campaignID":{"$in": ['4924dc05-03c5-4086-90ce-41d8bf501684','9618db88-fc78-47a5-9916-e864e696ae11', '5bf2ed40-6b98-45b2-b926-5eb4445ed38d','5aaa32f4-0a67-4daa-a404-3def00d73475','fd4c4b58-baee-41b4-adb4-24fcd3cf4ae6'] } });
-       q= { $and};
-    }
-    let fields={ batchCDate:1,receiveddate:1,mpsDueDate:1,artTeamStatus : 1, artTeamPriority : 1, exceptionCategory : 1, exception:1, presetstages:1,mathAuditor:1,flagedTeam:1,dateCreated:1, job_date_finished:1,pageNo:1,killed:1,flaged:1,batch:1,presetstages:1,isPaging:1, comment:1, mverification:1, duplicate:1, presetName:1, Preset_Stages:1, id:1, name:1, description:1, job_active_stage:1, jobMetaproperties:1, jobID:1, job_key:1, dateCreated:1, job_date_finished:1, thumb:1, generatedTags:1};
-    console.log("Calling artlogdata Data  SM" , JSON.stringify(q), JSON.stringify(fields));
-    Mdb.bynder_jobs.find(q ).sort({job_key:-1}).limit(100).then((data)=>{
-      console.log("data responded in DB TIMEs :", data.length, new Date().toISOString());
-      res.send(data);
-    }).catch(Error => {
-      console.log("Error in Find Query", Error);
-    })
-
-});
-
 postRoutes.route('/artlogdata', checkToken.checkToken).post(function (req, res) {
+  console.log("req parameters :" , req.body, new Date().toISOString());
+  let $and = [ ];
+  if(!!req.body.grade && req.body.grade!=""){
+    let g=req.body.grade.split(",");
+    if(g.length ==1){
+      $and.push( { "jobMetaproperties.c0ac0a86e65f4f7ebd88dbd7e77965ef" : g[0] } )
+    }else{
+      $and.push( { "jobMetaproperties.c0ac0a86e65f4f7ebd88dbd7e77965ef" :{ $in: g }} )
+    }
+  }
+  if(!!req.body.module && req.body.module!=""){
+    let m=req.body.module.split(",");
+    let $or=[];
+    if(m.length ==1){
+      $or.push( { "jobMetaproperties.7388493928bc4a9aa57ca65306ed1579" : m[0] } ) 
+    }else{
+      $or.push( { "jobMetaproperties.7388493928bc4a9aa57ca65306ed1579" :{$in:  m  }  }) 
+    }
+    $and.push({$or:$or})
+  }
+
+// filter start By Gurpreet
+  if(!!req.body.name && req.body.name!=""){
+    $and.push( { "name" : req.body.name } ); 
+  }
+
+  if(!!req.body.flagedTeam && req.body.flagedTeam!=""){
+    $and.push( { "flagedTeam" : req.body.flagedTeam } ); 
+  }
+
+  if(!!req.body.mathAuditor && req.body.mathAuditor!=""){
+    $and.push( { "mathAuditor" : req.body.mathAuditor } ); 
+  }
+
+  if(!!req.body.grade && req.body.grade!=""){
+    $and.push( { "grade" : req.body.grade } ); 
+  }
+
+  if(!!req.body.module && req.body.module!=""){
+    $and.push( { "module" : req.body.module } ); 
+  }
+
+  
+  if(!!req.body.component && req.body.component!=""){
+    $and.push( { "component" : req.body.component } ); 
+  }
+  if(!!req.body.lesson && req.body.lesson!=""){
+    $and.push( { "lesson" : req.body.lesson } ); 
+  }
+  if(!!req.body.lessonlet && req.body.lessonlet!=""){
+    $and.push( { "lessonlet" : req.body.lessonlet } ); 
+  }
+  if(!!req.body.batch && req.body.batch!=""){
+    $and.push( { "batch" : req.body.batch } ); 
+  }
+  if(!!req.body.topic && req.body.topic!=""){
+    $and.push( { "topic" : req.body.topic } ); 
+  }
+
+  if(!!req.body.description && req.body.description!=""){
+    $and.push( { "description" : req.body.description } ); 
+  }
+
+
+  if(!!req.body.cstage && req.body.cstage!=""){
+    $and.push( { "cstage" : req.body.cstage } ); 
+  }
+  if(!!req.body.currentRTeam && req.body.currentRTeam!=""){
+    $and.push( { "currentRTeam" : req.body.currentRTeam } ); 
+  }
+  if(!!req.body.curriculum && req.body.curriculum!=""){
+    $and.push( { "curriculum" : req.body.curriculum } ); 
+  }
+  if(!!req.body.facing && req.body.facing!=""){
+    $and.push( { "facing" : req.body.facing } ); 
+  }
+  if(!!req.body.series && req.body.series!=""){
+    $and.push( { "series" : req.body.series } ); 
+  }
+  if(!!req.body.creditLine && req.body.creditLine!=""){
+    $and.push( { "creditLine" : req.body.creditLine } ); 
+  }
+  if(!!req.body.comment && req.body.comment!=""){
+    $and.push( { "comment" : req.body.comment } ); 
+  }
+  if(!!req.body.tags && req.body.tags!=""){
+    $and.push( { "tags" : req.body.tags } ); 
+  }
+  if(!!req.body.mverification && req.body.mverification!=""){
+    $and.push( { "mverification" : req.body.mverification } ); 
+  }
+  if(!!req.body.isPaging && req.body.isPaging!=""){
+    $and.push( { "isPaging" : req.body.isPaging } ); 
+  }
+
+
+  if(!!req.body.pageNo && req.body.pageNo!=""){
+    $and.push( { "pageNo" : req.body.pageNo } ); 
+  }
+  if(!!req.body.revisionC && req.body.revisionC!=""){
+    $and.push( { "revisionC" : req.body.revisionC } ); 
+  }
+  if(!!req.body.printAsset && req.body.printAsset!=""){
+    $and.push( { "printAsset" : req.body.printAsset } ); 
+  }
+  if(!!req.body.printReady && req.body.printReady!=""){
+    $and.push( { "printReady" : req.body.printReady } ); 
+  }
+  if(!!req.body.artcomplex && req.body.artcomplex!=""){
+    $and.push( { "artcomplex" : req.body.artcomplex } ); 
+  }
+
+
+  if(!!req.body.artassion && req.body.artassion!=""){
+    $and.push( { "artassion" : req.body.artassion } ); 
+  }
+
+  if(!!req.body.risk && req.body.risk!=""){
+    $and.push( { "risk" : req.body.risk } ); 
+  }
+
+  if(!!req.body.impact && req.body.impact!=""){
+    $and.push( { "impact" : req.body.impact } ); 
+  }
+
+
+  if(!!req.body.workflow && req.body.workflow!=""){
+    $and.push( { "workflow" : req.body.workflow } ); 
+  }
+
+  if(!!req.body.permissionType && req.body.permissionType!=""){
+    $and.push( { "permissionType" : req.body.permissionType } ); 
+  }      
+  
+  if(!!req.body.jobkey && req.body.jobkey!=""){
+    $and.push(q={"job_key": req.body.jobkey } ); 
+  }  
+  
+  
+// filter end By Gurpreet
+
+
+  if(!!req.body.topic && req.body.topic!=""){
+    $and.push( { "batch" : req.body.topic } ); 
+  }
+  if(!!req.body.curricula && req.body.curricula!=""){
+    $and.push( { "jobMetaproperties.0790cd4f2aed4ce0a315ff8034a43994" : req.body.curricula } ); 
+  }
+  if(!!req.body.added && req.body.added!= ""){
+    if(req.body.added==1){
+      $and.push({ "duplicate" : {$exists: false} });
+    }else if(req.body.added==2){
+      $and.push({ "duplicate" : true });
+    }else if(req.body.added==3){
+      $and.push({ "duplicate" : false });
+    }else if(req.body.added==4){
+      $and.push({ "flaged" : true });
+    }else if(req.body.added==5){
+      $and.push({ "killed" : true });
+    }else if(req.body.added==6){
+      $and.push({ "killed" : {$ne: true} });
+    }else if(req.body.added==7){
+      $and.push({ "job_active_stage.position" : 2 });
+    }
+  }
+  if(!!req.body.workflow && req.body.workflow!=""){
+    $and.push({'presetName':{ $regex:  new RegExp(".*"+req.body.workflow+".*") }} ) 
+  }
+  if(req.body.status && req.body.status!=""){
+    let st=req.body.status.split(",");
+    if(st.indexOf('Active') > -1){
+      st.push('NeedsChanges')
+    }
+    if(st.length ==0){
+      $and.push( {"job_active_stage.status":{"$in": st[0] } });
+    }else{
+      $and.push( {"job_active_stage.status":{"$in": st } });
+    }
+  }else{
+    $and.push( {"job_active_stage.status":{"$in": ['NeedsChanges'] } });
+
+  }
+  //  if($and.length >0){
+  //   $and.push(
+  //     {"job_active_stage.status":{"$ne":"Cancelled"}}
+  //   ) 
+  // }
+  q = { $and };
+  console.log("Calling artlogdata Data sm $and" , JSON.stringify($and));
+  // q={"job_key": req.body.jobkey }
+  
+  // let q={"job_active_stage.status": { $in: [ 'Active', 'NeedsChanges']} ,
+  // "campaignID":{"$in": ['4924dc05-03c5-4086-90ce-41d8bf501684',
+  //  '9618db88-fc78-47a5-9916-e864e696ae11','5bf2ed40-6b98-45b2-b926-5eb4445ed38d','5aaa32f4-0a67-4daa-a404-3def00d73475','fd4c4b58-baee-41b4-adb4-24fcd3cf4ae6'] } };
+  //  // Global search filters 
+  //  let df = {};
+  //  if (!!req.body.filters && req.body.filters!="") {
+  //   let filters =JSON.parse(req.body.filters);
+  //   for( let keys of Object.keys(filters)) {
+  //     if(filters[keys].value!="" && (keys =="job_key" || keys =="name") ){
+  //       df[keys] = { $regex:  new RegExp( filters[keys].value + ".*") };// new RegExp('/'+ filters[keys].value +'/i');
+  //     } else {
+  //       df[keys] = filters[keys].value;
+  //     }
+  //     $and.push(df);
+  //   }
+  // }
+  
+  // console.log("Calling artlogdata Data sm $and" , JSON.stringify($and));
+  // if(!!req.body.jobkey && req.body.jobkey!=""){
+  //   q={"job_key": req.body.jobkey }
+  // }  else if($and.length >0){
+  // condition for ignore other Jobs  '4924dc05-03c5-4086-90ce-41d8bf501684',
+  // '9618db88-fc78-47a5-9916-e864e696ae11',
+  // $and.push( {"campaignID":{"$in": ['4924dc05-03c5-4086-90ce-41d8bf501684','9618db88-fc78-47a5-9916-e864e696ae11', '5bf2ed40-6b98-45b2-b926-5eb4445ed38d','5aaa32f4-0a67-4daa-a404-3def00d73475','fd4c4b58-baee-41b4-adb4-24fcd3cf4ae6'] } });
+  //   q = { $and };
+  // }
+  // q={  job_key:"EM2-5207" };
+  let fields={ batchCDate:1,receiveddate:1,mpsDueDate:1,artTeamStatus : 1, artTeamPriority : 1, exceptionCategory : 1, exception:1, presetstages:1,mathAuditor:1,flagedTeam:1,dateCreated:1, job_date_finished:1,pageNo:1,killed:1,flaged:1,batch:1,presetstages:1,isPaging:1, comment:1, mverification:1, duplicate:1, presetName:1, Preset_Stages:1, id:1, name:1, description:1, job_active_stage:1, jobMetaproperties:1, jobID:1, job_key:1, dateCreated:1, job_date_finished:1, thumb:1, generatedTags:1};
+  console.log("Calling artlogdata Data sm 222" , JSON.stringify(q));
+  // testing in Live Build with Pradeep Sir 
+  //.skip(2000) export dt
+  /*pagination Script here*/
+  //.skip(  parseInt(req.body.fromPage)).limit( parseInt(req.body.toPage) ).
+  console.log('req.body.fromPage:---',req.body.fromPage);
+  console.log('req.body.toPage:---',req.body.toPage);
+  // req.body.toPage= 1000;
+  // console.log('req.body.jobkey:---',req.body);
+
+  Mdb.bynder_jobs.find(q ).sort({job_key:-1}).skip(  parseInt(req.body.fromPage)).limit( parseInt(req.body.toPage) ).then((data)=>{
+      
+// start
+
+
+let dataResult=[];
+let Meta= new Metadt()
+  Meta.iniMeta(WorkFlowJobsMetaData);
+  Meta.initAssetMeta(GCurriculaWIP);
+  Meta.PrintAssetMeta(GPrintReady)
+  
+for(let  dtkey in data){
+var objData = data[dtkey].toObject();
+if(!!data[dtkey].jobMetaproperties){
+  
+  Meta.getInitDataSet(data[dtkey]);
+  let Mdt= Meta.getMeta();
+  let metaObj=Object.entries(data[dtkey].jobMetaproperties);
+  if(data[dtkey].Preset_Stages.length > 0 ){
+   let lastChangeCreated= data[dtkey].Preset_Stages[data[dtkey].Preset_Stages.length -1].start_date;
+   let lastChangeComplated=(!!data[dtkey].Preset_Stages[data[dtkey].Preset_Stages.length -1].job_date_finished)?
+    data[dtkey].Preset_Stages[data[dtkey].Preset_Stages.length -1].job_date_finished: new Date();
+    objData.lastage=dateDiffinDurationStage(lastChangeComplated, lastChangeCreated);
+  }
+  var dateCreatedJob =  data[dtkey].dateCreated ||Mdt.dateCreatedM ;
+  if(data[dtkey].job_date_finished===null && data[dtkey].job_active_stage.status!="Approved"){
+    data[dtkey].job_date_finished=new Date().toISOString();
+  }else if(data[dtkey].job_date_finished===null){
+    data[dtkey].job_date_finished=new Date().toISOString();
+  }
+  objData.cstage=""; objData.workflow=Meta.getWorkflow();
+  objData.mathAuditRC = 0;
+  if(objData.Preset_Stages.length > 0){
+    // IT Should be another that we can not captuchred 
+    objData.mathAuditRC= objData.Preset_Stages.filter( d => d.StageNames =='Math Audit Review' ).length;
+    let ob=objData.Preset_Stages[ objData.Preset_Stages.length-1 ];
+    if(ob.hasOwnProperty('name')){
+      objData.cstage=ob.name;
+    }else if(ob.hasOwnProperty('StageNames')){
+      objData.cstage=ob.StageNames;
+    }
+    if(objData.cstage=="" && !!ob.position && objData.presetstages.length > 0){
+      let objdt=objData.presetstages.filter(d=> d.position == ob.position);
+      if(objdt.length > 0)
+      objData.cstage = objdt[0].name;
+    }
+  }
+  objData.comment = (objData.flaged)? objData.flaggedComment +'|'+ objData.flaggedUser +'|'+ moment(objData.flaggedDate).format('MM-DD-YYYY') :'';
+  //demo
+  objData.artTeamPriority   =   Meta.getTeamPriority(objData);
+  objData.artTeamStatus     =   Meta.getTeamStatus(objData);
+  objData.batchCDate        =  (objData.batchCDate!="" && typeof objData.batchCDate != "undefined")? moment(objData.batchCDate).format('DD/MM/YYYY'):'';
+  objData.receiveddate      =  (objData.receiveddate!="" && typeof objData.receiveddate != "undefined")? moment(objData.receiveddate).format('DD/MM/YYYY'):'';
+  objData.mpsDueDate        =  (objData.mpsDueDate!="" && typeof objData.mpsDueDate != "undefined")? moment(objData.mpsDueDate).format('DD/MM/YYYY'):'';
+  
+   // Art Team Columns // 
+   /*objData.receiveddate      =   Meta.getMathAuditStartDt(objData);
+   objData.mpsDueDate        =   Meta.getMpsDueDate(objData);
+   objData.artTeamStatus     =   Meta.getTeamStatus(objData);
+   objData.artTeamPriority   =   Meta.getTeamPriority(objData);
+   objData.exceptionCategory =   Meta.getExceptionCategory(objData);
+   objData.exceptoin         =   Meta.getExceptoin(objData);
+   */
+   //------------------------//
+   objData.currentRTeam =   Meta.getStageRTeam(objData.cstage);
+   objData.totalage     =   dateDiffinDurationStage(data[dtkey].job_date_finished , dateCreatedJob );
+   objData.lesson       =   Mdt.lesson;
+   objData.lessonlet    =   Mdt.lessonlet;
+   objData.component    =   Mdt.component; 
+   objData.tags         =   Mdt.tag; 
+   objData.gradeID      =   Mdt.grade;
+   objData.grade        =   Mdt.gradeVal;
+   objData.moduleID     =   Mdt.module;
+   objData.module       =   Mdt.moduleVal;
+   objData.topic        =   Mdt.topic;
+   objData.facing       =   Mdt.facingVal;
+   objData.facingID     =   Mdt.facing;
+   objData.series       =   Mdt.series;
+   //test
+   objData.revisionID   =   Mdt.revision;
+   objData.revisionC    =   Mdt.revisionVal;
+   objData.artcomplexID =   Mdt.artComplex;
+   objData.artcomplex   =   Mdt.artComplexVal;
+   objData.artassionID  =   Mdt.artAssion;
+   objData.artassion    =   Mdt.artAssionVal;
+   objData.riskID       =   Mdt.risk;
+   objData.risk         =   Mdt.riskVal;
+   objData.impactId     =   Mdt.impact;
+   objData.impact       =   Mdt.impactVal;
+   objData.curriculum   =   Mdt.wip;
+   objData.creditLine   =   Mdt.creditLine;
+   objData.printAsset   =   Mdt.printAsset;
+   objData.printReady   =   Mdt.printReady;
+   objData.permissionType = Mdt.permissionType
+}
+//console.log("Object Final VAlues: ==>", objData);
+dataResult.push(objData);
+}
+
+
+
+
+
+
+    
+    
+    
+    
+    
+    // end
+    
+    let GridFilters={
+    
+        mathAuditors     :   [...new Set(dataResult.filter( (v, i)=> !!v.mathAuditor ).map(d=>d.mathAuditor))].sort(),
+        pageNos          :   [...new Set(dataResult.filter( (v, i)=> !!v.pageNo ).map(d=>d.pageNo))].sort(),
+        flagedTeams      :   [...new Set(dataResult.filter( (v, i)=> !!v.flagedTeam ).map(d=>d.flagedTeam))].sort(),
+        printAssets      :   [...new Set(dataResult.filter( (v, i)=> !!v.printAsset ).map(d=>d.printAsset))].sort(),
+        printReadys      :   [...new Set(dataResult.filter( (v, i)=> !!v.printReady ).map(d=>d.printReady))].sort(),
+        permissionTypes  :   [...new Set(dataResult.filter( (v, i)=> !!v.permissionType ).map(d=>d.permissionType))].sort(),
+        curriculum       :   [...new Set(dataResult.filter( (v, i)=> !!v.curriculum ).map(d=>d.curriculum))].sort(),
+        workflow         :   [...new Set(dataResult.filter( (v, i)=> !!v.workflow ).map(d=>d.workflow))].sort(),
+        currentRTeam     :   [...new Set(dataResult.filter( (v, i)=> !!v.currentRTeam ).map(d=>d.currentRTeam))].sort(),
+        lesson           :   [...new Set(dataResult.filter( (v, i)=> !!v.lesson ).map(d=>d.lesson))].sort(), 
+        lessonlet        :   [...new Set(dataResult.filter( (v, i)=> !!v.lessonlet ).map(d=> d.lessonlet))].sort(),
+        component        :   [...new Set(dataResult.filter( (d)=> !!d.component ).map(d=>d.component))].sort(),
+        grade            :   [...new Set(dataResult.filter( (d)=> !!d.grade ).map(d=>d.grade))].sort(),
+        module           :   [...new Set(dataResult.filter( (d)=> !!d.module ).map(d=>d.module))].sort(),
+        artcomplex       :   [...new Set(dataResult.filter( (d)=> !!d.artcomplex ).map(d=>d.artcomplex))].sort(),
+        artassion        :   [...new Set( dataResult.filter( (d)=> !!d.artassion ).map(d=>d.artassion))].sort(),
+        risk             :   [...new Set(dataResult.filter( (d)=> !!d.risk ).map(d=>d.risk))].sort(),
+        impact           :   [...new Set(dataResult.filter( (d)=> !!d.impact ).map(d=>d.impact))].sort(),
+        facing           :   [...new Set(dataResult.filter( (d)=> !!d.facing ).map(d=>d.facing))].sort(),
+        series           :   [...new Set(dataResult.filter( (d)=> !!d.series ).map(d=>d.series))].sort(),
+        topic            :   [...new Set(dataResult.filter( (d)=> !!d.topic ).map(d=>d.topic))].sort(),
+        batch            :   [...new Set(dataResult.filter( (d)=> !!d.batch ).map(d=>d.batch))].sort(),
+        revision         :   [...new Set(dataResult.filter( (d)=> !!d.revisionC ).map(d=>d.revisionC ))].sort(),
+        cstages          :   [...new Set(dataResult.filter( (d)=> !!d.cstage ).map(d=>d.cstage))].sort(),
+        cstatus          :   [...new Set(dataResult.filter( (d)=> !!d.job_active_stage.status ).map(d=>d.job_active_stage.status))].sort(),
+        
+       
+      
+      };
+      // console.log('-------------Data-------',dataResult);
+      Mdb.bynder_jobs.find( q ).count().then(countVal =>{
+        // result prepration
+        let result={ artLogData : dataResult, GridFilters : GridFilters, totalCount: countVal};
+        res.send( result );
+      }).catch(Error =>{
+        console.log("Error In Total Count data", Error);
+      });
+  }).catch((Err)=>
+   console.log("Error in finder ERROR:", Err )
+  );
+});
+
+
+postRoutes.route('/artlogdataback', checkToken.checkToken).post(function (req, res) {
     console.log("req parameters :" , req.body, new Date().toISOString());
     let $and = [ ];
     if(!!req.body.grade && req.body.grade!=""){
@@ -1138,124 +1293,6 @@ postRoutes.route('/artlogdata', checkToken.checkToken).post(function (req, res) 
       }
       $and.push({$or:$or})
     }
-
-// filter start By Gurpreet
-    if(!!req.body.name && req.body.name!=""){
-      $and.push( { "name" : req.body.name } ); 
-    }
-
-    if(!!req.body.flagedTeam && req.body.flagedTeam!=""){
-      $and.push( { "flagedTeam" : req.body.flagedTeam } ); 
-    }
-
-    if(!!req.body.mathAuditor && req.body.mathAuditor!=""){
-      $and.push( { "mathAuditor" : req.body.mathAuditor } ); 
-    }
-
-    if(!!req.body.grade && req.body.grade!=""){
-      $and.push( { "grade" : req.body.grade } ); 
-    }
-
-    if(!!req.body.module && req.body.module!=""){
-      $and.push( { "module" : req.body.module } ); 
-    }
-
-    
-    if(!!req.body.component && req.body.component!=""){
-      $and.push( { "component" : req.body.component } ); 
-    }
-    if(!!req.body.lesson && req.body.lesson!=""){
-      $and.push( { "lesson" : req.body.lesson } ); 
-    }
-    if(!!req.body.lessonlet && req.body.lessonlet!=""){
-      $and.push( { "lessonlet" : req.body.lessonlet } ); 
-    }
-    if(!!req.body.batch && req.body.batch!=""){
-      $and.push( { "batch" : req.body.batch } ); 
-    }
-    if(!!req.body.topic && req.body.topic!=""){
-      $and.push( { "topic" : req.body.topic } ); 
-    }
-
-    if(!!req.body.description && req.body.description!=""){
-      $and.push( { "description" : req.body.description } ); 
-    }
-
-
-    if(!!req.body.cstage && req.body.cstage!=""){
-      $and.push( { "cstage" : req.body.cstage } ); 
-    }
-    if(!!req.body.currentRTeam && req.body.currentRTeam!=""){
-      $and.push( { "currentRTeam" : req.body.currentRTeam } ); 
-    }
-    if(!!req.body.curriculum && req.body.curriculum!=""){
-      $and.push( { "curriculum" : req.body.curriculum } ); 
-    }
-    if(!!req.body.facing && req.body.facing!=""){
-      $and.push( { "facing" : req.body.facing } ); 
-    }
-    if(!!req.body.series && req.body.series!=""){
-      $and.push( { "series" : req.body.series } ); 
-    }
-    if(!!req.body.creditLine && req.body.creditLine!=""){
-      $and.push( { "creditLine" : req.body.creditLine } ); 
-    }
-    if(!!req.body.comment && req.body.comment!=""){
-      $and.push( { "comment" : req.body.comment } ); 
-    }
-    if(!!req.body.tags && req.body.tags!=""){
-      $and.push( { "tags" : req.body.tags } ); 
-    }
-    if(!!req.body.mverification && req.body.mverification!=""){
-      $and.push( { "mverification" : req.body.mverification } ); 
-    }
-    if(!!req.body.isPaging && req.body.isPaging!=""){
-      $and.push( { "isPaging" : req.body.isPaging } ); 
-    }
-
-
-    if(!!req.body.pageNo && req.body.pageNo!=""){
-      $and.push( { "pageNo" : req.body.pageNo } ); 
-    }
-    if(!!req.body.revisionC && req.body.revisionC!=""){
-      $and.push( { "revisionC" : req.body.revisionC } ); 
-    }
-    if(!!req.body.printAsset && req.body.printAsset!=""){
-      $and.push( { "printAsset" : req.body.printAsset } ); 
-    }
-    if(!!req.body.printReady && req.body.printReady!=""){
-      $and.push( { "printReady" : req.body.printReady } ); 
-    }
-    if(!!req.body.artcomplex && req.body.artcomplex!=""){
-      $and.push( { "artcomplex" : req.body.artcomplex } ); 
-    }
-
-
-    if(!!req.body.artassion && req.body.artassion!=""){
-      $and.push( { "artassion" : req.body.artassion } ); 
-    }
-
-    if(!!req.body.risk && req.body.risk!=""){
-      $and.push( { "risk" : req.body.risk } ); 
-    }
-
-    if(!!req.body.impact && req.body.impact!=""){
-      $and.push( { "impact" : req.body.impact } ); 
-    }
-
-
-    if(!!req.body.workflow && req.body.workflow!=""){
-      $and.push( { "workflow" : req.body.workflow } ); 
-    }
-
-    if(!!req.body.permissionType && req.body.permissionType!=""){
-      $and.push( { "permissionType" : req.body.permissionType } ); 
-    }      
-    
-    
-// filter end By Gurpreet
-
-
     if(!!req.body.topic && req.body.topic!=""){
       $and.push( { "batch" : req.body.topic } ); 
     }
@@ -1297,196 +1334,161 @@ postRoutes.route('/artlogdata', checkToken.checkToken).post(function (req, res) 
         {"job_active_stage.status":{"$ne":"Cancelled"}}
       ) 
     }
-    
     let q={"job_active_stage.status": { $in: [ 'Active', 'NeedsChanges']} ,
     "campaignID":{"$in": ['4924dc05-03c5-4086-90ce-41d8bf501684',
-     '9618db88-fc78-47a5-9916-e864e696ae11','5bf2ed40-6b98-45b2-b926-5eb4445ed38d','5aaa32f4-0a67-4daa-a404-3def00d73475','fd4c4b58-baee-41b4-adb4-24fcd3cf4ae6'] } };
-     // Global search filters 
-     let df = {};
-     if (!!req.body.filters && req.body.filters!="") {
-      let filters =JSON.parse(req.body.filters);
-      for( let keys of Object.keys(filters)) {
-        if(filters[keys].value!="" && (keys =="job_key" || keys =="name") ){
-          df[keys] = { $regex:  new RegExp( filters[keys].value + ".*") };// new RegExp('/'+ filters[keys].value +'/i');
-        } else {
-          df[keys] = filters[keys].value;
-        }
-        $and.push(df);
-      }
-    }
+     '9618db88-fc78-47a5-9916-e864e696ae11','5bf2ed40-6b98-45b2-b926-5eb4445ed38d','5aaa32f4-0a67-4daa-a404-3def00d73475','fd4c4b58-baee-41b4-adb4-24fcd3cf4ae6','5fed54b6-e54f-4f89-aa64-1b77ad906bed'] } };
+       
     if(!!req.body.jobkey && req.body.jobkey!=""){
       q={"job_key": req.body.jobkey }
-    }  else if($and.length >0){
-    // condition for ignore other Jobs  '4924dc05-03c5-4086-90ce-41d8bf501684',
-    // '9618db88-fc78-47a5-9916-e864e696ae11',
-    $and.push( {"campaignID":{"$in": ['4924dc05-03c5-4086-90ce-41d8bf501684','9618db88-fc78-47a5-9916-e864e696ae11', '5bf2ed40-6b98-45b2-b926-5eb4445ed38d','5aaa32f4-0a67-4daa-a404-3def00d73475','fd4c4b58-baee-41b4-adb4-24fcd3cf4ae6'] } });
-      q = { $and };
+    }else if($and.length >0){
+      // condition for ignore other Jobs  '4924dc05-03c5-4086-90ce-41d8bf501684',
+     // '9618db88-fc78-47a5-9916-e864e696ae11',
+      $and.push( {"campaignID":{"$in": ['4924dc05-03c5-4086-90ce-41d8bf501684','9618db88-fc78-47a5-9916-e864e696ae11', '5bf2ed40-6b98-45b2-b926-5eb4445ed38d','5aaa32f4-0a67-4daa-a404-3def00d73475','fd4c4b58-baee-41b4-adb4-24fcd3cf4ae6','5fed54b6-e54f-4f89-aa64-1b77ad906bed'] } });
+       q= { $and};
     }
-    // q={  job_key:"EM2-5207" };
+   // q={  job_key:"EM2-5207" };
     let fields={ batchCDate:1,receiveddate:1,mpsDueDate:1,artTeamStatus : 1, artTeamPriority : 1, exceptionCategory : 1, exception:1, presetstages:1,mathAuditor:1,flagedTeam:1,dateCreated:1, job_date_finished:1,pageNo:1,killed:1,flaged:1,batch:1,presetstages:1,isPaging:1, comment:1, mverification:1, duplicate:1, presetName:1, Preset_Stages:1, id:1, name:1, description:1, job_active_stage:1, jobMetaproperties:1, jobID:1, job_key:1, dateCreated:1, job_date_finished:1, thumb:1, generatedTags:1};
-    console.log("Calling artlogdata Data sm 222" , JSON.stringify(q));
+    console.log("Calling artlogdata Data " , JSON.stringify(q), JSON.stringify(fields));
     // testing in Live Build with Pradeep Sir 
-    //.skip(2000) export dt
-    /*pagination Script here*/
     //.skip(  parseInt(req.body.fromPage)).limit( parseInt(req.body.toPage) ).
-    console.log('req.body.fromPage:---',req.body.fromPage);
-    console.log('req.body.toPage:---',req.body.toPage);
-    // req.body.toPage= 1000;
-    // console.log('req.body.jobkey:---',req.body);
-
-    Mdb.bynder_jobs.find(q ).sort({job_key:-1}).skip(  parseInt(req.body.fromPage)).limit( parseInt(req.body.toPage) ).then((data)=>{
+    //.skip(2000) export dt
+    Mdb.bynder_jobs.find(q ).sort({job_key:-1}).then((data)=>{
+      console.log("data responded in DB TIMEs :", data.length, new Date().toISOString());
+    let dataResult=[];
+    let Meta= new Metadt()
+        Meta.iniMeta(WorkFlowJobsMetaData);
+        Meta.initAssetMeta(GCurriculaWIP);
+        Meta.PrintAssetMeta(GPrintReady)
         
-// start
-
-
-let dataResult=[];
-let Meta= new Metadt()
-    Meta.iniMeta(WorkFlowJobsMetaData);
-    Meta.initAssetMeta(GCurriculaWIP);
-    Meta.PrintAssetMeta(GPrintReady)
-    
-for(let  dtkey in data){
-  var objData = data[dtkey].toObject();
-  if(!!data[dtkey].jobMetaproperties){
-    
-    Meta.getInitDataSet(data[dtkey]);
-    let Mdt= Meta.getMeta();
-    let metaObj=Object.entries(data[dtkey].jobMetaproperties);
-    if(data[dtkey].Preset_Stages.length > 0 ){
-     let lastChangeCreated= data[dtkey].Preset_Stages[data[dtkey].Preset_Stages.length -1].start_date;
-     let lastChangeComplated=(!!data[dtkey].Preset_Stages[data[dtkey].Preset_Stages.length -1].job_date_finished)?
-      data[dtkey].Preset_Stages[data[dtkey].Preset_Stages.length -1].job_date_finished: new Date();
-      objData.lastage=dateDiffinDurationStage(lastChangeComplated, lastChangeCreated);
-    }
-    var dateCreatedJob =  data[dtkey].dateCreated ||Mdt.dateCreatedM ;
-    if(data[dtkey].job_date_finished===null && data[dtkey].job_active_stage.status!="Approved"){
-      data[dtkey].job_date_finished=new Date().toISOString();
-    }else if(data[dtkey].job_date_finished===null){
-      data[dtkey].job_date_finished=new Date().toISOString();
-    }
-    objData.cstage=""; objData.workflow=Meta.getWorkflow();
-    objData.mathAuditRC = 0;
-    if(objData.Preset_Stages.length > 0){
-      // IT Should be another that we can not captuchred 
-      objData.mathAuditRC= objData.Preset_Stages.filter( d => d.StageNames =='Math Audit Review' ).length;
-      let ob=objData.Preset_Stages[ objData.Preset_Stages.length-1 ];
-      if(ob.hasOwnProperty('name')){
-        objData.cstage=ob.name;
-      }else if(ob.hasOwnProperty('StageNames')){
-        objData.cstage=ob.StageNames;
-      }
-      if(objData.cstage=="" && !!ob.position && objData.presetstages.length > 0){
-        let objdt=objData.presetstages.filter(d=> d.position == ob.position);
-        if(objdt.length > 0)
-        objData.cstage = objdt[0].name;
-      }
-    }
-    objData.comment = (objData.flaged)? objData.flaggedComment +'|'+ objData.flaggedUser +'|'+ moment(objData.flaggedDate).format('MM-DD-YYYY') :'';
-    //demo
-    objData.artTeamPriority   =   Meta.getTeamPriority(objData);
-    objData.artTeamStatus     =   Meta.getTeamStatus(objData);
-    objData.batchCDate        =  (objData.batchCDate!="" && typeof objData.batchCDate != "undefined")? moment(objData.batchCDate).format('DD/MM/YYYY'):'';
-    objData.receiveddate      =  (objData.receiveddate!="" && typeof objData.receiveddate != "undefined")? moment(objData.receiveddate).format('DD/MM/YYYY'):'';
-    objData.mpsDueDate        =  (objData.mpsDueDate!="" && typeof objData.mpsDueDate != "undefined")? moment(objData.mpsDueDate).format('DD/MM/YYYY'):'';
-    
-     // Art Team Columns // 
-     /*objData.receiveddate      =   Meta.getMathAuditStartDt(objData);
-     objData.mpsDueDate        =   Meta.getMpsDueDate(objData);
-     objData.artTeamStatus     =   Meta.getTeamStatus(objData);
-     objData.artTeamPriority   =   Meta.getTeamPriority(objData);
-     objData.exceptionCategory =   Meta.getExceptionCategory(objData);
-     objData.exceptoin         =   Meta.getExceptoin(objData);
-     */
-     //------------------------//
-     objData.currentRTeam =   Meta.getStageRTeam(objData.cstage);
-     objData.totalage     =   dateDiffinDurationStage(data[dtkey].job_date_finished , dateCreatedJob );
-     objData.lesson       =   Mdt.lesson;
-     objData.lessonlet    =   Mdt.lessonlet;
-     objData.component    =   Mdt.component; 
-     objData.tags         =   Mdt.tag; 
-     objData.gradeID      =   Mdt.grade;
-     objData.grade        =   Mdt.gradeVal;
-     objData.moduleID     =   Mdt.module;
-     objData.module       =   Mdt.moduleVal;
-     objData.topic        =   Mdt.topic;
-     objData.facing       =   Mdt.facingVal;
-     objData.facingID     =   Mdt.facing;
-     objData.series       =   Mdt.series;
-     //test
-     objData.revisionID   =   Mdt.revision;
-     objData.revisionC    =   Mdt.revisionVal;
-     objData.artcomplexID =   Mdt.artComplex;
-     objData.artcomplex   =   Mdt.artComplexVal;
-     objData.artassionID  =   Mdt.artAssion;
-     objData.artassion    =   Mdt.artAssionVal;
-     objData.riskID       =   Mdt.risk;
-     objData.risk         =   Mdt.riskVal;
-     objData.impactId     =   Mdt.impact;
-     objData.impact       =   Mdt.impactVal;
-     objData.curriculum   =   Mdt.wip;
-     objData.creditLine   =   Mdt.creditLine;
-     objData.printAsset   =   Mdt.printAsset;
-     objData.printReady   =   Mdt.printReady;
-     objData.permissionType = Mdt.permissionType
-  }
-  //console.log("Object Final VAlues: ==>", objData);
-  dataResult.push(objData);
-}
-
-
-
-
-
-
-      
-      
-      
-      
-      
-      // end
-      
-      let GridFilters={
-      
-          mathAuditors     :   [...new Set(dataResult.filter( (v, i)=> !!v.mathAuditor ).map(d=>d.mathAuditor))].sort(),
-          pageNos          :   [...new Set(dataResult.filter( (v, i)=> !!v.pageNo ).map(d=>d.pageNo))].sort(),
-          flagedTeams      :   [...new Set(dataResult.filter( (v, i)=> !!v.flagedTeam ).map(d=>d.flagedTeam))].sort(),
-          printAssets      :   [...new Set(dataResult.filter( (v, i)=> !!v.printAsset ).map(d=>d.printAsset))].sort(),
-          printReadys      :   [...new Set(dataResult.filter( (v, i)=> !!v.printReady ).map(d=>d.printReady))].sort(),
-          permissionTypes  :   [...new Set(dataResult.filter( (v, i)=> !!v.permissionType ).map(d=>d.permissionType))].sort(),
-          curriculum       :   [...new Set(dataResult.filter( (v, i)=> !!v.curriculum ).map(d=>d.curriculum))].sort(),
-          workflow         :   [...new Set(dataResult.filter( (v, i)=> !!v.workflow ).map(d=>d.workflow))].sort(),
-          currentRTeam     :   [...new Set(dataResult.filter( (v, i)=> !!v.currentRTeam ).map(d=>d.currentRTeam))].sort(),
-          lesson           :   [...new Set(dataResult.filter( (v, i)=> !!v.lesson ).map(d=>d.lesson))].sort(), 
-          lessonlet        :   [...new Set(dataResult.filter( (v, i)=> !!v.lessonlet ).map(d=> d.lessonlet))].sort(),
-          component        :   [...new Set(dataResult.filter( (d)=> !!d.component ).map(d=>d.component))].sort(),
-          grade            :   [...new Set(dataResult.filter( (d)=> !!d.grade ).map(d=>d.grade))].sort(),
-          module           :   [...new Set(dataResult.filter( (d)=> !!d.module ).map(d=>d.module))].sort(),
-          artcomplex       :   [...new Set(dataResult.filter( (d)=> !!d.artcomplex ).map(d=>d.artcomplex))].sort(),
-          artassion        :   [...new Set( dataResult.filter( (d)=> !!d.artassion ).map(d=>d.artassion))].sort(),
-          risk             :   [...new Set(dataResult.filter( (d)=> !!d.risk ).map(d=>d.risk))].sort(),
-          impact           :   [...new Set(dataResult.filter( (d)=> !!d.impact ).map(d=>d.impact))].sort(),
-          facing           :   [...new Set(dataResult.filter( (d)=> !!d.facing ).map(d=>d.facing))].sort(),
-          series           :   [...new Set(dataResult.filter( (d)=> !!d.series ).map(d=>d.series))].sort(),
-          topic            :   [...new Set(dataResult.filter( (d)=> !!d.topic ).map(d=>d.topic))].sort(),
-          batch            :   [...new Set(dataResult.filter( (d)=> !!d.batch ).map(d=>d.batch))].sort(),
-          revision         :   [...new Set(dataResult.filter( (d)=> !!d.revisionC ).map(d=>d.revisionC ))].sort(),
-          cstages          :   [...new Set(dataResult.filter( (d)=> !!d.cstage ).map(d=>d.cstage))].sort(),
-          cstatus          :   [...new Set(dataResult.filter( (d)=> !!d.job_active_stage.status ).map(d=>d.job_active_stage.status))].sort(),
-          
-         
+    for(let  dtkey in data){
+      var objData = data[dtkey].toObject();
+      if(!!data[dtkey].jobMetaproperties){
         
-        };
-        console.log('-------------Data-------',dataResult);
-        Mdb.bynder_jobs.find( q ).count().then(countVal =>{
-          // result prepration
-          let result={ artLogData : dataResult, GridFilters : GridFilters, totalCount: countVal};
-          res.send( result );
-        }).catch(Error =>{
-          console.log("Error In Total Count data", Error);
-        });
-    }).catch((Err)=>
-     console.log("Error in finder ERROR:", Err )
-    );
+        Meta.getInitDataSet(data[dtkey]);
+        let Mdt= Meta.getMeta();
+        let metaObj=Object.entries(data[dtkey].jobMetaproperties);
+        if(data[dtkey].Preset_Stages.length > 0 ){
+         let lastChangeCreated= data[dtkey].Preset_Stages[data[dtkey].Preset_Stages.length -1].start_date;
+         let lastChangeComplated=(!!data[dtkey].Preset_Stages[data[dtkey].Preset_Stages.length -1].job_date_finished)?
+          data[dtkey].Preset_Stages[data[dtkey].Preset_Stages.length -1].job_date_finished: new Date();
+          objData.lastage=dateDiffinDurationStage(lastChangeComplated, lastChangeCreated);
+        }
+        var dateCreatedJob =  data[dtkey].dateCreated ||Mdt.dateCreatedM ;
+        if(data[dtkey].job_date_finished===null && data[dtkey].job_active_stage.status!="Approved"){
+          data[dtkey].job_date_finished=new Date().toISOString();
+        }else if(data[dtkey].job_date_finished===null){
+          data[dtkey].job_date_finished=new Date().toISOString();
+        }
+        objData.cstage=""; objData.workflow=Meta.getWorkflow();
+        objData.mathAuditRC = 0;
+        if(objData.Preset_Stages.length > 0){
+          // IT Should be another that we can not captuchred 
+          objData.mathAuditRC= objData.Preset_Stages.filter( d => d.StageNames =='Math Audit Review' ).length;
+          let ob=objData.Preset_Stages[ objData.Preset_Stages.length-1 ];
+          if(ob.hasOwnProperty('name')){
+            objData.cstage=ob.name;
+          }else if(ob.hasOwnProperty('StageNames')){
+            objData.cstage=ob.StageNames;
+          }
+          if(objData.cstage=="" && !!ob.position && objData.presetstages.length > 0){
+            let objdt=objData.presetstages.filter(d=> d.position == ob.position);
+            if(objdt.length > 0)
+            objData.cstage = objdt[0].name;
+          }
+        }
+        objData.comment = (objData.flaged)? objData.flaggedComment +'|'+ objData.flaggedUser +'|'+ moment(objData.flaggedDate).format('MM-DD-YYYY') :'';
+        //demo
+        objData.artTeamPriority   =   Meta.getTeamPriority(objData);
+        objData.artTeamStatus     =   Meta.getTeamStatus(objData);
+        objData.batchCDate        =  (objData.batchCDate!="" && typeof objData.batchCDate != "undefined")? moment(objData.batchCDate).format('DD/MM/YYYY'):'';
+        objData.receiveddate      =  (objData.receiveddate!="" && typeof objData.receiveddate != "undefined")? moment(objData.receiveddate).format('DD/MM/YYYY'):'';
+        objData.mpsDueDate        =  (objData.mpsDueDate!="" && typeof objData.mpsDueDate != "undefined")? moment(objData.mpsDueDate).format('DD/MM/YYYY'):'';
+        
+         // Art Team Columns // 
+         /*objData.receiveddate      =   Meta.getMathAuditStartDt(objData);
+         objData.mpsDueDate        =   Meta.getMpsDueDate(objData);
+         objData.artTeamStatus     =   Meta.getTeamStatus(objData);
+         objData.artTeamPriority   =   Meta.getTeamPriority(objData);
+         objData.exceptionCategory =   Meta.getExceptionCategory(objData);
+         objData.exceptoin         =   Meta.getExceptoin(objData);
+         */
+         //------------------------//
+         objData.currentRTeam =   Meta.getStageRTeam(objData.cstage);
+         objData.totalage     =   dateDiffinDurationStage(data[dtkey].job_date_finished , dateCreatedJob );
+         objData.lesson       =   Mdt.lesson;
+         objData.lessonlet    =   Mdt.lessonlet;
+         objData.component    =   Mdt.component; 
+         objData.tags         =   Mdt.tag; 
+         objData.gradeID      =   Mdt.grade;
+         objData.grade        =   Mdt.gradeVal;
+         objData.moduleID     =   Mdt.module;
+         objData.module       =   Mdt.moduleVal;
+         objData.topic        =   Mdt.topic;
+         objData.facing       =   Mdt.facingVal;
+         objData.facingID     =   Mdt.facing;
+         objData.series       =   Mdt.series;
+         //test
+         objData.revisionID   =   Mdt.revision;
+         objData.revisionC    =   Mdt.revisionVal;
+         objData.artcomplexID =   Mdt.artComplex;
+         objData.artcomplex   =   Mdt.artComplexVal;
+         objData.artassionID  =   Mdt.artAssion;
+         objData.artassion    =   Mdt.artAssionVal;
+         objData.riskID       =   Mdt.risk;
+         objData.risk         =   Mdt.riskVal;
+         objData.impactId     =   Mdt.impact;
+         objData.impact       =   Mdt.impactVal;
+         objData.curriculum   =   Mdt.wip;
+         objData.creditLine   =   Mdt.creditLine;
+         objData.printAsset   =   Mdt.printAsset;
+         objData.printReady   =   Mdt.printReady;
+         objData.permissionType = Mdt.permissionType
+      }
+      //console.log("Object Final VAlues: ==>", objData);
+      dataResult.push(objData);
+    }
+    console.log("objData data responded in DB TIME:",  new Date().toISOString());
+     job_keys=dataResult.filter( (d)=> d.job_key!="" ).map(d=>d.job_key);
+     GridFilters={
+      
+      mathAuditors     :   [...new Set(dataResult.filter( (v, i)=> !!v.mathAuditor ).map(d=>d.mathAuditor))].sort(),
+      pageNos          :   [...new Set(dataResult.filter( (v, i)=> !!v.pageNo ).map(d=>d.pageNo))].sort(),
+      flagedTeams      :   [...new Set(dataResult.filter( (v, i)=> !!v.flagedTeam ).map(d=>d.flagedTeam))].sort(),
+      printAssets      :   [...new Set(dataResult.filter( (v, i)=> !!v.printAsset ).map(d=>d.printAsset))].sort(),
+      printReadys      :   [...new Set(dataResult.filter( (v, i)=> !!v.printReady ).map(d=>d.printReady))].sort(),
+      permissionTypes  :   [...new Set(dataResult.filter( (v, i)=> !!v.permissionType ).map(d=>d.permissionType))].sort(),
+      curriculum       :   [...new Set(dataResult.filter( (v, i)=> !!v.curriculum ).map(d=>d.curriculum))].sort(),
+      workflow         :   [...new Set(dataResult.filter( (v, i)=> !!v.workflow ).map(d=>d.workflow))].sort(),
+      currentRTeam     :   [...new Set(dataResult.filter( (v, i)=> !!v.currentRTeam ).map(d=>d.currentRTeam))].sort(),
+      lesson           :   [...new Set(dataResult.filter( (v, i)=> !!v.lesson ).map(d=>d.lesson))].sort(), 
+      lessonlet        :   [...new Set(dataResult.filter( (v, i)=> !!v.lessonlet ).map(d=> d.lessonlet))].sort(),
+      component        :   [...new Set(dataResult.filter( (d)=> !!d.component ).map(d=>d.component))].sort(),
+      grade            :   [...new Set(dataResult.filter( (d)=> !!d.grade ).map(d=>d.grade))].sort(),
+      module           :   [...new Set(dataResult.filter( (d)=> !!d.module ).map(d=>d.module))].sort(),
+      artcomplex       :   [...new Set(dataResult.filter( (d)=> !!d.artcomplex ).map(d=>d.artcomplex))].sort(),
+      artassion        :   [...new Set( dataResult.filter( (d)=> !!d.artassion ).map(d=>d.artassion))].sort(),
+      risk             :   [...new Set(dataResult.filter( (d)=> !!d.risk ).map(d=>d.risk))].sort(),
+      impact           :   [...new Set(dataResult.filter( (d)=> !!d.impact ).map(d=>d.impact))].sort(),
+      facing           :   [...new Set(dataResult.filter( (d)=> !!d.facing ).map(d=>d.facing))].sort(),
+      series           :   [...new Set(dataResult.filter( (d)=> !!d.series ).map(d=>d.series))].sort(),
+      topic            :   [...new Set(dataResult.filter( (d)=> !!d.topic ).map(d=>d.topic))].sort(),
+      batch            :   [...new Set(dataResult.filter( (d)=> !!d.batch ).map(d=>d.batch))].sort(),
+      revision         :   [...new Set(dataResult.filter( (d)=> !!d.revisionC ).map(d=>d.revisionC ))].sort(),
+      cstages          :   [...new Set(dataResult.filter( (d)=> !!d.cstage ).map(d=>d.cstage))].sort(),
+      cstatus          :   [...new Set(dataResult.filter( (d)=> !!d.job_active_stage.status ).map(d=>d.job_active_stage.status))].sort(),
+    
+    };
+      console.log("result length:", dataResult.length , new Date().toISOString());
+      
+      console.log("objData data MAPED responded in DB TIME:", dataResult.length , new Date().toISOString());
+      //Mdb.bynder_jobs.find(q, fields ).count().then(dt=>{
+        let result={ artLogData : dataResult, GridFilters : GridFilters, totalCount: dataResult.length};
+        console.log("result responce:", new Date().toISOString());
+        res.send( result );
+        console.log("============>result length:", dataResult.length , new Date().toISOString());
+      //})
+      
+    }).catch((Err)=>console.log("Error in finder ERROR:", Err));
 });
 
 postRoutes.route('/artlogteamdata', checkToken.checkToken).post(function (req, res) {
@@ -1624,96 +1626,6 @@ postRoutes.route('/artlogteamdata', checkToken.checkToken).post(function (req, r
     })
   })
 });
-postRoutes.route('/deletejobsreferesh', checkToken.checkToken).post(function (req, res) {
-  console.log("Action:deletejobsreferesh", req.body.filters);
-  let jobsKeys= req.body.filters.split(',');
-  //Spaces seprator handling;
-  //if(typeof a != "object" && jobsKeys.trim()!=''){ jobsKeys.split(' '); }
-  let jobsKeysId = [];
-  for(let k in jobsKeys){
-    //if(jobsKeys[k].trim()!=""){
-      jobsKeysId.push(jobsKeys[k]);
-    //}
-  }
-  Mdb.bynder_jobs.find({job_key: {$in : jobsKeysId}}).then(data=>{
-    for(let dt of data){
-
-      let refreshData = {
-        id        : dt.id,
-        assetID   : dt.assetID,
-        jobID     : dt.jobID,
-        job_key   : dt.job_key,
-        jobMetaproperties : dt.jobMetaproperties,
-        isDeleted: false,
-        addedDate : new Date()
-      }
-      console.log("refreshData:", refreshData);
-      var bynder_jobs_deletelist =  Mdb.bynder_jobs_deletelist(refreshData);
-      bynder_jobs_deletelist.save().then((rs) => {
-        console.log('data has been saved: result', rs);
-        //resolve(JobsResult);
-      });
-      console.log("data:",dt);
-    }
-    res.send({ msg: data.length +' jobs has been added for Delete List.', keys: jobsKeysId});
-  });
-});
-postRoutes.route('/deletelistjobs', checkToken.checkToken).post(function (req, res) {
-  console.log("Action data deletelistjobs");
-  var start = new Date();
-  start.setHours(0,0,0,0);
-  var end = new Date();
-  end.setHours(23,59,59,999);
-  let Meta= new Metadt()
-  Meta.iniMeta(WorkFlowJobsMetaData);
-  Meta.initAssetMeta(GCurriculaWIP);
-  Meta.PrintAssetMeta(GPrintReady);
-  Mdb.bynder_jobs_deletelist.find({addedDate :  {$gte: start, $lt: end}}).then((data) => {
-    let resData = [];
-    for(let dtkey in data ){
-      var objData = data[dtkey].toObject();
-      if( !!data[dtkey].jobMetaproperties ||!!data[dtkey].jobMetaproperties) {
-        Meta.getInitDataSet(data[dtkey]);
-        let Mdt= Meta.getMeta();
-        let metaObj=Object.entries(data[dtkey].jobMetaproperties);
-         objData.lesson       =   Mdt.lesson;
-         objData.lessonlet    =   Mdt.lessonlet;
-         objData.component    =   Mdt.component; 
-         objData.tags         =   Mdt.tag; 
-         objData.gradeID      =   Mdt.grade;
-         objData.grade        =   Mdt.gradeVal;
-         objData.moduleID     =   Mdt.module;
-         objData.module       =   Mdt.moduleVal;
-         objData.topic        =   Mdt.topic;
-         objData.facing       =   Mdt.facingVal;
-         objData.facingID     =   Mdt.facing;
-         objData.series       =   Mdt.series;
-         //test
-         objData.job_key      =   Meta.getOldJobkey();
-         objData.revisionID   =   Mdt.revision;
-         objData.revisionC    =   Mdt.revisionVal;
-         objData.artcomplexID =   Mdt.artComplex;
-         objData.artcomplex   =   Mdt.artComplexVal;
-         objData.artassionID  =   Mdt.artAssion;
-         objData.artassion    =   Mdt.artAssionVal;
-         objData.riskID       =   Mdt.risk;
-         objData.risk         =   Mdt.riskVal;
-         objData.impactId     =   Mdt.impact;
-         objData.impact       =   Mdt.impactVal;
-         objData.curriculum   =   Mdt.wip;
-         objData.creditLine   =   Mdt.creditLine;
-         objData.printAsset   =   Mdt.printAsset;
-         objData.printReady   =   Mdt.printReady;
-         objData.permissionType = Mdt.permissionType
-
-        resData.push(objData);
-      }
-    }
-    res.send(resData);
-  }).catch(Err=>{
-    console.log(Err);
-  })
-});
 postRoutes.route('/showrefreshjobs', checkToken.checkToken).post(function (req, res) {
   var start = new Date();
   start.setHours(0,0,0,0);
@@ -1723,7 +1635,6 @@ postRoutes.route('/showrefreshjobs', checkToken.checkToken).post(function (req, 
   Meta.iniMeta(WorkFlowJobsMetaData);
   Meta.initAssetMeta(GCurriculaWIP);
   Meta.PrintAssetMeta(GPrintReady);
-  //
   Mdb.bynder_jobs_refresh.find({addedDate :  {$gte: start, $lt: end}}).then((data) => {
     let resData = [];
     for(let dtkey in data ){
@@ -1807,11 +1718,10 @@ postRoutes.route('/refreshjobs', checkToken.checkToken).post(function (req, res)
       });
       console.log("data:",dt);
     }
-    res.send({ msg: data.length +' jobs has been added for metadata refresh.', keys: jobsKeysId, data: data.length});
+    res.send({ msg: data.length +' jobs has been added for metadata refresh.'});
   });
 });
 //artgraph scorecardinit
-let scoreCardGbdt ={ campaigns:[], grades:[],modules:[] };
 postRoutes.route('/scorecardinit', checkToken.checkToken).post(function (req, res) {
   console.log("Action artgraph");
  const myProm1 = new Promise(function(resolve, reject) {
@@ -1827,14 +1737,10 @@ postRoutes.route('/scorecardinit', checkToken.checkToken).post(function (req, re
   });
   myProm1.then((data)=>{
     Mdb.metaproperties.find({ ID : '262f92ed-59b1-4c3a-a74d-6877d7f8ba4c' }).then(dt =>{
-      scoreCardGbdt.grades = GGrades;
-      scoreCardGbdt.modules = GModules;
-      scoreCardGbdt.campaigns = data;
       res.send({  grade: GGrades, module: GModules, campaigns:data , jobType: dt, msg:'text'});
     });
   });
 });
-
 //medianoverdueperteam
 postRoutes.route('/medianoverdueperteam', checkToken.checkToken).post( async function (req, res) { 
   console.log("\x1b[34m \n ACTION medianoverdueperteam =>", JSON.stringify(req.body), "\n");
@@ -1848,8 +1754,8 @@ postRoutes.route('/medianoverdueperteam', checkToken.checkToken).post( async fun
     if(req.body.modules){ modules=req.body.modules.split("-").join(""); }
     if(req.body.startDateRange){ startDateRange=req.body.startDateRange; }
     if(req.body.endDateRange){ endDateRange=req.body.endDateRange; }
-    if(!!req.body.currentStatus ){
-      currentStatus=req.body.currentStatus.split(',');
+    if(req.body.currentStatus ){
+      currentStatus=req.body.currentStatus;
       var neWcurrentStatus=[]; 
       if(currentStatus.length > 0 ){
         for(let temp =0; temp< currentStatus.length; temp++){
@@ -1922,9 +1828,8 @@ postRoutes.route('/medianoverdueperteam', checkToken.checkToken).post( async fun
           if(GMatchFilter.length > 0){
             GMatchFilter = GMatchFilter.length > 0 ? { $and: GMatchFilter } : {};
             overDueQuery.push(  { $match: GMatchFilter });
-
           }
-          var group={ $group: { _id: "", overDueCount: { $sum: 1 }, overDueIds: {$push: "$_id"} , "jobDuration":{"$push": "$CalDuration" }}};
+          var group={ $group: { _id: "", overDueCount: { $sum: 1 }, overDueIds: {$push: "$id"} , "jobDuration":{"$push": "$CalDuration" }}};
           overDueQuery.push(group);
           console.log("\x1b[34m Query for Overdue data Loading",JSON.stringify(overDueQuery) );
           await Mdb.bynder_jobs.aggregate(overDueQuery).then((overDueRes)=>{
@@ -1945,11 +1850,14 @@ postRoutes.route('/medianoverdueperteam', checkToken.checkToken).post( async fun
         let PermissionsData=['Created Image','Shutterstock','Clip Art'];
         for(let k=0; k< PermissionsData.length; k++){
           var GlobalFiltes=[];
+          // for(let tt in GMatchFilter){
+          //   GlobalFiltes.push(GMatchFilter[tt] ) ;
+          // }
           var overdueQ=[],QueryTat; var tat=0;
           if(PermissionsData[k]=="Permission"){
            // QueryTat={"asset_typeId":'05dedb54-4418-4ea7-89c6-18ef1d188bd5'};
           }else{
-            QueryTat={"asset_typeId": PermissionsData[k]};
+            QueryTat={"asset_typeId":PermissionsData[k]};
             await Mdb.overdue_jobs.find(QueryTat).then((tatData)=>{
               tat= tatData[0].tat
             }).catch((Err)=>{
@@ -1978,7 +1886,7 @@ postRoutes.route('/medianoverdueperteam', checkToken.checkToken).post( async fun
             matchFilter = matchFilter.length > 0 ? { $and: matchFilter } : {};
             overDueQuery.push(  { $match: matchFilter });
           }
-          var group={ $group: { _id: "", overDueCount: { $sum: 1 }, overDueIds: {$push: "$_id"} , "jobDuration":{"$push": "$CalDuration" } }};
+          var group={ $group: { _id: "", overDueCount: { $sum: 1 }, overDueIds: {$push: "$id"} , "jobDuration":{"$push": "$CalDuration" } }};
           overDueQuery.push(group);
           console.log("\x1b[34m \n Query for Overdue data llll:", JSON.stringify(overDueQuery),"\n\n" );
           
@@ -1998,7 +1906,7 @@ postRoutes.route('/medianoverdueperteam', checkToken.checkToken).post( async fun
         // for permission overdue data
         var IDS=[], QuerysPermission=[];
         await Mdb.metaproperties.find({ID:'262f92ed-59b1-4c3a-a74d-6877d7f8ba4c'},{"options.ID":1}).then((Data)=>{
-         // console.log("All Tat Catatory data=",Data[0].options);
+          console.log("All Tat Catatory data=",Data[0].options);
           for(let k=0; k < Data[0].options.length; k++){
               if(Data[0].options[k].ID && Data[0].options[k].ID!="")
               IDS.push(Data[0].options[k].ID);
@@ -2031,7 +1939,7 @@ postRoutes.route('/medianoverdueperteam', checkToken.checkToken).post( async fun
                   matchFilter = matchFilter.length > 0 ? { $and: matchFilter } : {};
                   overDueQuery.push(  { $match: matchFilter });
                 }
-                var group={ $group: { _id: "", overDueCount: { $sum: 1 }, overDueIds: {$push: "$_id"} , "jobDuration":{"$push": "$CalDuration" } }};
+                var group={ $group: { _id: "", overDueCount: { $sum: 1 }, overDueIds: {$push: "$id"} , "jobDuration":{"$push": "$CalDuration" } }};
                 overDueQuery.push(group);
                 QuerysPermission.push(overDueQuery);
 
@@ -2069,9 +1977,8 @@ postRoutes.route('/createdcompletedjobs', checkToken.checkToken).post( async fun
     if(req.body.modules){ modules=req.body.modules.split("-").join(""); }
     if(req.body.startDateRange){ startDateRange=req.body.startDateRange; }
     if(req.body.endDateRange){ endDateRange=req.body.endDateRange; }
-
     if(req.body.currentStatus ){
-      currentStatus= JSON.parse(req.body.currentStatus);
+      currentStatus=req.body.currentStatus;
       var neWcurrentStatus=[]; 
       if(currentStatus.length > 0 ){
         for(let temp=0; temp< currentStatus.length; temp++){
@@ -2211,44 +2118,45 @@ postRoutes.route('/createdcompletedjobs', checkToken.checkToken).post( async fun
   });
 });
 postRoutes.route('/scorecardload', checkToken.checkToken).post( async function (req, res) {
-	console.log("\n\n ACTION scorecardload data comming =>", JSON.stringify(req.body),"\n");
-	var workflowPreset="", compaignId ="",jobType="", grade="", modules="", currentStatus=[], jobTypeTemp="", isOverdue=false;
-	if(req.body.workflowPreset){ workflowPreset=req.body.workflowPreset; }
-	if(req.body.compaignId){ compaignId=req.body.compaignId; }
-	if(req.body.jobType){ jobType=req.body.jobType.split("-").join(""); }
-	if(req.body.grade){ grade=req.body.grade.split("-").join(""); }
-	if(req.body.modules){ modules=req.body.modules.split("-").join(""); }
-	if(!!req.body.currentStatus && req.body.currentStatus!='' ){
-		currentStatus= JSON.parse(req.body.currentStatus);
-		var neWcurrentStatus=[]; 
-		if(currentStatus.length > 0 ){
-		  for(let temp=0; temp < currentStatus.length; temp++){
-			if( currentStatus[temp] != 'Overdue'){
-			  neWcurrentStatus.push( currentStatus[temp] );
-			}
-			if( currentStatus[temp] == 'Overdue'){
-			  isOverdue=true; 
-			}
-			if( currentStatus.indexOf('Overdue')>-1 &&   currentStatus.indexOf('Approved') == -1 ){
-			  neWcurrentStatus.push("Active");
-			  neWcurrentStatus.push("NeedsChanges");
-			}
-		  }
-		}
-		currentStatus=neWcurrentStatus;
-	}
-	if(workflowPreset==""&& compaignId=="" &&jobType=="" &&grade==""&&modules==""&& currentStatus.length==0 ){
-		currentStatus.push("Active");
-	}
-	var TatDays=0, TatRes = [];
-	await Mdb.overdue_jobs.find({}).then((resTat)=>{
-		TatRes = resTat;
-	}).catch((Err)=>{
-	  console.log("Error in tat Query==>", Err);
-	});
+
+});
+//scorecardload 
+postRoutes.route('/scorecardload1', checkToken.checkToken).post( async function (req, res) {
+  console.log("\n\n ACTION scorecardload data comming =>", JSON.stringify(req.body),"\n");
+  var workflowPreset="", compaignId ="",jobType="", grade="", modules="", startDateRange="", endDateRange="", currentStatus=[], jobTypeTemp="", isOverdue=false;
+  if(req.body.workflowPreset){ workflowPreset=req.body.workflowPreset; }
+  if(req.body.compaignId){ compaignId=req.body.compaignId; }
+  if(req.body.jobType){ jobType=req.body.jobType.split("-").join(""); }
+  if(req.body.grade){ grade=req.body.grade.split("-").join(""); }
+  if(req.body.modules){ modules=req.body.modules.split("-").join(""); }
+  if(req.body.startDateRange){ startDateRange=req.body.startDateRange; }
+  if(req.body.endDateRange){ endDateRange=req.body.endDateRange; }
+  if(req.body.currentStatus ){
+    currentStatus=req.body.currentStatus;
+    var neWcurrentStatus=[]; 
+    if(currentStatus.length > 0 ){
+      for(let temp=0; temp < currentStatus.length; temp++){
+        if( currentStatus[temp] != 'Overdue'){
+          neWcurrentStatus.push( currentStatus[temp] );
+        }
+        if( currentStatus[temp] == 'Overdue'){
+          isOverdue=true; 
+        }
+        if( currentStatus.indexOf('Overdue')>-1 &&   currentStatus.indexOf('Approved') == -1 ){
+          neWcurrentStatus.push("Active");
+          neWcurrentStatus.push("NeedsChanges");
+        }
+      }
+    }
+    currentStatus=neWcurrentStatus;
+  }
+  var frmDate, toDate, dt;
+  if(workflowPreset==""&& compaignId=="" &&jobType=="" &&grade==""&&modules==""&& currentStatus.length==0 &&startDateRange=="" && startDateRange==""){
+    currentStatus.push("Active");
+  }
   var resultData=[];
   var count=0;
-  
+  let PermissionsData=['Permission','Created Image','Shutterstock','Clip Art'];
   var permissionResponce=[];
   var serchFilter=[];
   var Query=[];
@@ -2258,6 +2166,15 @@ postRoutes.route('/scorecardload', checkToken.checkToken).post( async function (
   if(grade){ serchFilter.push({ "jobMetaproperties.c0ac0a86e65f4f7ebd88dbd7e77965ef": grade }); }
   if(modules){ 
     serchFilter.push({ "jobMetaproperties.7388493928bc4a9aa57ca65306ed1579": modules }); 
+  }
+  if(startDateRange && startDateRange.indexOf(" - ") != -1){
+    dt= startDateRange.split(" - ");
+    frmDate=dt[0], toDate=dt[1];
+    serchFilter.push( {"dateCreated":{"$gte" : new Date(frmDate) }}, { "dateCreated":{"$lte" : new Date(toDate) }} );
+  }else if(endDateRange!="" && endDateRange.indexOf(" - ") != -1){
+    dt= endDateRange.split(" - ");
+    frmDate=dt[0], toDate=dt[1];
+    serchFilter.push( {"job_date_finished":{"$gte" : new Date(frmDate) }}, { "job_date_finished":{"$lte" : new Date(toDate) }} );
   }
   if(currentStatus && currentStatus.length >0 ){ 
     serchFilter.push({ "job_active_stage.status":{'$in': currentStatus }}); 
@@ -2272,7 +2189,6 @@ postRoutes.route('/scorecardload', checkToken.checkToken).post( async function (
   };
   //var lookup1=  {"$lookup":{"localField":"presetID","from":"job_presets","foreignField":"ID","as":"joincollection"}};
   var project1={"$project":{"presetName":1, "jobMetaproperties":1,"name":1,"job_duration":1,"job_date_finished":1,"dateCreated":1,"job_active_stage":1,"presetID":1,"createdByID":1,"campaignID":1,"jobID":1,"jobMetaproperties":1,
-  "job_key":1, "batch":1, "topic":1,
   "CalDuration":{"$cond":{"if": {"$eq":["$job_date_finished",""]} ,"then":{"$divide":[{"$subtract":[new Date(),"$dateCreated"]},86400000]},
       "else":{
           "$cond":{"if": {"$eq":["$job_date_finished",null]}, "then":  {"$divide":[{"$subtract":[new Date(),"$dateCreated"]},86400000]},
@@ -2283,107 +2199,69 @@ postRoutes.route('/scorecardload', checkToken.checkToken).post( async function (
   if(workflowPreset){ 
     serchFilter.push({ "presetName" : {"$regex":new RegExp(".*"+workflowPreset+".*") } }); 
   }
-  let serchFilterUnder=[];
+  if(!workflowPreset){
+    for( let temp=0; temp < PermissionsData.length; temp++){
+      let serchFilterUnder=[];
       for(let tt=0; tt < serchFilter.length; tt++){
         serchFilterUnder.push(serchFilter[tt] ) ;
       }
       let Query2=[ project1];
+      serchFilterUnder.push( { "presetName" : {"$regex": new RegExp(".*"+PermissionsData[temp]+".*") } } ); 
       Query2.push(  { $match: { $and: serchFilterUnder } });
       console.log("without Preset data==>", JSON.stringify(Query2) ,"\n\n");
-      let Mdt =new Metadt();
-      Mdt.iniMeta(WorkFlowJobsMetaData);
-      let Meta= new Metadt()
-      Mdt.initAssetMeta(GCurriculaWIP);
-      Mdt.PrintAssetMeta(GPrintReady);
         await  Mdb.bynder_jobs.aggregate(Query2).then((res)=>{
           for(let key=0; key< res.length; key++){  
-            res[key].duration= parseInt(res[key].CalDuration);
-            res[key].CalDuration= parseFloat(res[key].CalDuration).toFixed(2);
-             //console.log(res[key].presetName)
-             let tat =0;
-             if(!!res[key].presetName && res[key].presetName.indexOf('Permission') > -1){
-              res[key].workflow = 'Permission';
-              // here we have need to refract each Permission Type
-              if(!!res[key].jobMetaproperties && !!res[key].jobMetaproperties['262f92ed59b14c3aa74d6877d7f8ba4c']) {
-                let  dt = TatRes.filter(d=> d.asset_typeId.split('-').join('') === res[key].jobMetaproperties['262f92ed59b14c3aa74d6877d7f8ba4c'])
-                tat = (dt.length > 0 ) ? dt[0].tat : 0;
-                res[key].overDueStatus = (res[key].duration > tat) ? true : false;
-              } else {
-                let  dt = TatRes.filter(d=> d.asset_typeId ==='Unallocated');
-                tat = (dt.length > 0 ) ? dt[0].tat : 0;
-                res[key].overDueStatus = (res[key].duration > tat) ? true : false;
-              }
-             } else if(!!res[key].presetName && res[key].presetName.indexOf('Created Image') > -1){
-              res[key].workflow = 'Created Image';
-              let  dt = TatRes.filter(d=> d.asset_typeId ===res[key].workflow)
-              tat = (dt.length > 0 ) ? dt[0].tat : 0;
-              res[key].overDueStatus = (res[key].duration > tat) ? true : false;
-             } else if(!!res[key].presetName && res[key].presetName.indexOf('Shutterstock Shutterstock') > -1){
-              res[key].workflow = 'Shutterstock';
-              let  dt = TatRes.filter(d=> d.asset_typeId ===res[key].workflow)
-              tat = (dt.length > 0 ) ? dt[0].tat : 0;
-              res[key].overDueStatus = (res[key].duration > tat) ? true : false;
-              res[key].overDueTat = tat;
-             } else if(!!res[key].presetName && res[key].presetName.indexOf('Clip Art') > -1){
-              res[key].workflow = 'Clip Art';
-              let  dt = TatRes.filter(d=> d.asset_typeId ===res[key].workflow)
-              tat = (dt.length > 0 ) ? dt[0].tat : 0;
-              res[key].overDueStatus = (res[key].duration > tat) ? true : false;
-             } else if(!!res[key].presetName && res[key].presetName.indexOf('Photograph') > -1){
-              res[key].workflow = 'Photograph';
-              let  dt = TatRes.filter(d=> d.asset_typeId === 'Unallocated')
-              tat = (dt.length > 0 ) ? dt[0].tat : 0;
-              res[key].overDueStatus = (res[key].duration > tat) ? true : false;
-             }  else {
-              res[key].workflow = 'Other';
-              let  dt = TatRes.filter(d=> d.asset_typeId === 'Unallocated')
-              tat = (dt.length > 0 ) ? dt[0].tat : 0;
-              res[key].overDueStatus = (res[key].duration > tat) ? true : false;
-             }
-             res[key].overDueTat = tat;
-             res[key].campaignName = getCampaignName(res[key].campaignID);
-             res[key].grade = getGradeName(res[key])
-             res[key].module = getModuleName(res[key]);
+            res[key].duration= res[key].CalDuration;
           }
-          permissionResponce = res;
+          permissionResponce.push({ "data" : res, "permission": PermissionsData[temp] } );
         }).catch((Err)=>{
           console.log("Error in permission data", Err);
         }); 
-      
-  let campaignIDDt = [];
-  
-  await Mdb.bynder_jobs.aggregate(
-    [
-      { $match: { $and: serchFilterUnder } },
-      {"$group" : {_id: { "campaignID":"$campaignID", "status":"$job_active_stage.status"},  count:{$sum:1} } }]
-    ).then((docs)=>{
-    campaignIDDt = docs;
-    var data={ GraphCreatedJobs: resultData, jobsStatus: [], campaignIDDt: campaignIDDt, permissionResponce:permissionResponce , TatRes: TatRes};
+      }
+    }else{
+      var TatQuery={};
+      if(isOverdue){
+        if(workflowPreset=="Permission"){
+          TatQuery={ asset_type: jobType};
+        }else{
+          TatQuery={ asset_type: workflowPreset };
+        }
+      }
+    console.log("TatQuery::====>", TatQuery);
+    var TatDays=0;
+    await Mdb.overdue_jobs.find(TatQuery).then((resTat)=>{
+      if(resTat.length ==1 && isOverdue){
+          TatDays=resTat[0].tat;
+          serchFilter.push({ CalDuration: { $gte: TatDays } });
+      }
+    }).catch((Err)=>{
+      console.log("Error in tat Query==>", Err);
+    });
+  console.log("data finding testing ================>");
+  if(serchFilter.length > 0){
+    serchFilter = serchFilter.length > 0 ? { $and: serchFilter } : {};
+    Query.push(  { $match: serchFilter });
+  }
+    /* eslint-disable */ 
+    console.log("Dynamic Search Query==>", JSON.stringify(Query));
+    await  Mdb.bynder_jobs.aggregate(Query).then((res)=>{
+      for(let key=0; key< res.length; key++){
+        res[key].duration= res[key].CalDuration;//dateDiffC(res[key].dateCompleted, res[key].dateCreated);
+      }
+      permissionResponce.push({ "data" : res, "permission": workflowPreset } );
+    }).catch((Err)=>{
+      console.log("Error in permission data", Err);
+    });
+    }
+  var docs='';
+  await Mdb.bynder_jobs.aggregate([ {"$group" : {_id: { "status":"$job_active_stage.status"},  count:{$sum:1} } }])
+    .then((docs)=>{
+    var data={ GraphCreatedJobs: resultData, jobsStatus:docs, permissionResponce:permissionResponce };
     res.send(data);
   }).catch((Err)=>{
     console.log("Error in groops");
   });
 });
-function getCampaignName(campaignID){
-  let d = scoreCardGbdt.campaigns.filter(d=> d.ID== campaignID);
-  return (d.length > 0)? d[0].name : '';
-}
-function getGradeName(dt) {
-  let res = '';
-  if(!!dt.jobMetaproperties && !!dt.jobMetaproperties['c0ac0a86e65f4f7ebd88dbd7e77965ef'] && dt.jobMetaproperties['c0ac0a86e65f4f7ebd88dbd7e77965ef']!=''){
-    let d = scoreCardGbdt.grades.filter(d=> d.id == dt.jobMetaproperties['c0ac0a86e65f4f7ebd88dbd7e77965ef']);
-    res = (d.length > 0) ? d[0].value: '';
-  }
-  return res;
-}
-function getModuleName(dt) {
-  let res = '';
-  if(!!dt.jobMetaproperties && !!dt.jobMetaproperties['7388493928bc4a9aa57ca65306ed1579'] && dt.jobMetaproperties['7388493928bc4a9aa57ca65306ed1579']!=''){
-    let d = scoreCardGbdt.modules.filter(d=> d.id == dt.jobMetaproperties['7388493928bc4a9aa57ca65306ed1579']);
-    res = (d.length > 0) ? d[0].value: '';
-  }
-  return res;
-}
 //scorecarddata
 postRoutes.route('/scorecarddata', checkToken.checkToken).post(function (req, res) {
   console.log("Action scorecarddata");
@@ -2398,8 +2276,8 @@ postRoutes.route('/scorecarddata', checkToken.checkToken).post(function (req, re
      if(req.body.endDateRange){ endDateRange=req.body.endDateRange; }
      if(req.body.currentStatus){ currentStatus=req.body.currentStatus; }
      var frmDate, toDate, dt, isOverdue;
-     if(!!req.body.currentStatus ){
-      currentStatus=req.body.currentStatus.split(',');
+     if(req.body.currentStatus ){
+      currentStatus=req.body.currentStatus;
       var neWcurrentStatus=[]; 
       if(currentStatus.length > 0 ){
         for(let temp=0; temp < currentStatus.length; temp++){
@@ -2449,10 +2327,7 @@ postRoutes.route('/scorecarddata', checkToken.checkToken).post(function (req, re
       // }
       let pipeline=[];
       if(compaignId){  pipeline.push( {"$match":{"campaignID":{"$eq": compaignId }}} );  }
-      pipeline.push({"$project":{
-         "presetName":1,"campaignID":1,"id":1,"jobMetaproperties":1,"name":1,
-         "job_duration":1,"job_date_finished":1, "job_key":1, "batch":1, "topic":1,
-         "dateCreated":1,"job_active_stage":1,"presetID":1,"createdByID":1,"campaignID":1,"jobID":1,"Preset_Stages":1,
+      pipeline.push({"$project":{ "presetName":1,"campaignID":1,"id":1,"jobMetaproperties":1,"name":1,"job_duration":1,"job_date_finished":1,"dateCreated":1,"job_active_stage":1,"presetID":1,"createdByID":1,"campaignID":1,"jobID":1,"Preset_Stages":1,
         "CalDuration":{"$cond":{"if":{"$eq":["$job_date_finished",""]},
         "then":{"$divide":[{"$subtract":[ new Date(),"$dateCreated"]},86400000]},
         "else":{"$cond":{"if":{"$eq":["$job_date_finished",null]},
@@ -2509,22 +2384,6 @@ postRoutes.route('/scorecarddata', checkToken.checkToken).post(function (req, re
          console.log("Tat Query Error :==>", Err);
         });
 });
-//jobsbyids
-
-postRoutes.route('/jobsbyids', checkToken.checkToken).post(function (req, res) {
-  console.log("Action jobsbyids");
-  
-  if( !!req.body.ids && req.body.ids.split(",").length > 1 ) {
-    console.log(req.body.ids.split(",").length);
-    Mdb.bynder_jobs.find({ id: { $in: req.body.ids.split(",") }}).then(data=>{
-      res.send(data)
-    });
-  } else {
-    let data = [];
-    res.send(data);
-  }
-  
-});
 postRoutes.route('/dsmsummary', checkToken.checkToken).post(function (req, res) {
   console.log("Action dsmsummary");
   Mdb.bynder_jobs.find({artTeamStatus: 'WIP'}).then(data=>{
@@ -2538,9 +2397,8 @@ postRoutes.route('/dsmsummary', checkToken.checkToken).post(function (req, res) 
       var objData = data[dtkey].toObject();
       if(!!data[dtkey].jobMetaproperties){
         Meta.getInitDataSet(data[dtkey]);
-        let Mdt= Meta.getSMeat();
+        let Mdt= Meta.getMeta();
         let metaObj=Object.entries(data[dtkey].jobMetaproperties);
-        objData.batch        = objData.batch | '';
         objData.gradeID      =   Mdt.grade;
         objData.grade        =   Mdt.gradeVal;
         objData.moduleID     =   Mdt.module;
@@ -2582,7 +2440,7 @@ postRoutes.route('/apiperformance', checkToken.checkToken).post(function (req, r
     })
   });
   myProm1.then(data => {
-    Mdb.ApiPerformance.find({}).sort({"_id":-1}).limit(1000).then((result)=>{
+    Mdb.ApiPerformance.find({}).sort({"_id":1}).limit(100).then((result)=>{
       res.send({ data: data, result: result});
     });
   })
@@ -2601,7 +2459,7 @@ postRoutes.route('/apiperformance', checkToken.checkToken).post(function (req, r
 postRoutes.route('/exporttocsv', checkToken.checkToken).post( (req, res) => {
   console.log("Action : exporttocsv");
   //res.send("data testing");
-  Mdb.bynder_jobs.find({},{ID:1,job_key:1}).sort({_id:-1}).then((jobsData) => {
+  Mdb.bynder_jobs.find({},{ID:1,job_key:1}).sort({_id:-1}).limit(5).then((jobsData) => {
     res.send(jobsData);
     /*
     let filename='Bynder_jobs.csv';

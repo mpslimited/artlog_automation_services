@@ -1,0 +1,12 @@
+
+> MEAN-stack-authentication@0.0.1 start /data/GreatMinds/gmartlogautomation
+> node ./bin/www
+
+(node:7406) DeprecationWarning: `open()` is deprecated in mongoose >= 4.11.0, use `openUri()` instead, or set the `useMongoClient` option if using `connect()` or `createConnection()`. See http://mongoosejs.com/docs/4.x/docs/connections.html#use-mongo-client
+Mongoose connected to mongodb://mpst:HBjgmdT649(T2@localhost:27017/mpsdb
+db Connected successfully
+A new connection was made by a client.
+A new connection was made by a client.
+1
+data https://greatminds.getbynder.com/api/workflow/jobs/95291ec4-26ba-47ea-867c-faec897247c5 { status: 'Hello Ladies + Gentlemen, a signed OAuth request!' }
+[0mPOST /dataApi/refreshJobs [32m200 [0m432.562 ms - 2760[0m

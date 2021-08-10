@@ -6,8 +6,8 @@ const request = require('request');
 const OAuth   = require('oauth-1.0a');
 const crypto  = require('crypto');
 const fetch = require('node-fetch');
-// let mysql  = require('mysql');
-// let slashes = require('slashes');
+let mysql  = require('mysql');
+let slashes = require('slashes');
 let moment = require('moment');
 let config = require('./../config/Mysqlconfig');
 let Mdb = require('../models/post.model');
@@ -168,10 +168,10 @@ poRoutes1.route('/mpsdueDate').post( function (req, res) {
   });
 })
 poRoutes1.route('/existingArtTeamData').post( function (req, res) {
-  Mdb.bynder_jobs.find({"job_active_stage.status": 'Active'}).then((data)=>{
+  Mdb.bynder_jobs.find().then((data)=>{
      for(let dt of data){
        if(!!dt.presetstages && dt.presetstages.length > 0 && !!dt.Preset_Stages && dt.Preset_Stages.length > 0){
-     // return 'Content Feedback 1';
+      return 'Content Feedback 1';
         let dd = dt.presetstages.filter(d => d.name =='Designer Create Asset' || d.name =='Art 2: Designer Create Asset');
         if(dd.length > 0 ){
          let poData= dt.Preset_Stages.filter(d => d.position == dd[0].position );
@@ -199,7 +199,7 @@ poRoutes1.route('/existingArtTeamData').post( function (req, res) {
 }); 
 
 poRoutes1.route('/refreshJobs').post( function (req, res) {
-  Mdb.bynder_jobs_refresh.find({ isRefresh: false, isExists: {$exists: false}}).limit(50).then((data)=>{
+  Mdb.bynder_jobs_refresh.find({ isRefresh: false}).limit(1).then((data)=>{
     console.log(data.length);
     if(data.length > 0 ) {
       for(let dt of data){
@@ -207,24 +207,11 @@ poRoutes1.route('/refreshJobs').post( function (req, res) {
         console.log("data", request_data.url,  request_data.data);
         request({url: request_data.url, method: request_data.method, qs: request_data.data, headers: oauth.toHeader(oauth.authorize(request_data, token)) }, function(error, response, body) {
          // console.log("data:", response);
-          if(error){
-            console.log("API Error :", error);
-          } else if(response.body.indexOf('<body') > -1){
-            console.log(response.body);
-            //isExists
-            /*Mdb.bynder_jobs_refresh.updateOne({ id: jsonDt.id, isRefresh: false, isExists: {$exists: false} },{
-              $set:{
-                isExists: false,
-                errorDesc: response.body
-              }
-            }).then((rs)=>{
-              console.log("Data not found in Bynder");
-            });*/
-          } else if(!!response.body){
+          if(!!response.body){
             let jsonDt = JSON.parse(response.body); 
             let job_key = (jsonDt.jobMetaproperties.hasOwnProperty('ccf531b93d1c46428aa5c52bc8cc639f'))? jsonDt.jobMetaproperties['ccf531b93d1c46428aa5c52bc8cc639f'].trim():''; 
             //console.log(jsonDt.id,  jsonDt.NewjobMetaproperties, job_key );
-            Mdb.bynder_jobs_refresh.updateOne({ id: jsonDt.id, isRefresh: false, isExists: {$exists: false} },{
+            Mdb.bynder_jobs_refresh.updateOne({ id: jsonDt.id, isRefresh: false },{
               $set:{
                 NewjobMetaproperties : jsonDt.jobMetaproperties,
                 isRefresh: true,
@@ -259,7 +246,7 @@ poRoutes1.route('/jobprocessing2').post( function (req, res) {
   let ApiInfo = {};
   ApiInfo.apiTaskName = 'Bynder Jobs sync';
   let ApiObj = appConfig.getApiConfigByID(1);
-  let  startTime = moment('2021-02-05T16:05:02+05:30').toDate();
+  let  startTime = moment().toDate();
   let nextRunTime = moment().add(ApiObj.addedm, 'minutes').toDate()
   ApiInfo.process={ apiType: ApiObj.ID , startTime: startTime, trigger: ApiObj.trigger, nextRunTime: nextRunTime } ;
   const myProm1 = new Promise(function(resolve, reject) {
@@ -307,14 +294,13 @@ poRoutes1.route('/jobprocessing2').post( function (req, res) {
             i= data[0].processedPage +1;
           } else {
             i = 1;
-          } 
-           data[0].lastExeTime = '2021-01-01'; //for old days data sync
+          }
           let tillDate = moment().add(1, 'days').toISOString();  
           var request_data=appConfig.getActionInfo("jobsbycampaignid", data[0].ID );
               request_data.data= {  
               dateModifiedFrom: new Date(data[0].lastExeTime).toISOString(),
               dateModifiedTo : tillDate,
-              limit: 250, page: i  
+              limit: 500, page: i  
           };
           ApiInfo.APISendInfo ={ url: request_data.url, data:request_data.data};
           console.log("request_data ===>", request_data.url, request_data.data );
@@ -347,6 +333,7 @@ poRoutes1.route('/jobprocessing2').post( function (req, res) {
             try{
               
               dt= JSON.parse(response.body);
+              console.log("Data getting at Bynder End Total:--------", response );
               console.log("Data getting at Bynder End Total:", dt.length );
               ApiInfo.responce= "Data getting at Bynder End Total:"+ dt.length ;
               ApiInfo.APIprocess.endTime= new Date() ;
@@ -365,7 +352,7 @@ poRoutes1.route('/jobprocessing2').post( function (req, res) {
 		  console.log( "Total Data Length :", data.data.length, ApiInfo );
       //res.send(data);
       let $campSet={  process: true, processedPage: i /* totalPage: i,*/ }
-        if(data.data.length < 250){  
+        if(data.data.length < 500){  
           $campSet.lastExeTime = moment().startOf('day').toISOString(); 
           $campSet.totalPage = i; 
           $campSet.process = false  
@@ -410,7 +397,7 @@ poRoutes1.route('/jobprocessing2').post( function (req, res) {
          console.log("ApiInfo", ApiInfo);
          let ApiPerformance = new Mdb.ApiPerformance(ApiInfo);
           ApiPerformance.save().then(d=>{
-            console.log(JSON.stringify(d));
+            console.log(d);
           });
          res.send(responceDt);
     }).catch((Error)=>{
@@ -435,7 +422,7 @@ poRoutes1.route('/jobprocessing').post( function (req, res) {
           resolve(dt);
         } else {
           //bb6f3943-5a47-49f0-ab82-c6278d1dad29
-          let where ={ ExyeOrder: true }
+          let where ={ ExeOrder: true }
           Mdb.campaign.updateMany(where ,{
            $set:{
             process: false,
