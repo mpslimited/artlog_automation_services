@@ -37,12 +37,23 @@ stats.socket.on('error', function (error) {
 })
  // catch 404 and forward to error handler
 
+
+ app.use((req, res, next) => {
+  res.header("Access-Control-Allow-Origin", "*");
+  res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+  res.header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
+  next();
+}) 
+
+
+
 app.use(responseTime(function (req, res, time) {
   var stat = (req.method + req.url).toLowerCase()
     .replace(/[:\.]/g, '')
     .replace(/\//g, '_')
   stats.timing(stat, time)
 }));
+
 
 const publicRoot = 'dist';
 var accessLogStream = fs.createWriteStream(path.join(__dirname, 'logs/access.log'), 
