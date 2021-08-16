@@ -17,6 +17,7 @@ var cors = require('cors');
 var url = require('url');
 var passport = require('passport');
 
+
 // [SH] Bring in the data model
 require('./api/models/db');
 // [SH] Bring in the Passport config after model is defined
@@ -37,13 +38,8 @@ stats.socket.on('error', function (error) {
 })
  // catch 404 and forward to error handler
 
+ app.use(cors());
 
- app.use((req, res, next) => {
-  res.header("Access-Control-Allow-Origin", "*");
-  res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
-  res.header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
-  next();
-}) 
 
 
 
