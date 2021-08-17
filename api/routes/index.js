@@ -21,6 +21,7 @@ var ctrlAuth = require('../controllers/authentication');
 // }) 
 
 
+
 router.get('/profile', auth, ctrlProfile.profileRead);
 
 // authentication

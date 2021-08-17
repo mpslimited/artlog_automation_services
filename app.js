@@ -37,16 +37,20 @@ stats.socket.on('error', function (error) {
 })
  // catch 404 and forward to error handler
 
+ var corsOptions = {
+  origin: '*',
+  optionsSuccessStatus: 200 // For legacy browser support
+}
  const cors       = require('cors');
- app.use(cors());
+ app.use(cors(corsOptions));
 
 
- app.use((req, res, next) => {
-  res.header("Access-Control-Allow-Origin", "*");
-  res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
-  res.header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
-  next();
-}) 
+//  app.use((req, res, next) => {
+//   res.header("Access-Control-Allow-Origin", "*");
+//   res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+//   res.header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
+//   next();
+// }) 
 
 
 
