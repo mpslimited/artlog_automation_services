@@ -12,7 +12,7 @@ var StatsD = require('node-statsd')
 
 require('log-timestamp');
 var bodyParser = require('body-parser');
-// var cors = require('cors');
+
 // [SH] Require Passport
 var url = require('url');
 var passport = require('passport');
@@ -37,10 +37,7 @@ stats.socket.on('error', function (error) {
 })
  // catch 404 and forward to error handler
 
-//  var corsOptions = {
-//   origin: 'https://gmartlogautomationuat.mpstechnologies.com',
-//   optionsSuccessStatus: 200 // For legacy browser support
-// }
+
  const cors   = require('cors');
  app.use(cors());
 
@@ -108,7 +105,7 @@ app.use(logger('dev'));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());
-// app.use(cors());
+
 // [SH] Initialise Passport before using the route middleware
 app.use(passport.initialize());
 // [SH] Use the API routes when path starts with /api

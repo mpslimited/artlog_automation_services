@@ -1,9 +1,6 @@
 var passport = require('passport');
 var mongoose = require('mongoose');
 var User = mongoose.model('User');
-// var cors = require('cors')
-// var allowlist = ['*'];
-
 
 
 var sendJSONresponse = function(res, status, content) {
@@ -31,13 +28,14 @@ module.exports.register = function(req, res) {
 
 module.exports.login = function(req, res) {
 
-  let origin = req.headers.origin;
-  // if (allowedOrigins.includes(origin)) {
-      // res.header("Access-Control-Allow-Origin", '*'); // restrict it to the required domain
-  // }
-  // res.header('Access-Control-Allow-Origin', '*');
-  // res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,OPTIONS');
-  // res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, Content-Length, X-Requested-With');
+  let allowedOrigins = ["https://gmartlogautomationdemo.mpstechnologies.com/api/login", 
+  "https://gmartlogautomationdemo.mpstechnologies.com"]
+let origin = req.headers.origin;
+if (allowedOrigins.includes(origin)) {
+    res.header("Access-Control-Allow-Origin", origin); // restrict it to the required domain
+}
+  
+  
   console.log("REQ==>",req.body);
   passport.authenticate('local', function(err, user, info){
     var token;
