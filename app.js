@@ -38,7 +38,7 @@ stats.socket.on('error', function (error) {
  // catch 404 and forward to error handler
 
  var corsOptions = {
-  origin: '*',
+  origin: 'https://gmartlogautomationuat.mpstechnologies.com',
   optionsSuccessStatus: 200 // For legacy browser support
 }
  const cors   = require('cors');
