@@ -7,28 +7,39 @@ var app = require('../app');
 var debug = require('debug')('MEAN-stack-authentication:server');
 var http = require('http');
 
+
+
 /**
  * Get port from environment and store in Express.
  */
 
 var port = normalizePort(process.env.PORT || '3000');
-app.set('port', port);
+// app.set('port', port);
 
 
 
+// app.use(function(req, res, next) {
+//   res.header('Access-Control-Allow-Origin', "*");
+//   res.header('Access-Control-Allow-Methods','GET,PUT,POST,DELETE');
+//   res.header('Access-Control-Allow-Headers', 'Content-Type');
+//   next();
+// })
 
 /**
  * Create HTTP server.
  */
 
-var server = http.createServer(app);
+// var server = http.createServer(app);
 
 /**
  * Listen on provided port, on all network interfaces.
  */
 
+ var server=  app.listen(port, () => {
+  console.log(`Example app listening at http://localhost:${port}`)
+})
 
-server.listen(port);
+// server.listen(port);
 server.on('connection', function(socket) {
   console.log("A new connection was made by a client.");
   socket.setTimeout(80 * 1000); 
