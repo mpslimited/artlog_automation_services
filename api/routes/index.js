@@ -27,13 +27,17 @@ router.get('/profile', auth, ctrlProfile.profileRead);
 // authentication
 router.post('/register', ctrlAuth.register);
 
+
+
 var corsOptions = {
   origin: 'https://gmartlogautomationuat.mpstechnologies.com',
   methods: ['GET','POST','DELETE','UPDATE','PUT','PATCH'],
   optionsSuccessStatus: 200 // For legacy browser support
 }
- const cors   = require('cors');
+//  const cors   = require('cors');
  //app.use(cors(corsOptions));
-router.post('/login',cors(corsOptions), ctrlAuth.login);
+ 
+// }
+router.post('/login', ctrlAuth.login);
 
 module.exports = router;
