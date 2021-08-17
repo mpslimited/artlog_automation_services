@@ -29,6 +29,7 @@ router.post('/register', ctrlAuth.register);
 
 var corsOptions = {
   origin: 'https://gmartlogautomationuat.mpstechnologies.com',
+  methods: "GET, PUT, POST",
   optionsSuccessStatus: 200 // For legacy browser support
 }
  const cors   = require('cors');
