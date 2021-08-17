@@ -26,6 +26,13 @@ router.get('/profile', auth, ctrlProfile.profileRead);
 
 // authentication
 router.post('/register', ctrlAuth.register);
-router.post('/login', ctrlAuth.login);
+
+var corsOptions = {
+  origin: 'https://gmartlogautomationuat.mpstechnologies.com',
+  optionsSuccessStatus: 200 // For legacy browser support
+}
+ const cors   = require('cors');
+ //app.use(cors(corsOptions));
+router.post('/login',cors(corsOptions), ctrlAuth.login);
 
 module.exports = router;

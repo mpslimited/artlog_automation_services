@@ -26,6 +26,8 @@ module.exports.register = function(req, res) {
   });
 };
 
+
+
 module.exports.login = function(req, res) {
 
   // res.header('Access-Control-Allow-Origin', '*');
