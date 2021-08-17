@@ -12,7 +12,7 @@ var StatsD = require('node-statsd')
 
 require('log-timestamp');
 var bodyParser = require('body-parser');
-var cors = require('cors');
+// var cors = require('cors');
 // [SH] Require Passport
 var url = require('url');
 var passport = require('passport');
@@ -41,7 +41,7 @@ stats.socket.on('error', function (error) {
   origin: '*',
   optionsSuccessStatus: 200 // For legacy browser support
 }
- const cors       = require('cors');
+ const cors   = require('cors');
  app.use(cors(corsOptions));
 
 
