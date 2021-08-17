@@ -32,11 +32,11 @@ module.exports.login = function(req, res) {
 
   let origin = req.headers.origin;
   // if (allowedOrigins.includes(origin)) {
-      res.header("Access-Control-Allow-Origin", origin); // restrict it to the required domain
+      res.header("Access-Control-Allow-Origin", '*'); // restrict it to the required domain
   // }
   // res.header('Access-Control-Allow-Origin', '*');
   res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,OPTIONS');
-  // res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, Content-Length, X-Requested-With');
+  res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, Content-Length, X-Requested-With');
   console.log("REQ==>",req.body);
   passport.authenticate('local', function(err, user, info){
     var token;
