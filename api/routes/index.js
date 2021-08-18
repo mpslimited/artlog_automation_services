@@ -11,6 +11,7 @@ var ctrlProfile = require('../controllers/profile');
 var ctrlAuth = require('../controllers/authentication');
 
 // profile
+const checkToken = require('../models/middleware');
 
 
 
@@ -22,7 +23,7 @@ router.get('/profile', auth, ctrlProfile.profileRead);
 router.post('/register', ctrlAuth.register);
 router.post('/login', ctrlAuth.login);
 router.post('/login', ctrlAuth.login);
-router.route('/getUserInfo1').post(function (req, res) {  
+router.route('/getUserInfo1',checkToken.checkToken ).post(function (req, res) {  
   res.send('Helloo    ');
 })
 
