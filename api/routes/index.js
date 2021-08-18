@@ -14,6 +14,8 @@ var ctrlAuth = require('../controllers/authentication');
 const checkToken = require('../models/middleware');
 
 
+var cors = require('cors');
+router.use(cors());
 
 
 
@@ -35,7 +37,7 @@ router.route('/getUserInfo1',checkToken.checkToken ).post(function (req, res) {
   // Set to true if you need the website to include cookies in the requests sent
   // to the API (e.g. in case you use sessions)
   res.setHeader('Access-Control-Allow-Credentials', true);
-  
+
   res.send('Helloo    ');
 })
 
