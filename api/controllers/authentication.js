@@ -9,6 +9,7 @@ var sendJSONresponse = function(res, status, content) {
 };
 
 module.exports.register = function(req, res) {
+  res.header("Access-Control-Allow-Origin", "*");
   var user = new User();
   user.name = req.body.name;
   user.email = req.body.email;
@@ -32,7 +33,7 @@ module.exports.login = function(req, res) {
 //   "https://gmartlogautomationdemo.mpstechnologies.com"]
 // let origin = req.headers.origin;
 // if (allowedOrigins.includes(origin)) {
-    // res.header("Access-Control-Allow-Origin", "*"); // restrict it to the required domain
+    res.header("Access-Control-Allow-Origin", "*"); // restrict it to the required domain
 // }
   
   
