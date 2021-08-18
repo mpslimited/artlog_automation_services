@@ -12,7 +12,9 @@ const checkToken = require('../models/middleware');
 const mongoose = require( 'mongoose' );
 const jwt = require('jsonwebtoken');
 let moment = require('moment'); //Test By Pradeep sir
-var allowedOrigins = [ "https://gmartlogautomationdemo.mpstechnologies.com"];
+// var allowedOrigins = [ "https://gmartlogautomationdemo.mpstechnologies.com"];
+var allowedOrigins = [ "https://gmartlogautomationuat.mpstechnologies.com"];
+                       
 
 //let appConfig=require('./config');
 // Metadt= new Metadt('dddd');
