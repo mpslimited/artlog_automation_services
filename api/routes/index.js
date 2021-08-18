@@ -24,7 +24,7 @@ router.get('/profile', auth, ctrlProfile.profileRead);
 // authentication
 router.post('/register', ctrlAuth.register);
 router.post('/login', ctrlAuth.login);
-router.post('/login', ctrlAuth.login);
+// router.post('/login', ctrlAuth.login);
 router.route('/getUserInfo1',checkToken.checkToken ).post(function (req, res) {  
   res.setHeader('Access-Control-Allow-Origin', '*');
 
