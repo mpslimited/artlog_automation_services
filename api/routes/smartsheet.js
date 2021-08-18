@@ -33,11 +33,16 @@ Mdb.bynder_jobs.find({ }).then((data)=>{
 });
 */
 
-// postRoutes.use((req, res, next) => {
-//   console.log('--------------------------Access-Control-Allow-Origin---------------------');
-//   res.header("Access-Control-Allow-Origin", "*");
-//     next();
-// }) 
+postRoutes.use((req, res, next) => {
+  console.log('--------------------------Access-Control-Allow-Origin---------------------');
+  let allowedOrigins = [ 
+    "https://gmartlogautomationdemo.mpstechnologies.com"]
+  let origin = req.headers.origin;
+  if (allowedOrigins.includes(origin)) {
+      res.header("Access-Control-Allow-Origin", origin); // restrict it to the required domain
+  }
+    next();
+}) 
 
 
 
