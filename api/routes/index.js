@@ -21,5 +21,10 @@ router.get('/profile', auth, ctrlProfile.profileRead);
 // authentication
 router.post('/register', ctrlAuth.register);
 router.post('/login', ctrlAuth.login);
+router.post('/login', ctrlAuth.login);
+router.route('/getUserInfo1').post(function (req, res) {  
+  res.send('Helloo    ');
+})
+
 
 module.exports = router;
