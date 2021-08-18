@@ -9,7 +9,6 @@ var sendJSONresponse = function(res, status, content) {
 };
 
 module.exports.register = function(req, res) {
-  res.header("Access-Control-Allow-Origin", "*");
   var user = new User();
   user.name = req.body.name;
   user.email = req.body.email;
@@ -28,16 +27,16 @@ module.exports.register = function(req, res) {
 
 
 module.exports.login = function(req, res) {
-  console.log("REQ==1111 111----->",req.body);
-//   let allowedOrigins = [ 
-//   "https://gmartlogautomationdemo.mpstechnologies.com"]
-// let origin = req.headers.origin;
-// if (allowedOrigins.includes(origin)) {
-    res.header("Access-Control-Allow-Origin", "*"); // restrict it to the required domain
-// }
+  console.log("REQ==1111 1----->",req.body);
+  let allowedOrigins = [ 
+  "https://gmartlogautomationdemo.mpstechnologies.com"]
+let origin = req.headers.origin;
+if (allowedOrigins.includes(origin)) {
+    res.header("Access-Control-Allow-Origin", origin); // restrict it to the required domain
+}
   
   
-  console.log("REQ==2222 22-------->",req.body);
+  console.log("REQ==2222 2-------->",req.body);
   passport.authenticate('local', function(err, user, info){
     var token;
     if (err) {
