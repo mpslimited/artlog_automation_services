@@ -901,9 +901,9 @@ postRoutes.route('/artloginit', checkToken.checkToken).post(function (req, res) 
   let origin = req.headers.origin;
   if (allowedOrigins.includes(origin)) {
       res.header("Access-Control-Allow-Origin", origin); // restrict it to the required domain
-      res.setHeader("Access-Control-Allow-Credentials", "true");
-      res.setHeader("Access-Control-Allow-Methods", "GET,HEAD,OPTIONS,POST,PUT");
-      res.setHeader("Access-Control-Allow-Headers", "Access-Control-Allow-Headers, Origin,Accept, X-Requested-With, Content-Type, Access-Control-Request-Method, Access-Control-Request-Headers");
+      // res.setHeader("Access-Control-Allow-Credentials", "true");
+      // res.setHeader("Access-Control-Allow-Methods", "GET,HEAD,OPTIONS,POST,PUT");
+      // res.setHeader("Access-Control-Allow-Headers", "Access-Control-Allow-Headers, Origin,Accept, X-Requested-With, Content-Type, Access-Control-Request-Method, Access-Control-Request-Headers");
   }
   
   Mdb.searchState.find({ uid: req.headers['authuser'] }).then((dt)=>{
