@@ -28,7 +28,7 @@ module.exports.register = function(req, res) {
 
 module.exports.login = function(req, res) {
   console.log("REQ==111----->",req.body);
-  let allowedOrigins = ["https://gmartlogautomationdemo.mpstechnologies.com/api/login", 
+  let allowedOrigins = [ 
   "https://gmartlogautomationdemo.mpstechnologies.com"]
 let origin = req.headers.origin;
 if (allowedOrigins.includes(origin)) {
