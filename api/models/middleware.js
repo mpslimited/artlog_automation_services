@@ -2,7 +2,7 @@ let jwt = require('jsonwebtoken');
 const config = require('./config.js');
 
 let checkToken = (req, res, next) => {
-
+  console.log("----------checkToken-------");
   var allowedOrigins = [ "https://gmartlogautomationuat.mpstechnologies.com"];
 let origin = req.headers.origin;
 if (allowedOrigins.includes(origin)) {
