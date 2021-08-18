@@ -87,22 +87,22 @@ Mdb.assetMeta.find({},{"curricula_wip.options":1, "print_ready.options":1}).then
   }
 }).catch((Err)=>{ console.log(" Error in ASset Meta:", Err);});
 postRoutes.route('/dt').get(function (req, res) {  
-  res.header("Access-Control-Allow-Origin", "*"); 
+   
   
   res.send({ grade: GGrades, module: GModules, artcomplex: GArtComplex, artAssign: GArtAssign, risk: GRisk, impact: GImpact});
 });
 postRoutes.route('/dataInit').post(function (req, res) {  
-  res.header("Access-Control-Allow-Origin", "*");
+  
   res.send({ grade: GGrades, module: GModules, artcomplex: GArtComplex, artAssign: GArtAssign, risk: GRisk, impact: GImpact});
 });
 postRoutes.route('/logout').post(function (req, res) {  
-  res.header("Access-Control-Allow-Origin", "*");
+  
   console.log("Action Logout");
   res.send(data={'mag':"cleard"});
 });
 //dellSearchState
 postRoutes.route('/dellSearchState', verifyToken).post(function (req, res) {
-  res.header("Access-Control-Allow-Origin", "*");
+  
   console.log("ACTION : dellSearchState REQ==>",req.body);
   Mdb.searchState.remove({'_id': req.body._id}).then((data)=>{
     res.send({'msg': 'DELETED', "did": req.body._id});
@@ -111,7 +111,7 @@ postRoutes.route('/dellSearchState', verifyToken).post(function (req, res) {
   });
 });
 postRoutes.route('/setDefaultSearch', verifyToken).post(function (req, res) {
-  res.header("Access-Control-Allow-Origin", "*");
+  
   console.log("ACTION : dellSearchState REQ==>",req.body);
   Mdb.searchState.updateMany({'uid':  req.headers['authuser']},{ $set:{ isDefault: false }}).then((rs)=>{
     Mdb.searchState.updateOne({"_id": req.body.default},{
@@ -126,14 +126,14 @@ postRoutes.route('/setDefaultSearch', verifyToken).post(function (req, res) {
 });
 //cleargridStage
 postRoutes.route('/cleargridStage', verifyToken).post(function (req, res) { 
-  res.header("Access-Control-Allow-Origin", "*");
+  
   console.log("ACTION : cleargridStage selectedColumn REQ==>",req.body);
   Mdb.searchState.remove({ uid: req.headers['authuser'] , state:'GridStage' }).then((data)=>{
    res.send(data);
   });
 });
 postRoutes.route('/gridStage', verifyToken).post(function (req, res) {  
-  res.header("Access-Control-Allow-Origin", "*");
+  
   console.log("ACTION : gridStage selectedColumn REQ==>",req.body);
   Mdb.searchState.find({ uid: req.headers['authuser'] , state:'GridStage' }).then((data)=>{
     if(data.length > 0){
@@ -158,7 +158,7 @@ postRoutes.route('/gridStage', verifyToken).post(function (req, res) {
   });
 })
 postRoutes.route('/searchState', verifyToken).post(function (req, res) {  
-  res.header("Access-Control-Allow-Origin", "*");
+  
   console.log("ACTION : searchState REQ==>",req.body);
   let frm = JSON.parse(req.body.frmdt);
   let searchState= new Mdb.searchState(
@@ -177,7 +177,7 @@ postRoutes.route('/searchState', verifyToken).post(function (req, res) {
 });
 
 postRoutes.route('/getUserInfo').post(function (req, res) {  
-  res.header("Access-Control-Allow-Origin", "*");
+  
    console.log("getUserInfo cookies values :: ", req.cookies);
    if(!req.cookies.jssonId){
     res.status(404);
@@ -246,12 +246,12 @@ postRoutes.route('/getUserInfo').post(function (req, res) {
 });
 
 postRoutes.route('/jobsMetadata').post(function (req, res) {  
-  res.header("Access-Control-Allow-Origin", "*");
+  
   console.log("calling api jobsMetadata");
   res.send(WorkFlowJobsMetaData);
 });
 postRoutes.route('/updateartlog').post(function (req, res) {
-  res.header("Access-Control-Allow-Origin", "*");
+  
   if(!!req.body.RowData){
       let set={ ID: MetaDatas[temp].ID };
       let where ={ ID: MetaDatas[temp].ID };
@@ -260,7 +260,7 @@ postRoutes.route('/updateartlog').post(function (req, res) {
 });
 
 postRoutes.route('/updateBulkBatchCDate').post(function (req, res) {
-  res.header("Access-Control-Allow-Origin", "*");
+  
   console.log("ACTION : updateBulkBatchCDate REQ==>",req.body);
   if(req.body.selectedids ){
     let ids = JSON.parse(req.body.selectedids);
@@ -286,7 +286,7 @@ postRoutes.route('/updateBulkBatchCDate').post(function (req, res) {
 });
 
 postRoutes.route('/updateBulkExceptionCat').post(function (req, res) {
-  res.header("Access-Control-Allow-Origin", "*");
+  
   console.log("ACTION : updateBulkExceptionCat REQ==>",req.body);
   if(req.body.selectedids ){
     let ids = JSON.parse(req.body.selectedids);
@@ -311,7 +311,7 @@ postRoutes.route('/updateBulkExceptionCat').post(function (req, res) {
   }
 });
 postRoutes.route('/updateBulkException').post(function (req, res) {
-  res.header("Access-Control-Allow-Origin", "*");
+  
   console.log("ACTION : updateBulkException REQ==>",req.body);
   if(req.body.selectedids ){
     let ids = JSON.parse(req.body.selectedids);
@@ -336,7 +336,7 @@ postRoutes.route('/updateBulkException').post(function (req, res) {
   }
 });
 postRoutes.route('/updateBulkBatch').post(function (req, res) {
-  res.header("Access-Control-Allow-Origin", "*");
+  
   console.log("ACTION : updateBulkBatch REQ==>",req.body);
   if(req.body.selectedids ){
     let ids = JSON.parse(req.body.selectedids);
@@ -361,13 +361,13 @@ postRoutes.route('/updateBulkBatch').post(function (req, res) {
   }
 });
 postRoutes.route('/reactiveJobs').post(function (req, res) {
-  res.header("Access-Control-Allow-Origin", "*");
+  
   if(!!req.body.status &&  !!req.body.id){
     
   }
 })
 postRoutes.route('/updateBulkTags').post(function (req, res) {
-  res.header("Access-Control-Allow-Origin", "*");
+  
   console.log("ACTION : updateBulkTags REQ==>",req.body);
   if(req.body.selectedids ){
     let ids = JSON.parse(req.body.selectedids);
@@ -393,7 +393,7 @@ postRoutes.route('/updateBulkTags').post(function (req, res) {
   }
 });
 postRoutes.route('/unflagedRows').post(function (req, res) {
-  res.header("Access-Control-Allow-Origin", "*");
+  
   console.log("ACTION : unflagedRows REQ==>",req.body);
   if(req.body.UnflagedID ){ 
     Mdb.bynder_jobs.updateMany({ _id: req.body.UnflagedID},{
@@ -409,7 +409,7 @@ postRoutes.route('/unflagedRows').post(function (req, res) {
   }
 })
 postRoutes.route('/assignAuditors').post(function (req, res) {
-  res.header("Access-Control-Allow-Origin", "*");
+  
   console.log("ACTION : assignAuditors REQ==>",req.body);
   if(req.body.mathAuditor ){
     let mathAuditor = JSON.parse(req.body.mathAuditor);
@@ -427,7 +427,7 @@ postRoutes.route('/assignAuditors').post(function (req, res) {
 });
 
 postRoutes.route('/flagedRows').post(function (req, res) {
-  res.header("Access-Control-Allow-Origin", "*");
+  
   console.log("ACTION : flagedRows REQ==>",req.body);
   if(req.body.flagedID ){ 
     let auth = JSON.parse(req.body.auth);
@@ -455,7 +455,7 @@ postRoutes.route('/flagedRows').post(function (req, res) {
   }
 })
 postRoutes.route('/killedRows').post(function (req, res) {
-  res.header("Access-Control-Allow-Origin", "*");
+  
   console.log("ACTION : killedRows REQ==>",req.body);
   if(req.body.killedID ){ 
     let killedID= JSON.parse(req.body.killedID);
@@ -471,7 +471,7 @@ postRoutes.route('/killedRows').post(function (req, res) {
   }
 });
 postRoutes.route('/unkilledRows').post(function (req, res) {
-  res.header("Access-Control-Allow-Origin", "*");
+  
   console.log("ACTION : unkilledRows REQ==>",req.body);
   if(req.body.UnkilledID ){ 
     Mdb.bynder_jobs.updateOne({ _id: req.body.UnkilledID},{
@@ -486,7 +486,7 @@ postRoutes.route('/unkilledRows').post(function (req, res) {
   }
 })
 postRoutes.route('/updateJobVerified').post(function (req, res) {
-  res.header("Access-Control-Allow-Origin", "*");
+  
   console.log("ACTION : updateJobVerified  REQ==>",req.body);
   if(req.body.newData ){
     let newDt=JSON.parse(req.body.newData);
@@ -516,7 +516,7 @@ postRoutes.route('/updateJobVerified').post(function (req, res) {
   }
 })
 postRoutes.route('/updateJob').post(function (req, res) {
-  res.header("Access-Control-Allow-Origin", "*");
+  
   console.log("ACTION : updateJob  REQ==>",req.body);
   if(req.body.newData ){
     let newDt=JSON.parse(req.body.newData);
@@ -583,7 +583,7 @@ postRoutes.route('/updateJob').post(function (req, res) {
   //res.send(req.body);
 }); 
 postRoutes.route('/addnewjobs').post(function (req, res) {
-  res.header("Access-Control-Allow-Origin", "*");
+  
     console.log("ACTION : addnewjobs REQ==>",req.body);
     //res.send(req.body);
     if(req.body.jobAdd){
@@ -770,7 +770,7 @@ postRoutes.route('/addnewjobs').post(function (req, res) {
     }
 });
 postRoutes.route('/updateAsset', checkToken.checkToken).post(function (req, res) {
-  res.header("Access-Control-Allow-Origin", "*");
+  
   console.log("req parameters :" , req.body);
   let data=JSON.parse(req.body.data)
   for(let d of data){
@@ -786,7 +786,7 @@ postRoutes.route('/updateAsset', checkToken.checkToken).post(function (req, res)
   res.send({'msg': 'processing'});
 });
 postRoutes.route('/artloginit', checkToken.checkToken).post(function (req, res) {
-  res.header("Access-Control-Allow-Origin", "*");
+  
   Mdb.searchState.find({ uid: req.headers['authuser'] }).then((dt)=>{
     console.log(' GCurriculaWIP  ' , GCurriculaWIP);
     let resJSON={ inData:dt, grade: GGrades, module: GModules, artcomplex: GArtComplex, artAssign: GArtAssign, risk: GRisk, impact: GImpact, wip: GCurriculaWIP
@@ -798,7 +798,7 @@ postRoutes.route('/artloginit', checkToken.checkToken).post(function (req, res) 
 });
 
 postRoutes.route('/updatelaststage').post(function (req, res) {
-  res.header("Access-Control-Allow-Origin", "*");
+  
   console.log('Data testing.. in updatelaststage action');
   Mdb.bynder_jobs.find({
     job_key: {
@@ -839,7 +839,7 @@ postRoutes.route('/updatelaststage').post(function (req, res) {
 });
 
 postRoutes.route('/searchdtinit').post(async (req, res)=> {
-  res.header("Access-Control-Allow-Origin", "*");
+  
   //,'Approved','Cancelled'
   let dataResult =[]
   let NoSql = { 'job_active_stage.status' :{ $nin :['Active','NeedsChanges'] }};
@@ -930,7 +930,7 @@ postRoutes.route('/searchdtinit').post(async (req, res)=> {
 
 
 postRoutes.route('/artlogdata', checkToken.checkToken).post(function (req, res) {
-  res.header("Access-Control-Allow-Origin", "*");
+  
   console.log("req parameters :" , req.body, new Date().toISOString());
   let $and = [ ];
   if(!!req.body.grade && req.body.grade!=""){
@@ -1317,7 +1317,7 @@ dataResult.push(objData);
 
 
 postRoutes.route('/artlogdataback', checkToken.checkToken).post(function (req, res) {
-  res.header("Access-Control-Allow-Origin", "*");
+  
     console.log("req parameters :" , req.body, new Date().toISOString());
     let $and = [ ];
     if(!!req.body.grade && req.body.grade!=""){
@@ -1537,7 +1537,7 @@ postRoutes.route('/artlogdataback', checkToken.checkToken).post(function (req, r
 });
 
 postRoutes.route('/artlogteamdata', checkToken.checkToken).post(function (req, res) {
-  res.header("Access-Control-Allow-Origin", "*");
+  
   console.log("artlogteamdata req parameters :" , req.body);
   let sData =JSON.parse(req.body.filters);
   let q ={};
@@ -1673,7 +1673,7 @@ postRoutes.route('/artlogteamdata', checkToken.checkToken).post(function (req, r
   })
 });
 postRoutes.route('/showrefreshjobs', checkToken.checkToken).post(function (req, res) {
-  res.header("Access-Control-Allow-Origin", "*");
+  
   var start = new Date();
   start.setHours(0,0,0,0);
   var end = new Date();
@@ -1735,7 +1735,7 @@ postRoutes.route('/showrefreshjobs', checkToken.checkToken).post(function (req, 
   })
 });
 postRoutes.route('/refreshjobs', checkToken.checkToken).post(function (req, res) {
-  res.header("Access-Control-Allow-Origin", "*");
+  
   console.log("Action:refreshjobs", req.body.filters);
   let jobsKeys= req.body.filters.split(',');
   //Spaces seprator handling;
@@ -1771,7 +1771,7 @@ postRoutes.route('/refreshjobs', checkToken.checkToken).post(function (req, res)
 });
 //artgraph scorecardinit
 postRoutes.route('/scorecardinit', checkToken.checkToken).post(function (req, res) {
-  res.header("Access-Control-Allow-Origin", "*");
+  
   console.log("Action artgraph");
  const myProm1 = new Promise(function(resolve, reject) {
   let query={ ID : '262f92ed-59b1-4c3a-a74d-6877d7f8ba4c'};
@@ -1792,7 +1792,7 @@ postRoutes.route('/scorecardinit', checkToken.checkToken).post(function (req, re
 });
 //medianoverdueperteam
 postRoutes.route('/medianoverdueperteam', checkToken.checkToken).post( async function (req, res) { 
-  res.header("Access-Control-Allow-Origin", "*");
+  
   console.log("\x1b[34m \n ACTION medianoverdueperteam =>", JSON.stringify(req.body), "\n");
  
   var workflowPreset="", compaignId ="",jobType="",
@@ -2017,7 +2017,7 @@ postRoutes.route('/medianoverdueperteam', checkToken.checkToken).post( async fun
 });
 //createdcompletedjobs
 postRoutes.route('/createdcompletedjobs', checkToken.checkToken).post( async function (req, res) { 
-  res.header("Access-Control-Allow-Origin", "*");
+  
   console.log('Data testing createdcompletedjobs');
   var workflowPreset="", compaignId ="",jobType="",
   grade="", modules="", startDate="", endDate="",startDateRange="", endDateRange="", currentStatus=[], jobTypeTemp="", isOverdue=false;
@@ -2169,12 +2169,12 @@ postRoutes.route('/createdcompletedjobs', checkToken.checkToken).post( async fun
   });
 });
 postRoutes.route('/scorecardload', checkToken.checkToken).post( async function (req, res) {
-  res.header("Access-Control-Allow-Origin", "*");
+  
 
 });
 //scorecardload 
 postRoutes.route('/scorecardload1', checkToken.checkToken).post( async function (req, res) {
-  res.header("Access-Control-Allow-Origin", "*");
+  
   console.log("\n\n ACTION scorecardload data comming =>", JSON.stringify(req.body),"\n");
   var workflowPreset="", compaignId ="",jobType="", grade="", modules="", startDateRange="", endDateRange="", currentStatus=[], jobTypeTemp="", isOverdue=false;
   if(req.body.workflowPreset){ workflowPreset=req.body.workflowPreset; }
@@ -2317,7 +2317,7 @@ postRoutes.route('/scorecardload1', checkToken.checkToken).post( async function 
 });
 //scorecarddata
 postRoutes.route('/scorecarddata', checkToken.checkToken).post(function (req, res) {
-  res.header("Access-Control-Allow-Origin", "*");
+  
   console.log("Action scorecarddata");
   let workflowPreset="", compaignId ="",jobType="",
    grade="", modules="", startDateRange="", endDateRange="", currentStatus=[], jobTypeTemp="";
@@ -2439,7 +2439,7 @@ postRoutes.route('/scorecarddata', checkToken.checkToken).post(function (req, re
         });
 });
 postRoutes.route('/dsmsummary', checkToken.checkToken).post(function (req, res) {
-  res.header("Access-Control-Allow-Origin", "*");
+  
   console.log("Action dsmsummary");
   Mdb.bynder_jobs.find({artTeamStatus: 'WIP'}).then(data=>{
     let Meta= new Metadt()
@@ -2471,7 +2471,7 @@ postRoutes.route('/dsmsummary', checkToken.checkToken).post(function (req, res) 
 });
 //apiperformance
 postRoutes.route('/apiperformance', checkToken.checkToken).post(function (req, res) {
-  res.header("Access-Control-Allow-Origin", "*");
+  
   console.log("Action apiperformance");
   const myProm1 = new Promise(function(resolve, reject) {
     let q = { 
@@ -2513,7 +2513,7 @@ postRoutes.route('/apiperformance', checkToken.checkToken).post(function (req, r
 //var csv      = require('csv-express');
 
 postRoutes.route('/exporttocsv', checkToken.checkToken).post( (req, res) => {
-  res.header("Access-Control-Allow-Origin", "*");
+  
   console.log("Action : exporttocsv");
   //res.send("data testing");
   Mdb.bynder_jobs.find({},{ID:1,job_key:1}).sort({_id:-1}).limit(5).then((jobsData) => {
