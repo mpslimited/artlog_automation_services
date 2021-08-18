@@ -32,7 +32,7 @@ module.exports.login = function(req, res) {
 //   "https://gmartlogautomationdemo.mpstechnologies.com"]
 // let origin = req.headers.origin;
 // if (allowedOrigins.includes(origin)) {
-    res.header("Access-Control-Allow-Origin", "*"); // restrict it to the required domain
+    // res.header("Access-Control-Allow-Origin", "*"); // restrict it to the required domain
 // }
   
   

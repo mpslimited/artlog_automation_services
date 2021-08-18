@@ -34,6 +34,7 @@ Mdb.bynder_jobs.find({ }).then((data)=>{
 */
 
 postRoutes.use((req, res, next) => {
+  console.log('--------------------------Access-Control-Allow-Origin---------------------');
   res.header("Access-Control-Allow-Origin", "*");
     next();
 }) 

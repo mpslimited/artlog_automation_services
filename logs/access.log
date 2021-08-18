@@ -1,0 +1,5 @@
+Mongoose disconnected
+(node:16358) DeprecationWarning: `open()` is deprecated in mongoose >= 4.11.0, use `openUri()` instead, or set the `useMongoClient` option if using `connect()` or `createConnection()`. See http://mongoosejs.com/docs/4.x/docs/connections.html#use-mongo-client
+Mongoose connected to mongodb://mpst:HBjgmdT649(T2@10.31.1.143:27017/mpsdb
+db Connected successfully
+Mongoose disconnected
