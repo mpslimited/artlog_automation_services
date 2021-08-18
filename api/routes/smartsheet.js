@@ -902,7 +902,7 @@ postRoutes.route('/updateAsset', checkToken.checkToken).post(function (req, res)
   res.send({'msg': 'processing'});
 });
 postRoutes.route('/artloginit', checkToken.checkToken).post(function (req, res) {
-  
+  console.log("---------------artloginit:---------- ");
   
   Mdb.searchState.find({ uid: req.headers['authuser'] }).then((dt)=>{
     console.log(' GCurriculaWIP  ' , GCurriculaWIP);
