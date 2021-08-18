@@ -27,13 +27,13 @@ module.exports.register = function(req, res) {
 
 
 module.exports.login = function(req, res) {
-  console.log("REQ==1111 11----->",req.body);
-  let allowedOrigins = [ 
-  "https://gmartlogautomationdemo.mpstechnologies.com"]
-let origin = req.headers.origin;
-if (allowedOrigins.includes(origin)) {
+  console.log("REQ==1111 111----->",req.body);
+//   let allowedOrigins = [ 
+//   "https://gmartlogautomationdemo.mpstechnologies.com"]
+// let origin = req.headers.origin;
+// if (allowedOrigins.includes(origin)) {
     res.header("Access-Control-Allow-Origin", "*"); // restrict it to the required domain
-}
+// }
   
   
   console.log("REQ==2222 22-------->",req.body);

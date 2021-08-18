@@ -33,6 +33,14 @@ Mdb.bynder_jobs.find({ }).then((data)=>{
 });
 */
 
+postRoutes.use((req, res, next) => {
+  res.header("Access-Control-Allow-Origin", "*");
+    next();
+}) 
+
+
+
+
 function verifyToken(req, res, next) {
   const bearerHeader = req.headers['authorization'];
 
