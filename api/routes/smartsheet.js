@@ -895,6 +895,7 @@ postRoutes.route('/updateAsset', checkToken.checkToken).post(function (req, res)
   res.send({'msg': 'processing'});
 });
 postRoutes.route('/artloginit', checkToken.checkToken).post(function (req, res) {
+  
   let origin = req.headers.origin;
   if (allowedOrigins.includes(origin)) {
       res.header("Access-Control-Allow-Origin", origin); // restrict it to the required domain
