@@ -1,5 +1,6 @@
 const express = require('express');
 const postRoutes = express.Router();
+
 const request = require('request');
 const OAuth   = require('oauth-1.0a');
 const crypto  = require('crypto');
@@ -11,6 +12,7 @@ const checkToken = require('../models/middleware');
 const mongoose = require( 'mongoose' );
 const jwt = require('jsonwebtoken');
 let moment = require('moment'); //Test By Pradeep sir
+var allowedOrigins = [ "https://gmartlogautomationdemo.mpstechnologies.com"];
 
 //let appConfig=require('./config');
 // Metadt= new Metadt('dddd');
@@ -33,16 +35,19 @@ Mdb.bynder_jobs.find({ }).then((data)=>{
 });
 */
 
-postRoutes.use((req, res, next) => {
-  console.log('--------------------------Access-Control-Allow-Origin---------------------');
-  let allowedOrigins = [ 
-    "https://gmartlogautomationdemo.mpstechnologies.com"]
-  let origin = req.headers.origin;
-  if (allowedOrigins.includes(origin)) {
-      res.header("Access-Control-Allow-Origin", origin); // restrict it to the required domain
-  }
-    next();
-}) 
+// postRoutes.use((req, res, next) => {
+  // let origin = req.headers.origin;
+  // if (allowedOrigins.includes(origin)) {
+  //     res.header("Access-Control-Allow-Origin", origin); // restrict it to the required domain
+  // }
+//   console.log('--------------------------Access-Control-Allow-Origin---------------------');
+  
+//   let origin = req.headers.origin;
+//   if (allowedOrigins.includes(origin)) {
+//       res.header("Access-Control-Allow-Origin", origin); // restrict it to the required domain
+//   }
+//     next();
+// }) 
 
 
 
@@ -87,21 +92,37 @@ Mdb.assetMeta.find({},{"curricula_wip.options":1, "print_ready.options":1}).then
   }
 }).catch((Err)=>{ console.log(" Error in ASset Meta:", Err);});
 postRoutes.route('/dt').get(function (req, res) {  
+  let origin = req.headers.origin;
+  if (allowedOrigins.includes(origin)) {
+      res.header("Access-Control-Allow-Origin", origin); // restrict it to the required domain
+  }
    
   
   res.send({ grade: GGrades, module: GModules, artcomplex: GArtComplex, artAssign: GArtAssign, risk: GRisk, impact: GImpact});
 });
 postRoutes.route('/dataInit').post(function (req, res) {  
+  let origin = req.headers.origin;
+  if (allowedOrigins.includes(origin)) {
+      res.header("Access-Control-Allow-Origin", origin); // restrict it to the required domain
+  }
   
   res.send({ grade: GGrades, module: GModules, artcomplex: GArtComplex, artAssign: GArtAssign, risk: GRisk, impact: GImpact});
 });
 postRoutes.route('/logout').post(function (req, res) {  
+  let origin = req.headers.origin;
+  if (allowedOrigins.includes(origin)) {
+      res.header("Access-Control-Allow-Origin", origin); // restrict it to the required domain
+  }
   
   console.log("Action Logout");
   res.send(data={'mag':"cleard"});
 });
 //dellSearchState
 postRoutes.route('/dellSearchState', verifyToken).post(function (req, res) {
+  let origin = req.headers.origin;
+  if (allowedOrigins.includes(origin)) {
+      res.header("Access-Control-Allow-Origin", origin); // restrict it to the required domain
+  }
   
   console.log("ACTION : dellSearchState REQ==>",req.body);
   Mdb.searchState.remove({'_id': req.body._id}).then((data)=>{
@@ -111,6 +132,10 @@ postRoutes.route('/dellSearchState', verifyToken).post(function (req, res) {
   });
 });
 postRoutes.route('/setDefaultSearch', verifyToken).post(function (req, res) {
+  let origin = req.headers.origin;
+  if (allowedOrigins.includes(origin)) {
+      res.header("Access-Control-Allow-Origin", origin); // restrict it to the required domain
+  }
   
   console.log("ACTION : dellSearchState REQ==>",req.body);
   Mdb.searchState.updateMany({'uid':  req.headers['authuser']},{ $set:{ isDefault: false }}).then((rs)=>{
@@ -126,6 +151,10 @@ postRoutes.route('/setDefaultSearch', verifyToken).post(function (req, res) {
 });
 //cleargridStage
 postRoutes.route('/cleargridStage', verifyToken).post(function (req, res) { 
+  let origin = req.headers.origin;
+  if (allowedOrigins.includes(origin)) {
+      res.header("Access-Control-Allow-Origin", origin); // restrict it to the required domain
+  }
   
   console.log("ACTION : cleargridStage selectedColumn REQ==>",req.body);
   Mdb.searchState.remove({ uid: req.headers['authuser'] , state:'GridStage' }).then((data)=>{
@@ -133,6 +162,10 @@ postRoutes.route('/cleargridStage', verifyToken).post(function (req, res) {
   });
 });
 postRoutes.route('/gridStage', verifyToken).post(function (req, res) {  
+  let origin = req.headers.origin;
+  if (allowedOrigins.includes(origin)) {
+      res.header("Access-Control-Allow-Origin", origin); // restrict it to the required domain
+  }
   
   console.log("ACTION : gridStage selectedColumn REQ==>",req.body);
   Mdb.searchState.find({ uid: req.headers['authuser'] , state:'GridStage' }).then((data)=>{
@@ -158,6 +191,10 @@ postRoutes.route('/gridStage', verifyToken).post(function (req, res) {
   });
 })
 postRoutes.route('/searchState', verifyToken).post(function (req, res) {  
+  let origin = req.headers.origin;
+  if (allowedOrigins.includes(origin)) {
+      res.header("Access-Control-Allow-Origin", origin); // restrict it to the required domain
+  }
   
   console.log("ACTION : searchState REQ==>",req.body);
   let frm = JSON.parse(req.body.frmdt);
@@ -177,6 +214,10 @@ postRoutes.route('/searchState', verifyToken).post(function (req, res) {
 });
 
 postRoutes.route('/getUserInfo').post(function (req, res) {  
+  let origin = req.headers.origin;
+  if (allowedOrigins.includes(origin)) {
+      res.header("Access-Control-Allow-Origin", origin); // restrict it to the required domain
+  }
   
    console.log("getUserInfo cookies values :: ", req.cookies);
    if(!req.cookies.jssonId){
@@ -246,11 +287,19 @@ postRoutes.route('/getUserInfo').post(function (req, res) {
 });
 
 postRoutes.route('/jobsMetadata').post(function (req, res) {  
+  let origin = req.headers.origin;
+  if (allowedOrigins.includes(origin)) {
+      res.header("Access-Control-Allow-Origin", origin); // restrict it to the required domain
+  }
   
   console.log("calling api jobsMetadata");
   res.send(WorkFlowJobsMetaData);
 });
 postRoutes.route('/updateartlog').post(function (req, res) {
+  let origin = req.headers.origin;
+  if (allowedOrigins.includes(origin)) {
+      res.header("Access-Control-Allow-Origin", origin); // restrict it to the required domain
+  }
   
   if(!!req.body.RowData){
       let set={ ID: MetaDatas[temp].ID };
@@ -260,6 +309,10 @@ postRoutes.route('/updateartlog').post(function (req, res) {
 });
 
 postRoutes.route('/updateBulkBatchCDate').post(function (req, res) {
+  let origin = req.headers.origin;
+  if (allowedOrigins.includes(origin)) {
+      res.header("Access-Control-Allow-Origin", origin); // restrict it to the required domain
+  }
   
   console.log("ACTION : updateBulkBatchCDate REQ==>",req.body);
   if(req.body.selectedids ){
@@ -286,6 +339,10 @@ postRoutes.route('/updateBulkBatchCDate').post(function (req, res) {
 });
 
 postRoutes.route('/updateBulkExceptionCat').post(function (req, res) {
+  let origin = req.headers.origin;
+  if (allowedOrigins.includes(origin)) {
+      res.header("Access-Control-Allow-Origin", origin); // restrict it to the required domain
+  }
   
   console.log("ACTION : updateBulkExceptionCat REQ==>",req.body);
   if(req.body.selectedids ){
@@ -311,6 +368,10 @@ postRoutes.route('/updateBulkExceptionCat').post(function (req, res) {
   }
 });
 postRoutes.route('/updateBulkException').post(function (req, res) {
+  let origin = req.headers.origin;
+  if (allowedOrigins.includes(origin)) {
+      res.header("Access-Control-Allow-Origin", origin); // restrict it to the required domain
+  }
   
   console.log("ACTION : updateBulkException REQ==>",req.body);
   if(req.body.selectedids ){
@@ -336,6 +397,10 @@ postRoutes.route('/updateBulkException').post(function (req, res) {
   }
 });
 postRoutes.route('/updateBulkBatch').post(function (req, res) {
+  let origin = req.headers.origin;
+  if (allowedOrigins.includes(origin)) {
+      res.header("Access-Control-Allow-Origin", origin); // restrict it to the required domain
+  }
   
   console.log("ACTION : updateBulkBatch REQ==>",req.body);
   if(req.body.selectedids ){
@@ -361,12 +426,20 @@ postRoutes.route('/updateBulkBatch').post(function (req, res) {
   }
 });
 postRoutes.route('/reactiveJobs').post(function (req, res) {
+  let origin = req.headers.origin;
+  if (allowedOrigins.includes(origin)) {
+      res.header("Access-Control-Allow-Origin", origin); // restrict it to the required domain
+  }
   
   if(!!req.body.status &&  !!req.body.id){
     
   }
 })
 postRoutes.route('/updateBulkTags').post(function (req, res) {
+  let origin = req.headers.origin;
+  if (allowedOrigins.includes(origin)) {
+      res.header("Access-Control-Allow-Origin", origin); // restrict it to the required domain
+  }
   
   console.log("ACTION : updateBulkTags REQ==>",req.body);
   if(req.body.selectedids ){
@@ -393,6 +466,10 @@ postRoutes.route('/updateBulkTags').post(function (req, res) {
   }
 });
 postRoutes.route('/unflagedRows').post(function (req, res) {
+  let origin = req.headers.origin;
+  if (allowedOrigins.includes(origin)) {
+      res.header("Access-Control-Allow-Origin", origin); // restrict it to the required domain
+  }
   
   console.log("ACTION : unflagedRows REQ==>",req.body);
   if(req.body.UnflagedID ){ 
@@ -409,6 +486,10 @@ postRoutes.route('/unflagedRows').post(function (req, res) {
   }
 })
 postRoutes.route('/assignAuditors').post(function (req, res) {
+  let origin = req.headers.origin;
+  if (allowedOrigins.includes(origin)) {
+      res.header("Access-Control-Allow-Origin", origin); // restrict it to the required domain
+  }
   
   console.log("ACTION : assignAuditors REQ==>",req.body);
   if(req.body.mathAuditor ){
@@ -427,6 +508,10 @@ postRoutes.route('/assignAuditors').post(function (req, res) {
 });
 
 postRoutes.route('/flagedRows').post(function (req, res) {
+  let origin = req.headers.origin;
+  if (allowedOrigins.includes(origin)) {
+      res.header("Access-Control-Allow-Origin", origin); // restrict it to the required domain
+  }
   
   console.log("ACTION : flagedRows REQ==>",req.body);
   if(req.body.flagedID ){ 
@@ -455,6 +540,10 @@ postRoutes.route('/flagedRows').post(function (req, res) {
   }
 })
 postRoutes.route('/killedRows').post(function (req, res) {
+  let origin = req.headers.origin;
+  if (allowedOrigins.includes(origin)) {
+      res.header("Access-Control-Allow-Origin", origin); // restrict it to the required domain
+  }
   
   console.log("ACTION : killedRows REQ==>",req.body);
   if(req.body.killedID ){ 
@@ -471,6 +560,10 @@ postRoutes.route('/killedRows').post(function (req, res) {
   }
 });
 postRoutes.route('/unkilledRows').post(function (req, res) {
+  let origin = req.headers.origin;
+  if (allowedOrigins.includes(origin)) {
+      res.header("Access-Control-Allow-Origin", origin); // restrict it to the required domain
+  }
   
   console.log("ACTION : unkilledRows REQ==>",req.body);
   if(req.body.UnkilledID ){ 
@@ -486,6 +579,10 @@ postRoutes.route('/unkilledRows').post(function (req, res) {
   }
 })
 postRoutes.route('/updateJobVerified').post(function (req, res) {
+  let origin = req.headers.origin;
+  if (allowedOrigins.includes(origin)) {
+      res.header("Access-Control-Allow-Origin", origin); // restrict it to the required domain
+  }
   
   console.log("ACTION : updateJobVerified  REQ==>",req.body);
   if(req.body.newData ){
@@ -516,6 +613,10 @@ postRoutes.route('/updateJobVerified').post(function (req, res) {
   }
 })
 postRoutes.route('/updateJob').post(function (req, res) {
+  let origin = req.headers.origin;
+  if (allowedOrigins.includes(origin)) {
+      res.header("Access-Control-Allow-Origin", origin); // restrict it to the required domain
+  }
   
   console.log("ACTION : updateJob  REQ==>",req.body);
   if(req.body.newData ){
@@ -583,6 +684,10 @@ postRoutes.route('/updateJob').post(function (req, res) {
   //res.send(req.body);
 }); 
 postRoutes.route('/addnewjobs').post(function (req, res) {
+  let origin = req.headers.origin;
+  if (allowedOrigins.includes(origin)) {
+      res.header("Access-Control-Allow-Origin", origin); // restrict it to the required domain
+  }
   
     console.log("ACTION : addnewjobs REQ==>",req.body);
     //res.send(req.body);
@@ -770,6 +875,10 @@ postRoutes.route('/addnewjobs').post(function (req, res) {
     }
 });
 postRoutes.route('/updateAsset', checkToken.checkToken).post(function (req, res) {
+  let origin = req.headers.origin;
+  if (allowedOrigins.includes(origin)) {
+      res.header("Access-Control-Allow-Origin", origin); // restrict it to the required domain
+  }
   
   console.log("req parameters :" , req.body);
   let data=JSON.parse(req.body.data)
@@ -786,6 +895,10 @@ postRoutes.route('/updateAsset', checkToken.checkToken).post(function (req, res)
   res.send({'msg': 'processing'});
 });
 postRoutes.route('/artloginit', checkToken.checkToken).post(function (req, res) {
+  let origin = req.headers.origin;
+  if (allowedOrigins.includes(origin)) {
+      res.header("Access-Control-Allow-Origin", origin); // restrict it to the required domain
+  }
   
   Mdb.searchState.find({ uid: req.headers['authuser'] }).then((dt)=>{
     console.log(' GCurriculaWIP  ' , GCurriculaWIP);
@@ -798,6 +911,10 @@ postRoutes.route('/artloginit', checkToken.checkToken).post(function (req, res) 
 });
 
 postRoutes.route('/updatelaststage').post(function (req, res) {
+  let origin = req.headers.origin;
+  if (allowedOrigins.includes(origin)) {
+      res.header("Access-Control-Allow-Origin", origin); // restrict it to the required domain
+  }
   
   console.log('Data testing.. in updatelaststage action');
   Mdb.bynder_jobs.find({
@@ -839,6 +956,10 @@ postRoutes.route('/updatelaststage').post(function (req, res) {
 });
 
 postRoutes.route('/searchdtinit').post(async (req, res)=> {
+  let origin = req.headers.origin;
+  if (allowedOrigins.includes(origin)) {
+      res.header("Access-Control-Allow-Origin", origin); // restrict it to the required domain
+  }
   
   //,'Approved','Cancelled'
   let dataResult =[]
@@ -930,6 +1051,10 @@ postRoutes.route('/searchdtinit').post(async (req, res)=> {
 
 
 postRoutes.route('/artlogdata', checkToken.checkToken).post(function (req, res) {
+  let origin = req.headers.origin;
+  if (allowedOrigins.includes(origin)) {
+      res.header("Access-Control-Allow-Origin", origin); // restrict it to the required domain
+  }
   
   console.log("req parameters :" , req.body, new Date().toISOString());
   let $and = [ ];
@@ -1317,6 +1442,10 @@ dataResult.push(objData);
 
 
 postRoutes.route('/artlogdataback', checkToken.checkToken).post(function (req, res) {
+  let origin = req.headers.origin;
+  if (allowedOrigins.includes(origin)) {
+      res.header("Access-Control-Allow-Origin", origin); // restrict it to the required domain
+  }
   
     console.log("req parameters :" , req.body, new Date().toISOString());
     let $and = [ ];
@@ -1537,6 +1666,10 @@ postRoutes.route('/artlogdataback', checkToken.checkToken).post(function (req, r
 });
 
 postRoutes.route('/artlogteamdata', checkToken.checkToken).post(function (req, res) {
+  let origin = req.headers.origin;
+  if (allowedOrigins.includes(origin)) {
+      res.header("Access-Control-Allow-Origin", origin); // restrict it to the required domain
+  }
   
   console.log("artlogteamdata req parameters :" , req.body);
   let sData =JSON.parse(req.body.filters);
@@ -1673,6 +1806,10 @@ postRoutes.route('/artlogteamdata', checkToken.checkToken).post(function (req, r
   })
 });
 postRoutes.route('/showrefreshjobs', checkToken.checkToken).post(function (req, res) {
+  let origin = req.headers.origin;
+  if (allowedOrigins.includes(origin)) {
+      res.header("Access-Control-Allow-Origin", origin); // restrict it to the required domain
+  }
   
   var start = new Date();
   start.setHours(0,0,0,0);
@@ -1735,6 +1872,10 @@ postRoutes.route('/showrefreshjobs', checkToken.checkToken).post(function (req, 
   })
 });
 postRoutes.route('/refreshjobs', checkToken.checkToken).post(function (req, res) {
+  let origin = req.headers.origin;
+  if (allowedOrigins.includes(origin)) {
+      res.header("Access-Control-Allow-Origin", origin); // restrict it to the required domain
+  }
   
   console.log("Action:refreshjobs", req.body.filters);
   let jobsKeys= req.body.filters.split(',');
@@ -1771,6 +1912,10 @@ postRoutes.route('/refreshjobs', checkToken.checkToken).post(function (req, res)
 });
 //artgraph scorecardinit
 postRoutes.route('/scorecardinit', checkToken.checkToken).post(function (req, res) {
+  let origin = req.headers.origin;
+  if (allowedOrigins.includes(origin)) {
+      res.header("Access-Control-Allow-Origin", origin); // restrict it to the required domain
+  }
   
   console.log("Action artgraph");
  const myProm1 = new Promise(function(resolve, reject) {
@@ -1792,6 +1937,10 @@ postRoutes.route('/scorecardinit', checkToken.checkToken).post(function (req, re
 });
 //medianoverdueperteam
 postRoutes.route('/medianoverdueperteam', checkToken.checkToken).post( async function (req, res) { 
+  let origin = req.headers.origin;
+  if (allowedOrigins.includes(origin)) {
+      res.header("Access-Control-Allow-Origin", origin); // restrict it to the required domain
+  }
   
   console.log("\x1b[34m \n ACTION medianoverdueperteam =>", JSON.stringify(req.body), "\n");
  
@@ -2017,6 +2166,10 @@ postRoutes.route('/medianoverdueperteam', checkToken.checkToken).post( async fun
 });
 //createdcompletedjobs
 postRoutes.route('/createdcompletedjobs', checkToken.checkToken).post( async function (req, res) { 
+  let origin = req.headers.origin;
+  if (allowedOrigins.includes(origin)) {
+      res.header("Access-Control-Allow-Origin", origin); // restrict it to the required domain
+  }
   
   console.log('Data testing createdcompletedjobs');
   var workflowPreset="", compaignId ="",jobType="",
@@ -2169,11 +2322,19 @@ postRoutes.route('/createdcompletedjobs', checkToken.checkToken).post( async fun
   });
 });
 postRoutes.route('/scorecardload', checkToken.checkToken).post( async function (req, res) {
+  let origin = req.headers.origin;
+  if (allowedOrigins.includes(origin)) {
+      res.header("Access-Control-Allow-Origin", origin); // restrict it to the required domain
+  }
   
 
 });
 //scorecardload 
 postRoutes.route('/scorecardload1', checkToken.checkToken).post( async function (req, res) {
+  let origin = req.headers.origin;
+  if (allowedOrigins.includes(origin)) {
+      res.header("Access-Control-Allow-Origin", origin); // restrict it to the required domain
+  }
   
   console.log("\n\n ACTION scorecardload data comming =>", JSON.stringify(req.body),"\n");
   var workflowPreset="", compaignId ="",jobType="", grade="", modules="", startDateRange="", endDateRange="", currentStatus=[], jobTypeTemp="", isOverdue=false;
@@ -2317,6 +2478,10 @@ postRoutes.route('/scorecardload1', checkToken.checkToken).post( async function 
 });
 //scorecarddata
 postRoutes.route('/scorecarddata', checkToken.checkToken).post(function (req, res) {
+  let origin = req.headers.origin;
+  if (allowedOrigins.includes(origin)) {
+      res.header("Access-Control-Allow-Origin", origin); // restrict it to the required domain
+  }
   
   console.log("Action scorecarddata");
   let workflowPreset="", compaignId ="",jobType="",
@@ -2439,6 +2604,10 @@ postRoutes.route('/scorecarddata', checkToken.checkToken).post(function (req, re
         });
 });
 postRoutes.route('/dsmsummary', checkToken.checkToken).post(function (req, res) {
+  let origin = req.headers.origin;
+  if (allowedOrigins.includes(origin)) {
+      res.header("Access-Control-Allow-Origin", origin); // restrict it to the required domain
+  }
   
   console.log("Action dsmsummary");
   Mdb.bynder_jobs.find({artTeamStatus: 'WIP'}).then(data=>{
@@ -2471,6 +2640,10 @@ postRoutes.route('/dsmsummary', checkToken.checkToken).post(function (req, res) 
 });
 //apiperformance
 postRoutes.route('/apiperformance', checkToken.checkToken).post(function (req, res) {
+  let origin = req.headers.origin;
+  if (allowedOrigins.includes(origin)) {
+      res.header("Access-Control-Allow-Origin", origin); // restrict it to the required domain
+  }
   
   console.log("Action apiperformance");
   const myProm1 = new Promise(function(resolve, reject) {
@@ -2513,6 +2686,10 @@ postRoutes.route('/apiperformance', checkToken.checkToken).post(function (req, r
 //var csv      = require('csv-express');
 
 postRoutes.route('/exporttocsv', checkToken.checkToken).post( (req, res) => {
+  let origin = req.headers.origin;
+  if (allowedOrigins.includes(origin)) {
+      res.header("Access-Control-Allow-Origin", origin); // restrict it to the required domain
+  }
   
   console.log("Action : exporttocsv");
   //res.send("data testing");
