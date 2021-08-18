@@ -27,13 +27,25 @@ module.exports.register = function(req, res) {
 
 
 module.exports.login = function(req, res) {
+  res.setHeader('Access-Control-Allow-Origin', '*');
+
+  // Request methods you wish to allow
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, PATCH, DELETE');
+
+  // Request headers you wish to allow
+  res.setHeader('Access-Control-Allow-Headers', 'X-Requested-With,content-type');
+
+  // Set to true if you need the website to include cookies in the requests sent
+  // to the API (e.g. in case you use sessions)
+  res.setHeader('Access-Control-Allow-Credentials', true);
+  
   console.log("REQ==1111 1222----->",req.body);
   let allowedOrigins = [ 
   "https://gmartlogautomationdemo.mpstechnologies.com"]
-let origin = req.headers.origin;
-if (allowedOrigins.includes(origin)) {
+  let origin = req.headers.origin;
+  if (allowedOrigins.includes(origin)) {
     // res.header("Access-Control-Allow-Origin", origin); // restrict it to the required domain
-}
+  }
   
   
   console.log("REQ==2222 2-------->",req.body);
