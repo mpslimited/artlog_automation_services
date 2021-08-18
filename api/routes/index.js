@@ -14,8 +14,8 @@ var ctrlAuth = require('../controllers/authentication');
 const checkToken = require('../models/middleware');
 
 
-// var cors = require('cors');
-// router.use(cors());
+var cors = require('cors');
+router.use(cors());
 
 
 
