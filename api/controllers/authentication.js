@@ -27,7 +27,7 @@ module.exports.register = function(req, res) {
 
 
 module.exports.login = function(req, res) {
-  console.log("REQ==111----->",req.body);
+  console.log("REQ==1111----->",req.body);
   let allowedOrigins = [ 
   "https://gmartlogautomationdemo.mpstechnologies.com"]
 let origin = req.headers.origin;
@@ -36,7 +36,7 @@ if (allowedOrigins.includes(origin)) {
 }
   
   
-  console.log("REQ==2222-------->",req.body);
+  console.log("REQ==22222-------->",req.body);
   passport.authenticate('local', function(err, user, info){
     var token;
     if (err) {
