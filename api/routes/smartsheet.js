@@ -1094,12 +1094,12 @@ postRoutes.route('/artlogdata', checkToken.checkToken).post(function (req, res) 
     $and.push( { "mathAuditor" : req.body.mathAuditor } ); 
   }
 
-  if(!!req.body.grade && req.body.grade!=""){
-    $and.push( { "grade" : req.body.grade } ); 
-  }
+  // if(!!req.body.grade && req.body.grade!=""){
+  //   $and.push( { "grade" : req.body.grade } ); 
+  // }
 
   if(!!req.body.module && req.body.module!=""){
-    $and.push( { "module" : req.body.module } ); 
+    // $and.push( { "module" : req.body.module } ); 
   }
 
   
