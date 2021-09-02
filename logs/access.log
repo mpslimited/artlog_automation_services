@@ -1734,3 +1734,490 @@ Mongoose connected to mongodb://mpst:HBjgmdT649(T2@10.31.1.143:27017/mpsdb
 ::1 - - [27/Aug/2021:04:15:51 +0000] "POST /api/artloginit/ HTTP/1.1" 200 7235 "http://localhost:4200/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/92.0.4515.159 Safari/537.36"
 ::1 - - [27/Aug/2021:04:15:55 +0000] "POST /api/artlogdata/ HTTP/1.1" 200 504915 "http://localhost:4200/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/92.0.4515.159 Safari/537.36"
 Mongoose disconnected
+(node:28141) DeprecationWarning: `open()` is deprecated in mongoose >= 4.11.0, use `openUri()` instead, or set the `useMongoClient` option if using `connect()` or `createConnection()`. See http://mongoosejs.com/docs/4.x/docs/connections.html#use-mongo-client
+Mongoose disconnected
+db Connection error : Error [MongoError]: failed to connect to server [10.31.1.143:27017] on first connect [Error [MongoError]: connection 0 to 10.31.1.143:27017 timed out
+    at Function.MongoError.create (/Users/gurpreet/Desktop/Mps/GM/github/artlog_automation_services/node_modules/mongodb-core/lib/error.js:29:11)
+    at Socket.<anonymous> (/Users/gurpreet/Desktop/Mps/GM/github/artlog_automation_services/node_modules/mongodb-core/lib/connection/connection.js:200:20)
+    at Object.onceWrapper (events.js:416:28)
+    at Socket.emit (events.js:310:20)
+    at Socket._onTimeout (net.js:479:8)
+    at listOnTimeout (internal/timers.js:549:17)
+    at processTimers (internal/timers.js:492:7) {
+  name: 'MongoError',
+  message: 'connection 0 to 10.31.1.143:27017 timed out'
+}]
+    at Pool.<anonymous> (/Users/gurpreet/Desktop/Mps/GM/github/artlog_automation_services/node_modules/mongodb-core/lib/topologies/server.js:336:35)
+    at Pool.emit (events.js:310:20)
+    at Connection.<anonymous> (/Users/gurpreet/Desktop/Mps/GM/github/artlog_automation_services/node_modules/mongodb-core/lib/connection/pool.js:280:12)
+    at Object.onceWrapper (events.js:417:26)
+    at Connection.emit (events.js:310:20)
+    at Socket.<anonymous> (/Users/gurpreet/Desktop/Mps/GM/github/artlog_automation_services/node_modules/mongodb-core/lib/connection/connection.js:199:10)
+    at Object.onceWrapper (events.js:416:28)
+    at Socket.emit (events.js:310:20)
+    at Socket._onTimeout (net.js:479:8)
+    at listOnTimeout (internal/timers.js:549:17)
+    at processTimers (internal/timers.js:492:7) {
+  name: 'MongoError',
+  message: 'failed to connect to server [10.31.1.143:27017] on first connect [Error [MongoError]: connection 0 to 10.31.1.143:27017 timed out\n' +
+    '    at Function.MongoError.create (/Users/gurpreet/Desktop/Mps/GM/github/artlog_automation_services/node_modules/mongodb-core/lib/error.js:29:11)\n' +
+    '    at Socket.<anonymous> (/Users/gurpreet/Desktop/Mps/GM/github/artlog_automation_services/node_modules/mongodb-core/lib/connection/connection.js:200:20)\n' +
+    '    at Object.onceWrapper (events.js:416:28)\n' +
+    '    at Socket.emit (events.js:310:20)\n' +
+    '    at Socket._onTimeout (net.js:479:8)\n' +
+    '    at listOnTimeout (internal/timers.js:549:17)\n' +
+    '    at processTimers (internal/timers.js:492:7) {\n' +
+    "  name: 'MongoError',\n" +
+    "  message: 'connection 0 to 10.31.1.143:27017 timed out'\n" +
+    '}]'
+}
+Mongoose disconnected through app termination
+(node:28217) DeprecationWarning: `open()` is deprecated in mongoose >= 4.11.0, use `openUri()` instead, or set the `useMongoClient` option if using `connect()` or `createConnection()`. See http://mongoosejs.com/docs/4.x/docs/connections.html#use-mongo-client
+Mongoose connected to mongodb://mpst:HBjgmdT649(T2@10.31.1.143:27017/mpsdb
+db Connected successfully
+A new connection was made by a client.
+getUserInfo cookies values ::  [Object: null prototype] {}
+A new connection was made by a client.
+REQ==1111 1222-----> [Object: null prototype] {
+  email: 'gm.art.production@mpslimited.com',
+  password: 'gm@remote'
+}
+REQ==2222 2--------> [Object: null prototype] {
+  email: 'gm.art.production@mpslimited.com',
+  password: 'gm@remote'
+}
+::1 - - [02/Sep/2021:06:41:33 +0000] "POST /api/login HTTP/1.1" 200 460 "http://localhost:4200/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/92.0.4515.159 Safari/537.36"
+::1 - - [02/Sep/2021:06:41:34 +0000] "OPTIONS /api/artloginit/ HTTP/1.1" 204 0 "http://localhost:4200/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/92.0.4515.159 Safari/537.36"
+---------------artloginit:---------- 
+A new connection was made by a client.
+::1 - - [02/Sep/2021:06:41:34 +0000] "OPTIONS /api/artlogdata/ HTTP/1.1" 204 0 "http://localhost:4200/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/92.0.4515.159 Safari/537.36"
+req parameters : [Object: null prototype] {
+  apiDatakey: 'artLogData',
+  jobkey: '',
+  grade: '',
+  module: '',
+  batch: '',
+  workflow: '',
+  curricula: '',
+  status: 'Active',
+  resTeam: '',
+  added: '',
+  fromPage: '0',
+  toPage: '50',
+  filters: ''
+} 2021-09-02T06:41:34.490Z
+Calling artlogdata Data sm $and [{"job_active_stage.status":{"$in":["Active","NeedsChanges"]}}]
+Calling artlogdata Data sm 222 {"$and":[{"job_active_stage.status":{"$in":["Active","NeedsChanges"]}}]}
+req.body.fromPage:--- 0
+req.body.toPage:--- 50
+ GCurriculaWIP   [
+  {
+    value: '0BA90096-1E7A-4E4C-9828383715745B3A',
+    label: 'Eureka Math 1',
+    name: 'eurekamath'
+  },
+  {
+    value: '4F365339-BD96-4E83-97F86A27DBFD7AA1',
+    label: 'Eureka Math 2',
+    name: 'eurekamath2'
+  },
+  {
+    value: 'B7AF8F2F-CE74-4978-856F7ECF865AE71D',
+    label: 'Wit & Wisdom',
+    name: 'witandwisdom'
+  },
+  {
+    value: '3377679E-5291-4638-A44C78881962A9C3',
+    label: 'Geodes Readable Library',
+    name: 'readables'
+  },
+  {
+    value: 'C28FBE2C-C8B5-42E1-B25E18B5DEB0C941',
+    label: 'PhD Science',
+    name: 'science'
+  },
+  {
+    value: '0072657F-B29A-4830-8FCB61BE68F85216',
+    label: 'Wit & Wisdom PD',
+    name: 'witandwisdompd'
+  },
+  {
+    value: 'E8A8723B-6142-42D3-861DADE4F2CB07A4',
+    label: 'Science PD',
+    name: 'sciencepd'
+  },
+  {
+    value: 'C016F361-B3F3-400F-847E35F169DC318C',
+    label: 'Geodes: A Readable Library PD',
+    name: 'readablespd'
+  },
+  {
+    value: 'f0fa2e67-ae6c-4d69-a3db-70a45f8f0121',
+    label: 'EM1 TX Parent Tip Sheets',
+    name: 'readablespd1'
+  },
+  {
+    value: 'a5791568-f90b-4034-8a85-bd0a0c1adeeb',
+    label: 'EM Big Search Project',
+    name: 'readablespd3'
+  },
+  {
+    value: 'abecc4a1-7ea6-4ed6-bc68-3eb6bbb9da65',
+    label: 'Eureka Math 1 VA',
+    name: 'em1math1va'
+  },
+  {
+    value: 'a2557f46-eb8c-4372-acbb-8ec2d3f3f1be',
+    label: 'Eureka Math 1 TX',
+    name: 'em1ma1tx'
+  },
+  {
+    value: '035d9f2a-7e6f-4d94-89f9-a641fdd58fd4',
+    label: 'Eureka Math 1 Recovery',
+    name: 'em1rec'
+  },
+  {
+    value: '8dd93a94-9d9b-4bc1-9494-7e09ea7fdad9',
+    label: 'WW LA Assessment',
+    name: 'wlassess'
+  },
+  {
+    value: '5dce69c9-1ee3-45cb-b350-af0123b4c32e',
+    label: 'Wit & Wisdom 2',
+    name: 'wandw2'
+  },
+  {
+    value: '3e09b3e0-598c-436e-a3ff-602e9e4a605d',
+    label: 'PhD Science TX Y2',
+    name: 'phsctxy2'
+  },
+  {
+    value: '021e7fc2-0f56-4a3f-9832-671bf5bb93c1',
+    label: 'Eureka Math 2 Digital',
+    name: 'em2digital'
+  },
+  {
+    value: '2ae409f0-62ae-44a1-8427-6bb10c382e0b',
+    label: 'Eureka Math 2 Benchmark',
+    name: 'em2bech'
+  },
+  {
+    value: '409697a8-8217-4152-8683-807ca058331c',
+    label: 'EM2 Projected B',
+    name: 'em2projb'
+  },
+  {
+    value: 'fa3c3bab-68a5-4628-b261-5b488a205db9',
+    label: 'EM2 Projected',
+    name: 'em2project'
+  },
+  {
+    value: '659a9cfe-16a1-44d2-96b6-2b05ad416770',
+    label: 'EM2 Print Alternative',
+    name: 'em2printalert'
+  },
+  {
+    value: '3b9aa8d6-d011-4d64-add2-4e309fa16825',
+    label: 'EM2 PK & TK',
+    name: 'em2pktk'
+  },
+  {
+    value: '447e03f0-11ce-474e-a658-11e9bd746611',
+    label: 'EM2 On My Own',
+    name: 'em2onmyown'
+  },
+  {
+    value: '84a710a7-c445-41bc-8ca2-454df65d1f7e',
+    label: 'EM2 Integrated',
+    name: 'em2integ'
+  },
+  {
+    value: '123708b7-594d-4d00-ac7e-5d1b6badd2da',
+    label: 'EM2 High School',
+    name: 'em2highshool'
+  },
+  {
+    value: 'f0706ad0-1fe8-4df4-aa5c-9b0426078824',
+    label: 'EM2 Equip',
+    name: 'em2eqip'
+  },
+  {
+    value: '58313889-72f4-4f0f-af0b-5150af0345db',
+    label: 'EM2 Accelerated Pathways',
+    name: 'em2asspath'
+  },
+  {
+    value: '6bd16d29-42b6-4a76-8b60-fb02d9539bde',
+    label: 'EM2 Accelerated',
+    name: 'em2accl'
+  }
+]
+::1 - - [02/Sep/2021:06:41:34 +0000] "POST /api/artloginit/ HTTP/1.1" 200 7235 "http://localhost:4200/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/92.0.4515.159 Safari/537.36"
+::1 - - [02/Sep/2021:06:41:38 +0000] "POST /api/artlogdata/ HTTP/1.1" 200 504915 "http://localhost:4200/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/92.0.4515.159 Safari/537.36"
+A new connection was made by a client.
+::1 - - [02/Sep/2021:06:41:55 +0000] "OPTIONS /api/artlogdata/ HTTP/1.1" 204 0 "http://localhost:4200/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/92.0.4515.159 Safari/537.36"
+req parameters : [Object: null prototype] {
+  apiDatakey: 'artLogData',
+  jobkey: '',
+  grade: '',
+  module: '',
+  batch: '',
+  workflow: 'Clip Art',
+  curricula: '4F365339-BD96-4E83-97F86A27DBFD7AA1',
+  status: '',
+  resTeam: '',
+  added: '',
+  fromPage: '0',
+  toPage: '50',
+  filters: ''
+} 2021-09-02T06:41:55.314Z
+Calling artlogdata Data sm $and [{"workflow":"Clip Art"},{"jobMetaproperties.0790cd4f2aed4ce0a315ff8034a43994":"4F365339-BD96-4E83-97F86A27DBFD7AA1"},{"presetName":{"$regex":{}}},{"job_active_stage.status":{"$in":["NeedsChanges"]}}]
+Calling artlogdata Data sm 222 {"$and":[{"workflow":"Clip Art"},{"jobMetaproperties.0790cd4f2aed4ce0a315ff8034a43994":"4F365339-BD96-4E83-97F86A27DBFD7AA1"},{"presetName":{"$regex":{}}},{"job_active_stage.status":{"$in":["NeedsChanges"]}}]}
+req.body.fromPage:--- 0
+req.body.toPage:--- 50
+::1 - - [02/Sep/2021:06:41:56 +0000] "POST /api/artlogdata/ HTTP/1.1" 200 403 "http://localhost:4200/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/92.0.4515.159 Safari/537.36"
+A new connection was made by a client.
+::1 - - [02/Sep/2021:06:42:05 +0000] "OPTIONS /api/artlogdata/ HTTP/1.1" 204 0 "http://localhost:4200/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/92.0.4515.159 Safari/537.36"
+req parameters : [Object: null prototype] {
+  apiDatakey: 'artLogData',
+  jobkey: '',
+  grade: '',
+  module: '',
+  batch: '',
+  workflow: 'Created Image',
+  curricula: '4F365339-BD96-4E83-97F86A27DBFD7AA1',
+  status: '',
+  resTeam: '',
+  added: '',
+  fromPage: '0',
+  toPage: '50',
+  filters: ''
+} 2021-09-02T06:42:05.855Z
+Calling artlogdata Data sm $and [{"workflow":"Created Image"},{"jobMetaproperties.0790cd4f2aed4ce0a315ff8034a43994":"4F365339-BD96-4E83-97F86A27DBFD7AA1"},{"presetName":{"$regex":{}}},{"job_active_stage.status":{"$in":["NeedsChanges"]}}]
+Calling artlogdata Data sm 222 {"$and":[{"workflow":"Created Image"},{"jobMetaproperties.0790cd4f2aed4ce0a315ff8034a43994":"4F365339-BD96-4E83-97F86A27DBFD7AA1"},{"presetName":{"$regex":{}}},{"job_active_stage.status":{"$in":["NeedsChanges"]}}]}
+req.body.fromPage:--- 0
+req.body.toPage:--- 50
+::1 - - [02/Sep/2021:06:42:06 +0000] "POST /api/artlogdata/ HTTP/1.1" 200 403 "http://localhost:4200/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/92.0.4515.159 Safari/537.36"
+::1 - - [02/Sep/2021:06:42:11 +0000] "OPTIONS /api/artlogdata/ HTTP/1.1" 204 0 "http://localhost:4200/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/92.0.4515.159 Safari/537.36"
+req parameters : [Object: null prototype] {
+  apiDatakey: 'artLogData',
+  jobkey: '',
+  grade: '',
+  module: '',
+  batch: '',
+  workflow: 'Permission',
+  curricula: '4F365339-BD96-4E83-97F86A27DBFD7AA1',
+  status: '',
+  resTeam: '',
+  added: '',
+  fromPage: '0',
+  toPage: '50',
+  filters: ''
+} 2021-09-02T06:42:11.191Z
+Calling artlogdata Data sm $and [{"workflow":"Permission"},{"jobMetaproperties.0790cd4f2aed4ce0a315ff8034a43994":"4F365339-BD96-4E83-97F86A27DBFD7AA1"},{"presetName":{"$regex":{}}},{"job_active_stage.status":{"$in":["NeedsChanges"]}}]
+Calling artlogdata Data sm 222 {"$and":[{"workflow":"Permission"},{"jobMetaproperties.0790cd4f2aed4ce0a315ff8034a43994":"4F365339-BD96-4E83-97F86A27DBFD7AA1"},{"presetName":{"$regex":{}}},{"job_active_stage.status":{"$in":["NeedsChanges"]}}]}
+req.body.fromPage:--- 0
+req.body.toPage:--- 50
+::1 - - [02/Sep/2021:06:42:11 +0000] "POST /api/artlogdata/ HTTP/1.1" 200 403 "http://localhost:4200/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/92.0.4515.159 Safari/537.36"
+req parameters : [Object: null prototype] {
+  apiDatakey: 'artLogData',
+  jobkey: '',
+  grade: '',
+  module: '',
+  batch: '',
+  workflow: 'Shutterstock',
+  curricula: '4F365339-BD96-4E83-97F86A27DBFD7AA1',
+  status: '',
+  resTeam: '',
+  added: '',
+  fromPage: '0',
+  toPage: '50',
+  filters: ''
+} 2021-09-02T06:42:15.852Z
+Calling artlogdata Data sm $and [{"workflow":"Shutterstock"},{"jobMetaproperties.0790cd4f2aed4ce0a315ff8034a43994":"4F365339-BD96-4E83-97F86A27DBFD7AA1"},{"presetName":{"$regex":{}}},{"job_active_stage.status":{"$in":["NeedsChanges"]}}]
+Calling artlogdata Data sm 222 {"$and":[{"workflow":"Shutterstock"},{"jobMetaproperties.0790cd4f2aed4ce0a315ff8034a43994":"4F365339-BD96-4E83-97F86A27DBFD7AA1"},{"presetName":{"$regex":{}}},{"job_active_stage.status":{"$in":["NeedsChanges"]}}]}
+req.body.fromPage:--- 0
+req.body.toPage:--- 50
+::1 - - [02/Sep/2021:06:42:29 +0000] "POST /api/artlogdata/ HTTP/1.1" 200 403 "http://localhost:4200/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/92.0.4515.159 Safari/537.36"
+::1 - - [02/Sep/2021:06:42:51 +0000] "POST /api/getUserInfo/ HTTP/1.1" - - "http://localhost:4200/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/92.0.4515.159 Safari/537.36"
+A new connection was made by a client.
+::1 - - [02/Sep/2021:06:46:19 +0000] "OPTIONS /api/artlogdata/ HTTP/1.1" 204 0 "http://localhost:4200/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/92.0.4515.159 Safari/537.36"
+req parameters : [Object: null prototype] {
+  apiDatakey: 'artLogData',
+  jobkey: '',
+  grade: '',
+  module: '',
+  batch: '',
+  workflow: 'Shutterstock',
+  curricula: '4F365339-BD96-4E83-97F86A27DBFD7AA1',
+  status: '',
+  resTeam: '',
+  added: '',
+  fromPage: '0',
+  toPage: '50',
+  filters: ''
+} 2021-09-02T06:46:19.950Z
+Calling artlogdata Data sm $and [{"workflow":"Shutterstock"},{"jobMetaproperties.0790cd4f2aed4ce0a315ff8034a43994":"4F365339-BD96-4E83-97F86A27DBFD7AA1"},{"presetName":{"$regex":{}}},{"job_active_stage.status":{"$in":["NeedsChanges"]}}]
+Calling artlogdata Data sm 222 {"$and":[{"workflow":"Shutterstock"},{"jobMetaproperties.0790cd4f2aed4ce0a315ff8034a43994":"4F365339-BD96-4E83-97F86A27DBFD7AA1"},{"presetName":{"$regex":{}}},{"job_active_stage.status":{"$in":["NeedsChanges"]}}]}
+req.body.fromPage:--- 0
+req.body.toPage:--- 50
+::1 - - [02/Sep/2021:06:46:20 +0000] "POST /api/artlogdata/ HTTP/1.1" 200 403 "http://localhost:4200/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/92.0.4515.159 Safari/537.36"
+A new connection was made by a client.
+::1 - - [02/Sep/2021:06:48:17 +0000] "OPTIONS /api/artlogdata/ HTTP/1.1" 204 0 "http://localhost:4200/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/92.0.4515.159 Safari/537.36"
+req parameters : [Object: null prototype] {
+  apiDatakey: 'artLogData',
+  jobkey: '',
+  grade: '',
+  module: '',
+  batch: '',
+  workflow: 'Shutterstock',
+  curricula: '4F365339-BD96-4E83-97F86A27DBFD7AA1',
+  status: '',
+  resTeam: '',
+  added: '4',
+  fromPage: '0',
+  toPage: '50',
+  filters: ''
+} 2021-09-02T06:48:17.804Z
+Calling artlogdata Data sm $and [{"workflow":"Shutterstock"},{"jobMetaproperties.0790cd4f2aed4ce0a315ff8034a43994":"4F365339-BD96-4E83-97F86A27DBFD7AA1"},{"flaged":true},{"presetName":{"$regex":{}}},{"job_active_stage.status":{"$in":["NeedsChanges"]}}]
+Calling artlogdata Data sm 222 {"$and":[{"workflow":"Shutterstock"},{"jobMetaproperties.0790cd4f2aed4ce0a315ff8034a43994":"4F365339-BD96-4E83-97F86A27DBFD7AA1"},{"flaged":true},{"presetName":{"$regex":{}}},{"job_active_stage.status":{"$in":["NeedsChanges"]}}]}
+req.body.fromPage:--- 0
+req.body.toPage:--- 50
+::1 - - [02/Sep/2021:06:48:18 +0000] "POST /api/artlogdata/ HTTP/1.1" 200 403 "http://localhost:4200/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/92.0.4515.159 Safari/537.36"
+A new connection was made by a client.
+::1 - - [02/Sep/2021:06:48:50 +0000] "OPTIONS /api/artlogdata/ HTTP/1.1" 204 0 "http://localhost:4200/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/92.0.4515.159 Safari/537.36"
+req parameters : [Object: null prototype] {
+  apiDatakey: 'artLogData',
+  jobkey: '',
+  grade: '',
+  module: '',
+  batch: '',
+  workflow: '',
+  curricula: '4F365339-BD96-4E83-97F86A27DBFD7AA1',
+  status: '',
+  resTeam: '',
+  added: '4',
+  fromPage: '0',
+  toPage: '50',
+  filters: ''
+} 2021-09-02T06:48:50.902Z
+Calling artlogdata Data sm $and [{"jobMetaproperties.0790cd4f2aed4ce0a315ff8034a43994":"4F365339-BD96-4E83-97F86A27DBFD7AA1"},{"flaged":true},{"job_active_stage.status":{"$in":["NeedsChanges"]}}]
+Calling artlogdata Data sm 222 {"$and":[{"jobMetaproperties.0790cd4f2aed4ce0a315ff8034a43994":"4F365339-BD96-4E83-97F86A27DBFD7AA1"},{"flaged":true},{"job_active_stage.status":{"$in":["NeedsChanges"]}}]}
+req.body.fromPage:--- 0
+req.body.toPage:--- 50
+::1 - - [02/Sep/2021:06:48:52 +0000] "POST /api/artlogdata/ HTTP/1.1" 200 88011 "http://localhost:4200/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/92.0.4515.159 Safari/537.36"
+A new connection was made by a client.
+::1 - - [02/Sep/2021:06:49:07 +0000] "OPTIONS /api/artlogdata/ HTTP/1.1" 204 0 "http://localhost:4200/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/92.0.4515.159 Safari/537.36"
+req parameters : [Object: null prototype] {
+  apiDatakey: 'artLogData',
+  jobkey: '',
+  grade: '',
+  module: '',
+  batch: '',
+  workflow: '',
+  curricula: '4F365339-BD96-4E83-97F86A27DBFD7AA1',
+  status: '',
+  resTeam: '',
+  added: '1',
+  fromPage: '0',
+  toPage: '50',
+  filters: ''
+} 2021-09-02T06:49:07.550Z
+Calling artlogdata Data sm $and [{"jobMetaproperties.0790cd4f2aed4ce0a315ff8034a43994":"4F365339-BD96-4E83-97F86A27DBFD7AA1"},{"duplicate":{"$exists":false}},{"job_active_stage.status":{"$in":["NeedsChanges"]}}]
+Calling artlogdata Data sm 222 {"$and":[{"jobMetaproperties.0790cd4f2aed4ce0a315ff8034a43994":"4F365339-BD96-4E83-97F86A27DBFD7AA1"},{"duplicate":{"$exists":false}},{"job_active_stage.status":{"$in":["NeedsChanges"]}}]}
+req.body.fromPage:--- 0
+req.body.toPage:--- 50
+::1 - - [02/Sep/2021:06:49:11 +0000] "POST /api/artlogdata/ HTTP/1.1" 200 564502 "http://localhost:4200/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/92.0.4515.159 Safari/537.36"
+Mongoose disconnected
+(node:28908) DeprecationWarning: `open()` is deprecated in mongoose >= 4.11.0, use `openUri()` instead, or set the `useMongoClient` option if using `connect()` or `createConnection()`. See http://mongoosejs.com/docs/4.x/docs/connections.html#use-mongo-client
+Mongoose connected to mongodb://mpst:HBjgmdT649(T2@10.31.1.143:27017/mpsdb
+db Connected successfully
+A new connection was made by a client.
+::1 - - [02/Sep/2021:06:50:54 +0000] "OPTIONS /api/artlogdata/ HTTP/1.1" 204 0 "http://localhost:4200/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/92.0.4515.159 Safari/537.36"
+req parameters : [Object: null prototype] {
+  apiDatakey: 'artLogData',
+  jobkey: '',
+  grade: '706c4c9855884e3cbc4aadb28255e6a8',
+  module: '',
+  batch: '',
+  workflow: '',
+  curricula: '4F365339-BD96-4E83-97F86A27DBFD7AA1',
+  status: '',
+  resTeam: '',
+  added: '1',
+  fromPage: '0',
+  toPage: '50',
+  filters: ''
+} 2021-09-02T06:50:54.432Z
+Calling artlogdata Data sm $and [{"jobMetaproperties.c0ac0a86e65f4f7ebd88dbd7e77965ef":"706c4c9855884e3cbc4aadb28255e6a8"},{"jobMetaproperties.0790cd4f2aed4ce0a315ff8034a43994":"4F365339-BD96-4E83-97F86A27DBFD7AA1"},{"duplicate":{"$exists":false}},{"job_active_stage.status":{"$in":["NeedsChanges"]}}]
+Calling artlogdata Data sm 222 {"$and":[{"jobMetaproperties.c0ac0a86e65f4f7ebd88dbd7e77965ef":"706c4c9855884e3cbc4aadb28255e6a8"},{"jobMetaproperties.0790cd4f2aed4ce0a315ff8034a43994":"4F365339-BD96-4E83-97F86A27DBFD7AA1"},{"duplicate":{"$exists":false}},{"job_active_stage.status":{"$in":["NeedsChanges"]}}]}
+req.body.fromPage:--- 0
+req.body.toPage:--- 50
+::1 - - [02/Sep/2021:06:51:02 +0000] "POST /api/artlogdata/ HTTP/1.1" 200 11439 "http://localhost:4200/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/92.0.4515.159 Safari/537.36"
+A new connection was made by a client.
+::1 - - [02/Sep/2021:06:51:08 +0000] "OPTIONS /api/artlogdata/ HTTP/1.1" 204 0 "http://localhost:4200/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/92.0.4515.159 Safari/537.36"
+req parameters : [Object: null prototype] {
+  apiDatakey: 'artLogData',
+  jobkey: '',
+  grade: '706c4c9855884e3cbc4aadb28255e6a8',
+  module: '',
+  batch: '',
+  workflow: '',
+  curricula: '4F365339-BD96-4E83-97F86A27DBFD7AA1',
+  status: '',
+  resTeam: '',
+  added: '',
+  fromPage: '0',
+  toPage: '50',
+  filters: ''
+} 2021-09-02T06:51:08.243Z
+Calling artlogdata Data sm $and [{"jobMetaproperties.c0ac0a86e65f4f7ebd88dbd7e77965ef":"706c4c9855884e3cbc4aadb28255e6a8"},{"jobMetaproperties.0790cd4f2aed4ce0a315ff8034a43994":"4F365339-BD96-4E83-97F86A27DBFD7AA1"},{"job_active_stage.status":{"$in":["NeedsChanges"]}}]
+Calling artlogdata Data sm 222 {"$and":[{"jobMetaproperties.c0ac0a86e65f4f7ebd88dbd7e77965ef":"706c4c9855884e3cbc4aadb28255e6a8"},{"jobMetaproperties.0790cd4f2aed4ce0a315ff8034a43994":"4F365339-BD96-4E83-97F86A27DBFD7AA1"},{"job_active_stage.status":{"$in":["NeedsChanges"]}}]}
+req.body.fromPage:--- 0
+req.body.toPage:--- 50
+::1 - - [02/Sep/2021:06:51:08 +0000] "POST /api/artlogdata/ HTTP/1.1" 200 11439 "http://localhost:4200/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/92.0.4515.159 Safari/537.36"
+A new connection was made by a client.
+::1 - - [02/Sep/2021:06:51:21 +0000] "OPTIONS /api/artlogdata/ HTTP/1.1" 204 0 "http://localhost:4200/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/92.0.4515.159 Safari/537.36"
+req parameters : [Object: null prototype] {
+  apiDatakey: 'artLogData',
+  jobkey: '',
+  grade: 'b795cf512398444db77ba09d549b4d95',
+  module: '',
+  batch: '',
+  workflow: '',
+  curricula: '4F365339-BD96-4E83-97F86A27DBFD7AA1',
+  status: '',
+  resTeam: '',
+  added: '',
+  fromPage: '0',
+  toPage: '50',
+  filters: ''
+} 2021-09-02T06:51:21.596Z
+Calling artlogdata Data sm $and [{"jobMetaproperties.c0ac0a86e65f4f7ebd88dbd7e77965ef":"b795cf512398444db77ba09d549b4d95"},{"jobMetaproperties.0790cd4f2aed4ce0a315ff8034a43994":"4F365339-BD96-4E83-97F86A27DBFD7AA1"},{"job_active_stage.status":{"$in":["NeedsChanges"]}}]
+Calling artlogdata Data sm 222 {"$and":[{"jobMetaproperties.c0ac0a86e65f4f7ebd88dbd7e77965ef":"b795cf512398444db77ba09d549b4d95"},{"jobMetaproperties.0790cd4f2aed4ce0a315ff8034a43994":"4F365339-BD96-4E83-97F86A27DBFD7AA1"},{"job_active_stage.status":{"$in":["NeedsChanges"]}}]}
+req.body.fromPage:--- 0
+req.body.toPage:--- 50
+::1 - - [02/Sep/2021:06:51:22 +0000] "POST /api/artlogdata/ HTTP/1.1" 200 14817 "http://localhost:4200/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/92.0.4515.159 Safari/537.36"
+A new connection was made by a client.
+::1 - - [02/Sep/2021:06:51:30 +0000] "OPTIONS /api/artlogdata/ HTTP/1.1" 204 0 "http://localhost:4200/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/92.0.4515.159 Safari/537.36"
+req parameters : [Object: null prototype] {
+  apiDatakey: 'artLogData',
+  jobkey: '',
+  grade: 'b795cf512398444db77ba09d549b4d95,eb8495e074394c5d880032b5bf8df5d7,706c4c9855884e3cbc4aadb28255e6a8',
+  module: '',
+  batch: '',
+  workflow: '',
+  curricula: '4F365339-BD96-4E83-97F86A27DBFD7AA1',
+  status: '',
+  resTeam: '',
+  added: '',
+  fromPage: '0',
+  toPage: '50',
+  filters: ''
+} 2021-09-02T06:51:30.786Z
+Calling artlogdata Data sm $and [{"jobMetaproperties.c0ac0a86e65f4f7ebd88dbd7e77965ef":{"$in":["b795cf512398444db77ba09d549b4d95","eb8495e074394c5d880032b5bf8df5d7","706c4c9855884e3cbc4aadb28255e6a8"]}},{"jobMetaproperties.0790cd4f2aed4ce0a315ff8034a43994":"4F365339-BD96-4E83-97F86A27DBFD7AA1"},{"job_active_stage.status":{"$in":["NeedsChanges"]}}]
+Calling artlogdata Data sm 222 {"$and":[{"jobMetaproperties.c0ac0a86e65f4f7ebd88dbd7e77965ef":{"$in":["b795cf512398444db77ba09d549b4d95","eb8495e074394c5d880032b5bf8df5d7","706c4c9855884e3cbc4aadb28255e6a8"]}},{"jobMetaproperties.0790cd4f2aed4ce0a315ff8034a43994":"4F365339-BD96-4E83-97F86A27DBFD7AA1"},{"job_active_stage.status":{"$in":["NeedsChanges"]}}]}
+req.body.fromPage:--- 0
+req.body.toPage:--- 50
+::1 - - [02/Sep/2021:06:51:34 +0000] "POST /api/artlogdata/ HTTP/1.1" 200 624290 "http://localhost:4200/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/92.0.4515.159 Safari/537.36"
+Mongoose disconnected

@@ -1186,9 +1186,9 @@ postRoutes.route('/artlogdata', checkToken.checkToken).post(function (req, res) 
   }
 
 
-  if(!!req.body.workflow && req.body.workflow!=""){
-    $and.push( { "workflow" : req.body.workflow } ); 
-  }
+  // if(!!req.body.workflow && req.body.workflow!=""){
+    // $and.push( { "workflow" : req.body.workflow } ); 
+  // }
 
   if(!!req.body.permissionType && req.body.permissionType!=""){
     $and.push( { "permissionType" : req.body.permissionType } ); 
