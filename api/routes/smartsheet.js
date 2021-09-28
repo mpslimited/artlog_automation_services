@@ -1160,7 +1160,7 @@ postRoutes.route('/artlogdata', checkToken.checkToken).post(function (req, res) 
     $and.push( { "pageNo" : req.body.pageNo } ); 
   }
   if(!!req.body.revisionC && req.body.revisionC!=""){
-    $and.push( { "revisionC" : req.body.revisionC } ); 
+    $and.push( { "revisionVal" : req.body.revisionC } ); 
   }
   if(!!req.body.printAsset && req.body.printAsset!=""){
     $and.push( { "printAsset" : req.body.printAsset } ); 
@@ -1286,10 +1286,17 @@ postRoutes.route('/artlogdata', checkToken.checkToken).post(function (req, res) 
   //.skip(  parseInt(req.body.fromPage)).limit( parseInt(req.body.toPage) ).
   console.log('req.body.fromPage:---',req.body.fromPage);
   console.log('req.body.toPage:---',req.body.toPage);
+  console.log('req.body.sortField:---',req.body.sortField);
+  console.log('req.body.sortOrder:---',req.body.sortOrder);
   // req.body.toPage= 1000;
   // console.log('req.body.jobkey:---',req.body);
-
-  Mdb.bynder_jobs.find(q ).sort({job_key:-1}).skip(  parseInt(req.body.fromPage)).limit( parseInt(req.body.toPage) ).then((data)=>{
+  // sortOrder,sortField
+  var sortby= {job_key:-1};
+  if(req.body.sortField){
+    sortby=  {  [req.body.sortField]:req.body.sortOrder }
+  }
+  console.log('sort order ',sortby);
+  Mdb.bynder_jobs.find(q ).sort(sortby).skip(  parseInt(req.body.fromPage)).limit( parseInt(req.body.toPage) ).then((data)=>{
       
 // start
 
