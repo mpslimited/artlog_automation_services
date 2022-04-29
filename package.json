@@ -6,7 +6,7 @@
     "start": "node ./bin/www"
   },
   "dependencies": {
-    "async": "^3.1.1",
+    "async": "^2.6.4",
     "async-redis": "^1.1.7",
     "await": "^0.2.6",
     "axios": "^0.19.2",
